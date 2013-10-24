@@ -124,7 +124,7 @@ module.exports = function (grunt)
   var verbose;
 
   grunt.registerMultiTask ('angular-packager',
-    'Builds a single javascript file containing all files required by the specified module.',
+    'Generates an optimized build of an AngularJS project.',
     function ()
     {
       modules = {};
@@ -491,6 +491,7 @@ module.exports = function (grunt)
       vm.runInNewContext (source, sandbox);
       delete sandbox.angular;
       delete sandbox.console;
+      delete sandbox.window;
       // Check if the sandbox contains any property at all.
       for (var prop in sandbox)
         throw sandbox;
@@ -502,6 +503,7 @@ module.exports = function (grunt)
       // the global scope.
       delete sandbox.angular;
       delete sandbox.console;
+      delete sandbox.window;
       grunt.log.verbose.writeln ('FAILED'.yellow);
       warnAboutGlobalCode (sandbox, path);
       // If --force, continue.
