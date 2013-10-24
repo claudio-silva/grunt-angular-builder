@@ -1,6 +1,6 @@
 {
-  "name":         "Grunt Angular Packager",
-  "description":  "AngularJS Packager Grunt plugin",
+  "name":         "grunt-angular-packager",
+  "description":  "A Grunt plugin that generates an optimized build of an AngularJS project.",
   "version":      "0.1.0-alpha",
   "engine":       "node 0.8.21",
   "author":       {
