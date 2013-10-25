@@ -1,10 +1,14 @@
 /**
  * @license
- * AngularJS Packager Grunt plugin.
+ * AngularJS Build Tool Grunt plugin.
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * Licensed under the MIT license.
  */
 'use strict';
+
+var TASK_NAME = 'angular-build-tool';
+
+var TASK_DESCRIPTION = 'Generates an optimized build of an AngularJS project.';
 
 /**
  * Get color and style in your node.js console.
@@ -123,8 +127,7 @@ module.exports = function (grunt)
    */
   var verbose;
 
-  grunt.registerMultiTask ('angular-packager',
-    'Generates an optimized build of an AngularJS project.',
+  grunt.registerMultiTask (TASK_NAME, TASK_DESCRIPTION,
     function ()
     {
       modules = {};
