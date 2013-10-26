@@ -22,12 +22,11 @@ For debug builds, it generates a loader script for the original javascript and C
     - Code from unused modules is excluded from the build. This allows you to include large libraries in your project but use only the parts you need.
     
 - The build tool assembles each module's source code into a single continuous code block per module.
-    - In the process, some code may be transformed in order to:
-
-        1. remove redundant module declarations;
-        - group, under the same context, code for the same module coming from multiple files;
-        - rearrange private module code to keep it under the same isolated context;
-        - make sure no leakage to the global context occurs.
+  - In the process, some code may be transformed in order to:
+    1. remove redundant module declarations;
+    - group, under the same context, code for the same module coming from multiple files;
+    - rearrange private module code to keep it under the same isolated context;
+    - make sure no leakage to the global context occurs.
         
 - All required modules are assembled in the correct loading order.
 - CSS stylesheets required by each module are concatenated into a single release file.
@@ -80,7 +79,7 @@ Task targets, files and options may be specified according to the grunt [Configu
 
 Do note, however, that destination targets are not set via the standard `dest` property. Instead, the destinations for each file group are specified with the following properties:
 
-### Extra file group properties:
+### Extra file group properties
 
 ##### targetScript
 Type `string`
@@ -195,7 +194,7 @@ To assemble a release build of your project, run the command:
 To setup a debug build of your project, run the command:
 `grunt debug`
 
-> If you want to minify/optimize your build files, or use javascript/css preprocessors, you can add the respective tasks to the `release` task list.
+> If you wish to minify/optimize your build files, or use javascript/css preprocessors, you can add the respective tasks to the `release` task list.
 
 #### A more sophisticated config
 
