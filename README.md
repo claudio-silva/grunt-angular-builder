@@ -154,7 +154,7 @@ The kind of build to be generated.
 The use of this setting as an option is, probably, not what you want.  
 Use the `debug` task argument instead (see above).
 
-# Usage Examples
+## Usage Examples
 
 ### Basic Use
 
