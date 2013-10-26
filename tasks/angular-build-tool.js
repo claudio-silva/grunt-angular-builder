@@ -15,6 +15,23 @@ var TASK_DESCRIPTION = 'Generates an optimized build of an AngularJS project.';
  * Note: requiring this here modifies the String prototype!
  */
 var colors = require ('colors');
+/**
+ * Utility functions.
+ */
+var util = require ('./lib/util');
+
+var tokenize = util.tokenize
+  , getProperties = util.getProperties
+  , toList = util.toList
+  , indent = util.indent
+  , sprintf = util.sprintf
+  , csprintf = util.csprintf
+  , debug = util.debug;
+/**
+ * OS dependent line terminator.
+ * @type {string}
+ */
+var NL;
 
 //------------------------------------------------------------------------------
 // DECLARATIONS
@@ -69,18 +86,17 @@ var TASK_OPTIONS = {
    */
   main:             '',
   /**
-   * Target file name. The packaged javascript file will be saved to this path.
+   * Target javascript file name. The javascript build output will be saved to this path.
    * Note: targets on Grunt file mappings are ignored, use this instead.
    * @type {string}
    */
-  dest:             '',
+  targetScript:     '',
   /**
-   * Code packaging method.
-   * When false, generates a single optimized javascript file with all required source code in the correct loading order.
-   * When true, generates a set of &lt;script> tags to include all the required source files in the correct loading order.
-   * @type {boolean}
+   * Target CSS file name. The packaged stylesheets will be saved to this path.
+   * Note: targets on Grunt file mappings are ignored, use this instead.
+   * @type {string}
    */
-  debug:            false,
+  targetCSS:        '',
   /**
    * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous functions.
    * @type {string}
@@ -93,8 +109,78 @@ var TASK_OPTIONS = {
    * a warning will be issued and the task may stop.
    * @type {boolean}
    */
-  renameModuleRefs: false
+  renameModuleRefs: false,
+  /**
+   * Code packaging method.
+   * When false, generates a single optimized javascript file with all required source code in the correct loading order.
+   * When true, generates a set of &lt;script> tags to include all the required source files in the correct loading order.
+   * Note: The use of this setting as an option is, probably, not what you want.
+   * Use the `debug` task argument instead.
+   * @type {boolean}
+   */
+  debug:            false
 };
+
+//------------------------------------------------------------------------------
+// PRIVATE DATA
+//------------------------------------------------------------------------------
+
+/**
+ * Regular expression string that matches an angular module declaration in one of these formats:
+ * angular.module('name',[dependencies]) or
+ * angular.module('name')
+ * @type {string}
+ */
+var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? `)';
+/**
+ * Regular expression that matches an angular module declaration.
+ * @see MODULE_DECL_EXP
+ * @type {RegExp}
+ */
+var MATCH_MODULE_DECL = new RegExp (tokenize (MODULE_DECL_EXP), 'i');
+/**
+ * Regular expression string that matches javascript block/line comments.
+ * @type {string}
+ */
+var MATCH_COMMENTS_EXP = '/`*[`s`S]*?`*/|//.*';
+/**
+ * Matches source code consisting only of white space and javascript comments.
+ * @type {RegExp}
+ */
+var MATCH_NO_SCRIPT = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*$'));
+/**
+ * Matches white space and javascript comments at the beginning of a file.
+ * @type {RegExp}
+ */
+var TRIM_COMMENTS_TOP = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*'));
+/**
+ * Matches white space and javascript comments at the end of a file.
+ * @type {RegExp}
+ */
+var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (' ((' + MATCH_COMMENTS_EXP + ') )*$'));
+/**
+ * Matches a self-invoking anonymous function that wraps all the remaining source code.
+ * It assumes white space and comments have been already removed from both ends of the script.
+ * It searches for one of these patterns:
+ * <code>
+ * (function () { ... }) ();
+ * function (var) { ... }) (angular.module('name'));
+ * function (var) { ... }) (angular.module('name', [dependencies]));
+ * </code>
+ * It also matches the following alternate self-invoking function syntax applied to any of the previous patterns:
+ * <code>
+ * !function () { ... } ();
+ * </code>
+ * @type {RegExp}
+ */
+var MATCH_MODULE_CLOSURE = new RegExp (tokenize ('^[`(!]function `( (.+?)? `) `{ ([`s`S]*?) `} `)? `( (' + MODULE_DECL_EXP + ')? `) ;?$'), 'i');
+/**
+ * Regular expression string that matches a javascript identifier.
+ * Note: % will be replaced by the identifier.
+ * Note: this is a poor man's identifier matcher! It may fail in many situations.
+ * @type {string}
+ */
+var MATCH_IDENTIFIER_EXP = '\\b%\\b';
 
 //------------------------------------------------------------------------------
 // TASKS
@@ -127,17 +213,19 @@ module.exports = function (grunt)
    */
   var verbose;
 
+  NL = grunt.util.linefeed;
+
   grunt.registerMultiTask (TASK_NAME, TASK_DESCRIPTION,
     function ()
     {
-      modules = {};
-      loaded = {};
-
       // Merge task-specific and/or target-specific options with these defaults.
       options = this.options (TASK_OPTIONS);
 
       if (!options.main)
-        grunt.fatal ("No main module was defined.");
+        grunt.fatal ("No main module is defined.");
+
+      if (!this.files.length)
+        grunt.fatal ("No source files were defined.");
 
       verbose = grunt.option ('verbose');
 
@@ -145,76 +233,25 @@ module.exports = function (grunt)
 
       this.files.forEach (function (fileGroup)
       {
+        // Reset source code analysis information for each file group, i.e. each group is an independent build.
+        modules = {};
+        loaded = {};
+
+        if (!fileGroup.targetScript)
+          grunt.fatal ("No target script is defined.");
+
+        // Process the source files.
         fileGroup.src.forEach (loadScript);
 
-      });
+        // On debug mode, output a script that dynamically loads all the required source files.
+        if (options.debug === undefined ? this.flags.debug : options.debug)
+          buildDebugPackage (options.main, fileGroup.targetScript, fileGroup.targetCSS);
 
-      // On debug mode, output a script that dinamically loads all the required source files.
+        // On release mode, output an optimized script.
+        else buildReleasePackage (options.main, fileGroup.targetScript, fileGroup.targetCSS);
 
-      if (options.debug)
-        buildDebugPackage (options.main, options.dest);
-
-      // On release mode, output an optimized script.
-
-      else buildReleasePackage (options.main, options.dest);
+      }.bind (this));
     });
-
-  /**
-   * Regular expression string that matches an angular module declaration in one of these formats:
-   * angular.module('name',[dependencies]) or
-   * angular.module('name')
-   * @type {string}
-   */
-  var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? `)';
-  /**
-   * Regular expression that matches an angular module declaration.
-   * @see MODULE_DECL_EXP
-   * @type {RegExp}
-   */
-  var MATCH_MODULE_DECL = new RegExp (tokenize (MODULE_DECL_EXP), 'i');
-  /**
-   * Regular expression string that matches javascript block/line comments.
-   * @type {string}
-   */
-  var MATCH_COMMENTS_EXP = '/`*[`s`S]*?`*/|//.*';
-  /**
-   * Matches source code consisting only of white space and javascript comments.
-   * @type {RegExp}
-   */
-  var MATCH_NO_SCRIPT = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*$'));
-  /**
-   * Matches white space and javascript comments at the beginning of a file.
-   * @type {RegExp}
-   */
-  var TRIM_COMMENTS_TOP = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*'));
-  /**
-   * Matches white space and javascript comments at the end of a file.
-   * @type {RegExp}
-   */
-  var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (' ((' + MATCH_COMMENTS_EXP + ') )*$'));
-  /**
-   * Matches a self-invoking anonymous function that wraps all the remaining source code.
-   * It assumes white space and comments have been already removed from both ends of the script.
-   * It searches for one of these patterns:
-   * <code>
-   * (function () { ... }) ();
-   * function (var) { ... }) (angular.module('name'));
-   * function (var) { ... }) (angular.module('name', [dependencies]));
-   * </code>
-   * It also matches the following alternate self-invoking function syntax applied to any of the previous patterns:
-   * <code>
-   * !function () { ... } ();
-   * </code>
-   * @type {RegExp}
-   */
-  var MATCH_MODULE_CLOSURE = new RegExp (tokenize ('^[`(!]function `( (.+?)? `) `{ ([`s`S]*?) `} `)? `( (' + MODULE_DECL_EXP + ')? `) ;?$'), 'i');
-  /**
-   * Regular expression string that matches a javascript identifier.
-   * Note: % will be replaced by the identifier.
-   * Note: this is a poor man's identifier matcher! It may fail in many situations.
-   * @type {string}
-   */
-  var MATCH_IDENTIFIER_EXP = '\\b%\\b';
 
   /**
    * Loads the specified script file and scans it for module definitions.
@@ -262,27 +299,29 @@ module.exports = function (grunt)
    * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
    * source scripts in the correct order. This is used on debug builds.
    * @param {string} mainName Main module name.
-   * @param {string} outputFileName Path to thw output script.
+   * @param {string} outputScriptFilename Path to the output script.
+   * @param {string} outputCSSFilename Path to the output stylesheet.
    */
-  function buildDebugPackage (mainName, outputFileName)
+  function buildDebugPackage (mainName, outputScriptFilename, outputCSSFilename)
   {
     var output = ['document.write (\''];
     includeModule (mainName, output, buildDebugScriptForModule);
     output.push ('\');');
-    grunt.file.write (outputFileName, output.join ('\\\n'));
+    grunt.file.write (outputScriptFilename, output.join ('\\\n'));
   }
 
   /**
    * Saves all script files required by the specified module into a single output file, in the correct
    * loading order. This is used on release builds.
-   * @param {string} mainName
-   * @param {string} outputFileName
+   * @param {string} mainName Main module name.
+   * @param {string} outputScriptFileName Path to the output script.
+   * @param {string} outputCSSFilename Path to the output stylesheet.
    */
-  function buildReleasePackage (mainName, outputFileName)
+  function buildReleasePackage (mainName, outputScriptFileName, outputCSSFilename)
   {
     var output = [];
     includeModule (mainName, output, buildReleaseScriptForModule);
-    grunt.file.write (outputFileName, output.join ('\n'));
+    grunt.file.write (outputScriptFileName, output.join ('\n'));
   }
 
   /**
@@ -388,8 +427,8 @@ module.exports = function (grunt)
           if (options.renameModuleRefs)
             source = source.replace (new RegExp (sprintf (MATCH_IDENTIFIER_EXP, moduleVar), 'g'), options.moduleVar);
           else grunt.fail.warn (
-            sprintcf ('yellow', "Module reference <cyan>%</cyan> doesn't match the configuration setting <cyan>moduleVar='%'</cyan>.\n" +
-              reportErrorLocation (path) +
+            csprintf ('yellow', "Module reference <cyan>%</cyan> doesn't match the configuration setting <cyan>moduleVar='%'</cyan>." +
+              NL + reportErrorLocation (path) +
               info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
               , moduleVar, options.moduleVar)
           );
@@ -520,10 +559,10 @@ module.exports = function (grunt)
    */
   function warnAboutGlobalCode (sandbox, path)
   {
-    var msg = sprintcf ('yellow', 'Code found on the global scope!'.red + '\n' +
+    var msg = csprintf ('yellow', 'Code found on the global scope!'.red + NL +
       reportErrorLocation (path) +
       info (
-        'This kind of code will behave differently between release and debug builds.\n' +
+        'This kind of code will behave differently between release and debug builds.' + NL +
           'You should wrap it in a self-invoking function.'
       )
     );
@@ -533,9 +572,9 @@ module.exports = function (grunt)
       {
         if (!found) {
           found = true;
-          msg += '  Detected globals:\n'.yellow;
+          msg += '  Detected globals:'.yellow + NL;
         }
-        msg += (typeof e[1] == 'function' ? '    function '.blue : '    var      '.blue) + e[0].cyan + '\n';
+        msg += (typeof e[1] == 'function' ? '    function '.blue : '    var      '.blue) + e[0].cyan + NL;
       });
     }
     grunt.fail.warn (msg + '>>'.yellow);
@@ -543,7 +582,7 @@ module.exports = function (grunt)
 
   function reportErrorLocation (path)
   {
-    return sprintcf ('yellow', '  File: <cyan>%</cyan>\n', path);
+    return csprintf ('yellow', '  File: <cyan>%</cyan>' + NL, path);
   }
 
   /**
@@ -571,125 +610,13 @@ module.exports = function (grunt)
 
   /**
    * @private
-   * Generates a regular expression for matching the specified javascript syntax.
-   * Use spaces to mark optional white space on the source code.
-   * Backticks are used instead of \ to allow for cleaner syntax on regexp strings. Ex: write '`n' instead of '\\n'.
-   * @param {string} syntax
-   * @return {string}
-   */
-  function tokenize (syntax)
-  {
-    return syntax.replace (/`/g, '\\').replace (/ /g, '\\s*');
-  }
-
-  /**
-   * @private
-   * Returns an array of properties and corresponding values of the given object.
-   * @param {Object} obj
-   * @returns {Array}
-   */
-  function getProperties (obj)
-  {
-    var p = [];
-    for (var prop in obj)
-      p.push ([prop, obj[prop]]);
-    return p;
-  }
-
-  /**
-   * @private
-   * Returns a comma-separated list of quoted strings from an array.
-   * @param {Array.<string>} array
-   * @returns {string}
-   */
-  function toList (array)
-  {
-    return array.length ? "['" + array.join ("', '") + "']" : '[]';
-  }
-
-  /**
-   * @private
-   * Indents each line in the given source code.
-   * @param {string} source
-   * @param {number} [level=1] Indentation depth level.
-   * @return {string}
-   */
-  function indent (source, level)
-  {
-    return source.split (/\r?\n/).map (function (line)
-    {
-      return line.trim () && (grunt.util.repeat (level || 1, '  ') + line)
-    }).join ('\n');
-  }
-
-  /**
-   * @private
-   * Inserts arguments into placeholders ('%') on the given string.
-   * @param {string} str The string to be formatted.
-   * @returns {string}
-   */
-  function sprintf (str)
-  {
-    var c = 0
-      , args = [].slice.call (arguments, 1);
-    return str.replace (/%/g, function ()
-    {
-      return args[c++];
-    });
-  }
-
-  /**
-   * @private
-   * Formats a string with color and injects values into placeholders.
-   * Placeholders are represented by the symbol %.
-   * To colorize, use markup with the syntax: <code>&lt;color_name>text&lt;/color_name></code>
-   * Warning: do not nest color tags!
-   * @param {string} baseColor The base color for the string. Segments with other colors will resume the base color where they end.
-   * @param {string} str The string to be formatted.
-   * @returns {string}
-   */
-  function sprintcf (baseColor, str)
-  {
-    str = sprintf.apply (null, [].slice.call (arguments, 1));
-    str = str.replace (/<(\w+)>([\s\S]*?)<\/\1>/g, function (m, m1, m2)
-    {
-      if (m1 == 'bold' || m1 == 'underline')
-        m2 = m2[baseColor];
-      return '±' + m2[m1] + '§';
-    });
-    str = str.replace (/^([\s\S]*?)±|§([\s\S]*?)±|§([\s\S]*?)$/g, function (m, m1, m2, m3)
-    {
-      var s = m1 || (m2 || '') || (m3 || '');
-      return s ? s[baseColor] : s;
-    });
-    return str[baseColor];
-  }
-
-  /**
-   * @private
    * Returns the given message colored grey if running in verbose mode otherwise, returns a generic short message.
    * @param msg
    * @returns {*}
    */
   function info (msg)
   {
-    return (verbose ? indent (sprintcf ('grey', msg)) : '  Use -v for more info.'.grey) + '\n';
+    return (verbose ? indent (csprintf ('grey', msg)) : '  Use -v for more info.'.grey) + NL;
   }
 
-  /**
-   * @private
-   * Outputs debug information to the console.
-   */
-  function debug ()
-  {
-    var util = require ('util');
-
-    Array.prototype.forEach.call (arguments, function (arg)
-    {
-      //grunt.log.write (arg instanceof Object || arg instanceof Array ? JSON.stringify (arg, null, 2) : arg + ' ')
-      grunt.log.write (util.inspect (arg).yellow);
-    });
-    grunt.log.writeln ();
-  }
-}
-;
+};
