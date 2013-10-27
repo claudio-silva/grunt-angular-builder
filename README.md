@@ -71,6 +71,8 @@ The next steps are:
 
 # Documentation
 
+> Note: in this documentation, whenever I say 'context' (as in 'wrap code in an isolated context'), I mean a javascript **scope**. The term 'scope' is avoided to prevent being mistaken with the Angular concept of scope.
+
 ## Getting Started
 This plugin requires Grunt `~0.4.0`
 
@@ -206,7 +208,7 @@ Use the `debug` task argument instead (see above).
 
 This is the minimal recommended setup.
 
-```
+```js
 module.exports = function (grunt)
 {
   grunt.initConfig ({
@@ -244,7 +246,7 @@ To setup a debug build of your project, run the command:
 
 #### A more sophisticated config
 
-```
+```js
 module.exports = function (grunt)
 {
   var conf = {
@@ -306,7 +308,7 @@ This last example splits the build process into multiple targets.
 
 This allows you to build each target independently, or to build them all in sequence.
 
-```
+```js
 module.exports = function (grunt)
 {
   grunt.initConfig ({
@@ -379,7 +381,6 @@ If running a release build, the following steps ensue:
     - The source code for all files that contribute to a given module is extracted.
         - If it's already wrapped by a self-invoking function, the wrapper code is discarded.
         - If it's not wrapped, analyze it to detect code running on the global scope that may change the scope's content and abort/warn if such code is found (_see why below_).
-        
     - References to angular modules (variables or `angular.module` expressions) are refactored.
     - The transformed source code fragments are concatenated into a single block wrapped by a self-invoking function.  
       The generated code follows this pattern:  
@@ -395,19 +396,18 @@ If running a release build, the following steps ensue:
 
 - Output each required source stylesheet to the target CSS file, in the same order as the javascript code.
 
-
 > Note: the operations above are performed independently for each **target** or **file group** specified on the Gruntfile.
 
 
 ## Pitfalls and Best Practices
 
-In order to obtain the best results with the build tool, I recommend the following:
+In order to obtain the best results with the build tool, some care should be taken with how you structure your code.
 
 #### Wrapped and unwrapped code
 
 The recommended practice is to always wrap your code, in each source file, like this:
 
-```
+```js
 (function () {
 
   var myPrivateVar = 1;
@@ -433,7 +433,7 @@ Code like this will work just fine with the builder tool.
 Nevertheless, if your code consists only of module definitions, with no private functions or variables, you do not need to wrap it.  
 For example:
 
-```
+```js
 // Valid code.
 
 angular.module ('moduleName', []).
@@ -467,7 +467,7 @@ Statements like those two lines at the end of the example above will be accepted
 
 But the following code will be rejected, as it would malfunction when transformed for a release build:
 
-```
+```js
 // Dangerous code.
 
 var x = 1;
@@ -482,10 +482,11 @@ angular.module('moduleName', []).
 function myPrivateFn3 () {
 }
 ```
+
 Here, three identifiers are added to the global scope: `x`, `e` and `myPrivateFn3`.  
 When running on a release build, those identifiers *will not* be added to the global scope. This may, or may not, have unintended consequences.
 
-You may force such code to be accepted by setting on option on the Gruntfile.
+> You may force such source code to be accepted by setting on option on the task configuration.
 
 #### Split your modules into several files
 
@@ -493,7 +494,7 @@ Don't create gigantic monolithic module files! The main reason for using a build
 
 One way to organize your code is to create a folder for each module. Inside that folder, you may create additional folders to group related functionality. You could also nest other modules inside some modules.
 
-Example directory structure:
+Example directory structure (not mandatory):
 
 ```
 src
@@ -518,7 +519,7 @@ src
  |  ...
 ```
 
-You can, of course, organize your code in any way you want. The build tool should be able to find and assemble all the related code, no matter into how many files and folders deep it was split to, or in which order they are read.
+**You can, of course, organize your code in any way you want**. The build tool should be able to find and assemble all the related code, no matter into how many files and folders deep it was split to, or in which order they are read.
 
 #### Take care with module references
 
@@ -526,9 +527,9 @@ To avoid redundancy and generate shorter code, the build tool replaces multiple 
 
 Suppose you have the following three files:
 
-- one that declares the module:
+- One that declares the module:
 
-```
+```js
 angular.module ('moduleName', []).
 
   service ('test', function () {
@@ -537,9 +538,9 @@ angular.module ('moduleName', []).
   
 ```
 
-- and another one that extends it with additional definitions:
+- Another one that extends it with additional definitions:
 
-```
+```js
 angular.module ('moduleName').
   factory ('test2', function () {
     // do something
@@ -548,9 +549,9 @@ angular.module ('moduleName').
 angular.module ('moduleName').constant ('X', 123);
 ```
 
-And another one that is wrapped in an isolated context:
+- And another one that is wrapped in an isolated context:
 
-```
+```js
 (function (mod) {
   var private1;
   
@@ -566,7 +567,7 @@ And another one that is wrapped in an isolated context:
 
 These would be assembled like this:
 
-```
+```js
 (function (exports) {
 
   exports.service ('test', function () {
@@ -606,7 +607,7 @@ It's safer that way.
 
 Don't do this:
 
-```
+```js
 var mod = angular.module('moduleName', []);
 ```
 
