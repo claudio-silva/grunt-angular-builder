@@ -86,18 +86,6 @@ var TASK_OPTIONS = {
    */
   main:             '',
   /**
-   * Target javascript file name. The javascript build output will be saved to this path.
-   * Note: targets on Grunt file mappings are ignored, use this instead.
-   * @type {string}
-   */
-  targetScript:     '',
-  /**
-   * Target CSS file name. The packaged stylesheets will be saved to this path.
-   * Note: targets on Grunt file mappings are ignored, use this instead.
-   * @type {string}
-   */
-  targetCSS:        '',
-  /**
    * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous functions.
    * @type {string}
    */
@@ -119,6 +107,28 @@ var TASK_OPTIONS = {
    * @type {boolean}
    */
   debug:            false
+};
+
+var FILE_GROUP_OPTIONS = {
+  /**
+   * Target javascript file name.
+   * The javascript build output will be saved to this path.
+   * @type {string}
+   */
+  targetScript:       '',
+  /**
+   * Target CSS file name.
+   * The packaged stylesheets will be saved to this path.
+   * @type {string}
+   */
+  targetCSS:          '',
+  /**
+   * Target folder path for publishing assets.
+   * Relative paths for the source files as specified in stylesheet asset urls are preserved on the output, so the required folder structure will be recreated on the output target.
+   * Urls on the exported stylesheets will be rebased to this folder.
+   * @type {string}
+   */
+  assetsTargetFolder: ''
 };
 
 //------------------------------------------------------------------------------
@@ -231,9 +241,9 @@ module.exports = function (grunt)
 
       // Iterate over all specified file groups and collect all scripts.
 
-      this.files.forEach (function (fileGroup)
+      this.files.forEach (function (/** FILE_GROUP_OPTIONS */ fileGroup)
       {
-        // Reset source code analysis information for each file group, i.e. each group is an independent build.
+          // Reset source code analysis information for each file group, i.e. each group is an independent build.
         modules = {};
         loaded = {};
 
