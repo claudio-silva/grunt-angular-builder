@@ -29,7 +29,7 @@ For debug builds, it generates a loader script for the original javascript and C
         - group, under the same javascript scope, code for the same module coming from multiple files;
         - rearrange private module code to keep it under the same isolated javascript scope;
         - make sure no leakage to the javascript global scope occurs.
-
+        
 - All required modules are assembled in the correct loading order.
 
 #### Stylesheets dependency management
@@ -49,7 +49,7 @@ For debug builds, it generates a loader script for the original javascript and C
 
 #### Other features
 
-1. This plugin **does not** minify the generated files. It preserves the original formatting and comments of the original files, so that the generated files can be distributed as human-friendly source code.
+1. This plugin **does not** minify the generated files. It preserves the original formatting and comments of the original files, so that the generated files can be distributed as human-friendly source code.  
     - Minification / optimization should be handled by other Grunt plugins.
 
 ---
@@ -71,7 +71,7 @@ The next steps are:
 
 # Documentation
 
-> Note: in this documentation, whenever the term 'javascript scope' apperas (ex. 'wrap code in an isolated javascript scope'), it really means a _javascript scope_, not an AngularJS scope. The term 'javascript scope' is used instead of just 'scope' to avoid ambiguity.
+> Note: in this documentation, whenever the term 'javascript scope' appears (ex. 'wrap code in an isolated javascript scope'), it really means a _javascript scope_, not an AngularJS scope. The term 'javascript scope' is used instead of just 'scope' to avoid ambiguity.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.0`
@@ -102,29 +102,29 @@ _View examples below to understand where they should be specified._
 
 ---
 ##### targetScript
-Type `string`
+Type `string`  
 Required: `yes`
 
-Target javascript file name.
+Target javascript file name.  
 The javascript build output will be saved to this path.
 
 ---
 ##### targetCSS
-Type `string`
+Type `string`  
 Required: `no`
 
-Target CSS file name.
+Target CSS file name.  
 The packaged stylesheets will be saved to this path.
 
 ---
 ##### assetsTargetFolder
-Type `string`
+Type `string`  
 Required: `no`
 
-Target folder path for publishing assets.
+Target folder path for publishing assets.  
 Relative paths for the source files as specified in stylesheet asset urls are preserved on the output, so the required folder structure will be recreated on the output target.
 
-If this property is specified, Urls on the exported stylesheets will be rebased to this folder.
+If this property is specified, Urls on the exported stylesheets will be rebased to this folder.  
 Otherwise, the assets will be stored relatively to folder of the `targetCSS` file.
 
 ---
@@ -136,7 +136,7 @@ You must, at least, define one target for the task. You may name it `'applicatio
 
 You may define additional targets to build other libraries or applications using the same Gruntfile. For instance, your application may require building additional libraries for it in a single build process.
 
-> **Note:** I don't recommend using targets to differentiate release builds from debug builds. You should use the `debug` task argument for that (see below).
+> **Note:** I don't recommend using targets to differentiate release builds from debug builds. You should use the `debug` task argument for that (see below).  
 > But if you still wish to do so, you may specify the `debug` property on an options object on each target.
 
 If you invoke the `angular-build-tool` task with no arguments, all targets will run.
@@ -151,11 +151,11 @@ Currently, the only available argument is:
 
 ---
 ##### debug
-Type `boolean`
+Type `boolean`  
 Default `false`
 
-The kind of build to be generated.
-When not specified (`false`), the tool builds a single optimized javascript file with all required source code in the correct loading order.
+The kind of build to be generated.  
+When not specified (`false`), the tool builds a single optimized javascript file with all required source code in the correct loading order.  
 When specified (`true`), the tool builds a script that loads all the required source files in the correct loading order.
 
 ---
@@ -171,14 +171,14 @@ Main module name. Only this module and its dependencies will be exported.
 
 ---
 ##### moduleVar
-Type `string`
+Type `string`  
 Default `'exports'`
 
 Name of the variable representing the angular module being defined. This will be used inside self-invoked anonymous functions.
 
 ---
 ##### renameModuleRefs
-Type `boolean`
+Type `boolean`  
 Default `false`
 
 When <code>true</code>, angular module references passed as arguments to self-invoking functions will be renamed to <code>config.moduleVar</code>.
@@ -188,7 +188,7 @@ a warning will be issued and the task will stop, unless the `--force` option is 
 
 ---
 ##### symlinkAssets
-Type `boolean`
+Type `boolean`  
 Default `false`
 
 When `false`, required assets are copied to the assets target folder.
@@ -199,11 +199,11 @@ If your operating system does not support symlinks, or if you want to archive or
 
 ---
 ##### debug
-Type `boolean`
+Type `boolean`  
 Default `false`
 
-The kind of build to be generated.
-The use of this setting as an option is, probably, not what you want.
+The kind of build to be generated.  
+The use of this setting as an option is, probably, not what you want.  
 Use the `debug` task argument instead (see above).
 
 ---
@@ -230,9 +230,9 @@ module.exports = function (grunt)
     }
 
   });
-
+  
   grunt.loadNpmTasks ('grunt-angular-build-tool');
-
+  
   grunt.registerTask ('release', ['angular-build-tool']);
   grunt.registerTask ('debug', ['angular-build-tool::debug']);
 
@@ -284,9 +284,9 @@ module.exports = function (grunt)
     }
 
   });
-
+  
   grunt.loadNpmTasks ('grunt-angular-build-tool');
-
+  
   grunt.registerTask ('release', ['angular-build-tool']);
   grunt.registerTask ('debug', ['angular-build-tool::debug']);
 
@@ -299,7 +299,7 @@ The example above assumes:
 
 - Your app's files reside on the folder `src/ExampleProjectName` (or on any subfolder of it).
 - A standalone library `library1` should be built from `src/library1`.
-- The output is saved on `build`.
+- The output is saved on `build`.  
 
 **Note:** these paths are all relative to the `Gruntfile.js` folder (i.e. your's projects root folder).
 
@@ -331,9 +331,9 @@ module.exports = function (grunt)
     }
 
   });
-
+  
   grunt.loadNpmTasks ('grunt-angular-build-tool');
-
+  
   grunt.registerTask ('release', ['angular-build-tool']);
   grunt.registerTask ('debug', ['angular-build-tool::debug']);
 
@@ -349,7 +349,7 @@ module.exports = function (grunt)
 
 In the example above, the tasks `release` and `release1` do the same, as do `debug` and `debug1`, they are just written in a different way.
 
-But, while `release` builds all targets, `release1` builds just the specified ones.
+But, while `release` builds all targets, `release1` builds just the specified ones.  
 As for the `lib-release` task, only `library1` is built.
 
 ## Writing build-enabled code
@@ -446,7 +446,7 @@ In this example source file, code is not wrapped, so the build tool will have to
 
 The build tool will run the code in an isolated sandbox to analyze whether the code will run the same way on debug builds and on release builds.
 
-> On release builds, each module's code is wrapped in an isolated javascript scope.
+> On release builds, each module's code is wrapped in an isolated javascript scope.  
 > On debug builds, code runs as it is.
 
 Statements like those two lines at the end of the example above will be accepted, as they will perform the same way whether wrapped or not.
@@ -471,7 +471,7 @@ function myPrivateFn3 () {
 }
 ```
 
-Here, three identifiers are added to the global scope: `x`, `e` and `myPrivateFn3`.
+Here, three identifiers are added to the global scope: `x`, `e` and `myPrivateFn3`.  
 When running on a release build, those identifiers **will not** be added to the global scope. This may, or may not, have unintended consequences.
 
 > You may force the build tool to accept this kind of source code by running the `grunt` command with the `--force` option.
@@ -482,15 +482,15 @@ Don't create gigantic monolithic module files!
 
 The main reason for using a build tool is to be able to split your code into as many files as you need, to make it more organized and simpler to understand.
 
-One way to organize your code is to create a folder for each module.
-Inside that folder, you may create additional folders to group related functionality.
+One way to organize your code is to create a folder for each module.  
+Inside that folder, you may create additional folders to group related functionality.  
 You may also nest some modules inside others, if you need to.
 
-Split your module's code into as many files as you want.
-You can put many services and directives per file, or you may create a file for each service or directive, or you can mix both approaches.
+Split your module's code into as many files as you want.  
+You can put many services and directives per file, or you may create a file for each service or directive, or you can mix both approaches.  
 Do what feels best for you.
 
-**One thing you shouldn't do, though, is to mix declarations for more than one module in the same source file!**
+**One thing you shouldn't do, though, is to mix declarations for more than one module in the same source file!**  
 
 > The build tools accepts no more than one single module reference per source file.
 
@@ -535,7 +535,7 @@ angular.module ('moduleName', []).
   service ('test', function () {
     // do something
   });
-
+  
 ```
 
 - Another one that extends it with additional definitions:
@@ -555,13 +555,13 @@ angular.module ('moduleName').constant ('X', 123);
 ```js
 (function (mod) {
   var private1;
-
+  
   mod.service ('test4', function () {
     // do something
   });
 
   function private2 () {}
-
+   
 }) (angular.module('moduleName'));
 ```
 
@@ -582,13 +582,13 @@ These would be assembled like this:
   exports.constant ('X', 123);
 
   var private1;
-
+  
   exports.service ('test4', function () {
     // do something
   });
 
   function private2 () {}
-
+   
 }) (angular.module('moduleName', []));
 ```
 
@@ -600,7 +600,7 @@ The example above would build just fine, although you may need to enable `rename
 
 This is so because **the build tool, by default, only allows safe operations.**
 
-The renaming operation is not bullet-proof and may, sometimes, fail to rename things properly. So, use this functionality with care.
+The renaming operation is not bullet-proof and may, sometimes, fail to rename things properly. So, use this functionality with care.   
 
 **I recommend that you always use the same variable name for module references.**
 It's safer that way.
@@ -621,7 +621,7 @@ Instead, use the method explained in the [first topic](#wrapped-and-unwrapped-co
 
 #### Build-directives
 
-The build tool recognizes special instructions encoded as comments.
+The build tool recognizes special instructions encoded as comments.  
 These allow the source files to provide additional information or to influence the build process.
 
 The syntax for build-directives is:
@@ -662,8 +662,8 @@ The specified path should be a relative path (not starting with `/`), which will
 
 #### Organizing assets
 
-Assets are files (images or fonts) referenced in stylesheets.
-The specified urls should be relative to the stylesheet location.
+Assets are files (images or fonts) referenced in stylesheets.  
+The specified urls should be relative to the stylesheet location.  
 This means the assets should be stored near the stylesheets that require them.
 
 When the assets are copied (or symlinked) to the release destination, the relative urls are preserved, so the necessary directory structure is automatically created and the assets are placed in folders that maintain the same relative location to the assembled release stylesheet.
@@ -705,13 +705,13 @@ If running a release build, the following steps ensue:
         - If it's already wrapped by a self-invoking function, the wrapper code is discarded.
         - If it's not wrapped, analyze it to detect code running on the global scope that may change the scope's content and abort/warn if such code is found (_see why below_).
     - References to angular modules (variables or `angular.module` expressions) are refactored.
-    - The transformed source code fragments are concatenated into a single block wrapped by a self-invoking function.
-    The generated code follows this pattern:
-
+    - The transformed source code fragments are concatenated into a single block wrapped by a self-invoking function.  
+    The generated code follows this pattern:  
+      
             (function (exports) {
               // all code fragments will be inserted here
             }) (angular.module('name', ['module1', 'module2', ...]));
-
+          
 - Scan all relevant stylesheets for references to external assets (images and fonts).
 - Copy the required assets to the configured release target folder. Alternatively, symlinks may be generated insted of copying files, if so is configured.
 
