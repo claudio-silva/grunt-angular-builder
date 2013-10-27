@@ -71,7 +71,7 @@ The next steps are:
 
 # Documentation
 
-> Note: in this documentation, whenever I say 'context' (as in 'wrap code in an isolated context'), I mean a javascript **scope**. The term 'scope' is avoided to prevent being mistaken with the Angular concept of scope.
+> Note: in this documentation, whenever I say 'context' (as in 'wrap code in an isolated context'), I mean a javascript **scope**. The term 'scope' is avoided to prevent it from being mistaken with the Angular concept of scope.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.0`
@@ -213,8 +213,6 @@ module.exports = function (grunt)
 {
   grunt.initConfig ({
 
-    // ANGULAR BUILD TASK
-    
     'angular-build-tool': {
       options: {
         main: 'mainModuleName'
@@ -260,8 +258,6 @@ module.exports = function (grunt)
   grunt.initConfig ({
     conf: conf,
 
-    // ANGULAR BUILD TASK
-    
     'angular-build-tool': {
       options:     {
         main: '<%= conf.mainModuleName %>'
@@ -313,8 +309,6 @@ module.exports = function (grunt)
 {
   grunt.initConfig ({
 
-    // ANGULAR BUILD TASK
-    
     'angular-build-tool': {
       options: {
         main: 'mainModuleName'
@@ -418,7 +412,7 @@ The recommended practice is to always wrap your code, in each source file, like 
       return {
         restrict: 'E',
         link: function (scope, element, attrs) {
-            return myPrivateFn ();
+          return myPrivateFn ();
         }
       }
     });
@@ -428,13 +422,40 @@ The recommended practice is to always wrap your code, in each source file, like 
 
 }) ();
 ```
-Code like this will work just fine with the builder tool.
+
+Or like this:
+
+```js
+(function (exports) {
+
+  var myPrivateVar = 1;
+
+  exports.
+
+    directive ('test', function () {
+      return {
+        restrict: 'E',
+        link: function (scope, element, attrs) {
+          return myPrivateFn ();
+        }
+      }
+    });
+
+  function myPrivateFn () {
+  }
+
+}) (angular.module ('moduleName', []));
+```
+
+Code like the examples above will work just fine with the builder tool.
 
 Nevertheless, if your code consists only of module definitions, with no private functions or variables, you do not need to wrap it.  
 For example:
 
 ```js
 // Valid code.
+
+/* Comments are allowed. */
 
 angular.module ('moduleName', []).
 
@@ -484,9 +505,9 @@ function myPrivateFn3 () {
 ```
 
 Here, three identifiers are added to the global scope: `x`, `e` and `myPrivateFn3`.  
-When running on a release build, those identifiers *will not* be added to the global scope. This may, or may not, have unintended consequences.
+When running on a release build, those identifiers **will not** be added to the global scope. This may, or may not, have unintended consequences.
 
-> You may force such source code to be accepted by setting on option on the task configuration.
+> You may force the build tool to accept this kind of source code by running the `grunt` command with the `--force` option.
 
 #### Split your modules into several files
 
@@ -593,12 +614,12 @@ These would be assembled like this:
 
 As you can see, the build tool had to unwrap the content of file 3, and then rename the module reference from `mod` to the preconfigured `exports`.
 
-> You can set your preferred name for module references in the task configuration.
+> You can set your preferred name for module references with the `moduleVar` task configuration option.
 
 The example above would build just fine, although you may need to enable `renameModuleRefs`, otherwise the build will stop with a warning.  
 This is so because the renaming method used by the build tool is very basic, and sometimes it may rename other things with the same name that should not be renamed. So you should only enable this functionality if you take some care.   
 
-> I may consider, in the future, including a full javascript parser in the project to improve source code transformation, but for now, it works quite nicely as it is, and it's much faster this way. So, let's see if I can avoid doing that ;-)
+> I may consider, in the future, including a full javascript parser in the project to improve source code transformation, but for now, all code transformations are made without needing one and it works quite nicely as it is, and it is **much faster** this way. So, let's see if I can avoid doing that ;-)
 
 **I recommend that you always use the same variable name for module references.**
 It's safer that way.
@@ -609,10 +630,18 @@ Don't do this:
 
 ```js
 var mod = angular.module('moduleName', []);
+
+mod.service ('test', function () {
+    // do something
+  });
 ```
 
-Instead, use the method explained in the previous topic.
+Instead, use the method explained in the [first topic](#wrapped-and-unwrapped-code).
 
+#### When the build fails, enable verbose mode
+
+More information is usually available when you run the `grunt` command with the `-v` option.
+You may also force it to ignore some errors by specifying the `--force` option on the command line.
 
 ## Release History
 
