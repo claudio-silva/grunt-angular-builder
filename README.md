@@ -12,45 +12,60 @@ For debug builds, it generates a loader script for the original javascript and C
 
 **WARNING: this project is in a early state. It's not recommended for use yet!**
 
-### Features
+## Features
+
+#### Javascript dependency management
 
 1. Allows you to structure your project in almost any file/directory organization you want.
     - Each angular module can be spread over many source files, over many directories.
     - The only restriction is: you can't mix declarations for multiple modules in the same file.
-    
+
 - The build tool analyzes your code to determine which modules there are and which dependencies they have.
     - Code from unused modules is excluded from the build. This allows you to include large libraries in your project but use only the parts you need.
-    
+
 - The build tool assembles each module's source code into a single continuous code block per module.
-  - In the process, some code may be transformed in order to:
-    1. remove redundant module declarations;
-    - group, under the same context, code for the same module coming from multiple files;
-    - rearrange private module code to keep it under the same isolated context;
-    - make sure no leakage to the global context occurs.
+    - In the process, some code may be transformed in order to:
+        1. remove redundant module declarations;
+        - group, under the same context, code for the same module coming from multiple files;
+        - rearrange private module code to keep it under the same isolated context;
+        - make sure no leakage to the global context occurs.
         
 - All required modules are assembled in the correct loading order.
-- CSS stylesheets required by each module are concatenated into a single release file.
-- Assets referred to on the included stylesheets are copied to a release location. All reative URLs on the release stylesheet will remain valid.
+
+#### Stylesheets dependency management
+
+1. CSS stylesheets required by each module are concatenated into a single release file.
+    - Only stylesheets referenced by modules included directly or indirectly in the application are included in the build.
+    - The stylesheets are assembled in the same order as the modules loading order.
+
+#### Assets management
+
+1. Assets referred to on the included stylesheets are copied to a release location. All relative URLs on the assembled stylesheet will remain valid.
     - Under that location, you may group assets by module or put them all under the same folder. Use any organization you like.
 
 - On debug builds, no assemblage or copying are performed but, instead, code is generated to make the browser read the original source files, in the correct loading order.
     - This allows debugging in the browser and faster write-save-refresh cycles.
-    - You may continue editing your files without rebuilding (unless you create a new file or change module dependencies).
+    - You may continue editing your files and refreshing the browser without rebuilding (unless you create a new file or change module dependencies).
 
-**Note:** this plugin **does not** minify the resulting files. It preserves the original formatting and comments, so that the resulting files can be distributed as human-friendly source code.  
-Minification should be handled by other plugins.
+#### Other features
+
+1. This plugin **does not** minify the generated files. It preserves the original formatting and comments of the original files, so that the generated files can be distributed as human-friendly source code.  
+    - Minification / optimization should be handled by other Grunt plugins.
+
+---
 
 ### Status
 
-The javascript source analyser / builder is implemented, although further testing is needed.
+The javascript source analyzer / builder is implemented, although further testing is needed.
 
 **The project is under active development.** More functionality will be available very soon.
 
-### TO DO
+### Roadmap
 
-- CSS builder.
+The next steps are:
+
+1. CSS builder.
 - Assets builder.
-- Improved documentation.
 
 ---
 
@@ -81,18 +96,22 @@ Do note, however, that destination targets are not set via the standard `dest` p
 
 ### Extra file group properties
 
+_View examples below to understand where they should be specified._
+
+***
 ##### targetScript
 Type `string`
 
-> Target javascript file name. The javascript build output will be saved to this path.
+Target javascript file name. The javascript build output will be saved to this path.
 
+***
 ##### targetCSS
 Type `string`
 
-> Target CSS file name. The packaged stylesheets will be saved to this path.
+Target CSS file name. The packaged stylesheets will be saved to this path.
 Note: targets on Grunt file mappings are ignored, use this instead.
 
-
+***
 ### Arguments
 
 The build tool is a Grunt multi-task, so each property at the root level of the task configuration object is a target name.
@@ -114,46 +133,53 @@ To specify additional arguments for all targets, append `::option1-name:option2-
 
 Currently, the only available argument is:
 
+---
 ##### debug
 Type `boolean`  
 Default `false`
->
+
 The kind of build to be generated.  
 When not specified (`false`), the tool builds a single optimized javascript file with all required source code in the correct loading order.  
 When specified (`true`), the tool builds a script that loads all the required source files in the correct loading order.
 
+---
 ### Options
 
-> You may specify options shared by all targets or set specific options for each target, or any combination of both.
+You may specify options shared by all targets or set specific options for each target, or any combination of both.
 
+---
 ##### main
 Type `string`
 
-> Main module name. Only this module and its dependencies will be exported.
+Main module name. Only this module and its dependencies will be exported.
 
+---
 ##### moduleVar
 Type `string`  
 Default `'exports'`
 
-> Name of the variable representing the angular module being defined. This will be used inside self-invoked anonymous functions.
+Name of the variable representing the angular module being defined. This will be used inside self-invoked anonymous functions.
 
+---
 ##### renameModuleRefs
 Type `boolean`  
 Default `false`
->
+
 When <code>true</code>, angular module references passed as arguments to self-invoking functions will be renamed to <code>config.moduleVar</code>.
->
+
 When <code>false</code>, if the module reference parameter has a name other than the one defined on <code>config.moduleVar</code>,
 a warning will be issued and the task will stop, unless the `--force` option is specified.
 
+---
 ##### debug
 Type `boolean`  
 Default `false`
->
+
 The kind of build to be generated.  
 The use of this setting as an option is, probably, not what you want.  
 Use the `debug` task argument instead (see above).
 
+---
 ## Usage Examples
 
 ### Basic Use
