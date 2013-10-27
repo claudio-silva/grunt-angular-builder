@@ -98,20 +98,29 @@ Do note, however, that destination targets are not set via the standard `dest` p
 
 _View examples below to understand where they should be specified._
 
-***
+---
 ##### targetScript
 Type `string`
 
-Target javascript file name. The javascript build output will be saved to this path.
+Target javascript file name.  
+The javascript build output will be saved to this path.
 
-***
+---
 ##### targetCSS
 Type `string`
 
-Target CSS file name. The packaged stylesheets will be saved to this path.
-Note: targets on Grunt file mappings are ignored, use this instead.
+Target CSS file name.  
+The packaged stylesheets will be saved to this path.    
 
-***
+---
+##### assetsTargetFolder
+Type `string`
+
+Target folder path for publishing assets.  
+Relative paths for the source files as specified in stylesheet asset urls are preserved on the output, so the required folder structure will be recreated on the output target.  
+Urls on the exported stylesheets will be rebased to this folder.
+
+---
 ### Arguments
 
 The build tool is a Grunt multi-task, so each property at the root level of the task configuration object is a target name.
@@ -169,6 +178,17 @@ When <code>true</code>, angular module references passed as arguments to self-in
 
 When <code>false</code>, if the module reference parameter has a name other than the one defined on <code>config.moduleVar</code>,
 a warning will be issued and the task will stop, unless the `--force` option is specified.
+
+---
+##### symlinkAssets
+Type `boolean`  
+Default `false`
+
+When `false`, required assets are copied to the assets target folder.
+
+When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk space.
+
+If your operating system does not support symlinks, or if you want to archive or upload the build output, use `false`.
 
 ---
 ##### debug
@@ -330,6 +350,268 @@ In the example above, the tasks `release` and `release1` do the same, as do `deb
 
 But, while `release` builds all targets, `release1` builds just the specified ones.  
 As for the `lib-release` task, only `library1` is built.
+
+## How the build process works
+
+These are the steps the build tool performs:
+
+#### Common steps
+
+1. Scan all files on the configured source folders.
+
+2. Map the dependency graph between the declared modules, starting from the configured main module.
+    - This will determine which source files are relevant to the current build; all other files will be ignored.
+
+3. If a CSS target is configured, trace the stylesheet dependencies too.
+
+#### Debug-specific build steps
+
+If running a debug build, the following step ensues:
+
+1. Generate one single javascript output file that will insert `<script>` and `<link>` tags into the HTML document's HEAD section, which will load all the required javascript and css original source files, in the correct order.
+    - These will be loaded before other `<script>` and `<link>` tags that may already exist in the document after the loader's `<script>` tag.
+
+#### Release-specific build steps
+
+If running a release build, the following steps ensue:
+
+1. Output each module to the target javascript file, in the correct order determined by the dependency graph.
+    - The source code for all files that contribute to a given module is extracted.
+        - If it's already wrapped by a self-invoking function, the wrapper code is discarded.
+        - If it's not wrapped, analyze it to detect code running on the global scope that may change the scope's content and abort/warn if such code is found (_see why below_).
+        
+    - References to angular modules (variables or `angular.module` expressions) are refactored.
+    - The transformed source code fragments are concatenated into a single block wrapped by a self-invoking function.  
+      The generated code follows this pattern:  
+      
+          (function (exports) {
+              // all code fragments will be inserted here
+          }) (angular.module('name', ['module1', 'module2', ...]));
+          
+- Scan all relevant stylesheets for references to external assets (images and fonts).
+- Copy the required assets to the configured release target folder. Alternatively, symlinks may be generated insted of copying files, if so is configured.
+
+- Rebase urls on the stylesheets to the target assets folder.
+
+- Output each required source stylesheet to the target CSS file, in the same order as the javascript code.
+
+
+> Note: the operations above are performed independently for each **target** or **file group** specified on the Gruntfile.
+
+
+## Pitfalls and Best Practices
+
+In order to obtain the best results with the build tool, I recommend the following:
+
+#### Wrapped and unwrapped code
+
+The recommended practice is to always wrap your code, in each source file, like this:
+
+```
+(function () {
+
+  var myPrivateVar = 1;
+
+  angular.module ('moduleName', []).
+
+    directive ('test', function () {
+      return {
+        restrict: 'E',
+        link: function (scope, element, attrs) {
+            return myPrivateFn ();
+        }
+      }
+    });
+
+  function myPrivateFn () {
+  }
+
+}) ();
+```
+Code like this will work just fine with the builder tool.
+
+Nevertheless, if your code consists only of module definitions, with no private functions or variables, you do not need to wrap it.  
+For example:
+
+```
+// Valid code.
+
+angular.module ('moduleName', []).
+
+  service ('test', function () {
+    // do something
+  }).
+
+  factory ('test2', function () {
+    // do something
+  }).
+
+  directive ('test3', function () {
+    return {
+      restrict: 'E',
+      link: function (scope, element, attrs) {
+        // do something
+      }
+    }
+  });
+
+window.name = "Hello";
+console.log ("Hey!");
+```
+
+In this example source file, the code is not wrapped, so the build tool will have to analyze it with more care, to make sure the code will run the same way in debug builds and in release builds.
+
+> In release builds, each module's code is wrapped in an isolated context, which doesn't happen on debug builds.
+
+Statements like those two lines at the end of the example above will be accepted, as they will perform the same way whether wrapped or not.
+
+But the following code will be rejected, as it would malfunction when transformed for a release build:
+
+```
+// Dangerous code.
+
+var x = 1;
+e = 1;
+
+angular.module('moduleName', []).
+
+  service ('test2', function () {
+    return myPrivateFn3 ();
+  });
+
+function myPrivateFn3 () {
+}
+```
+Here, three identifiers are added to the global scope: `x`, `e` and `myPrivateFn3`.  
+When running on a release build, those identifiers *will not* be added to the global scope. This may, or may not, have unintended consequences.
+
+You may force such code to be accepted by setting on option on the Gruntfile.
+
+#### Split your modules into several files
+
+Don't create gigantic monolithic module files! The main reason for using a build tool is to be able to split your code into as many files as you need to make it more organized and simpler to understand.
+
+One way to organize your code is to create a folder for each module. Inside that folder, you may create additional folders to group related functionality. You could also nest other modules inside some modules.
+
+Example directory structure:
+
+```
+src
+ |--module1
+ |  |--services
+ |  |    service1.js
+ |  |    services2_and_3.js
+ |  |--directives
+ |  |    my_directives.js
+ |  |    some_other_directive.js
+ |  |--modules
+ |  |  |--submodule A
+ |  |  |  |--services
+ |  |  |  |    ...
+ |  |  |  |--directives
+ |  |  |  |    ...
+ |  |  |  |--other-stuff
+ |  |  |  |    ...
+ |  |  |--submodule B
+ |  |  |    ...
+ |--module2
+ |  ...
+```
+
+You can, of course, organize your code in any way you want. The build tool should be able to find and assemble all the related code, no matter into how many files and folders deep it was split to, or in which order they are read.
+
+#### Take care with module references
+
+To avoid redundancy and generate shorter code, the build tool replaces multiple references to the same angular module with variables.
+
+Suppose you have the following three files:
+
+- one that declares the module:
+
+```
+angular.module ('moduleName', []).
+
+  service ('test', function () {
+    // do something
+  });
+  
+```
+
+- and another one that extends it with additional definitions:
+
+```
+angular.module ('moduleName').
+  factory ('test2', function () {
+    // do something
+  });
+
+angular.module ('moduleName').constant ('X', 123);
+```
+
+And another one that is wrapped in an isolated context:
+
+```
+(function (mod) {
+  var private1;
+  
+  mod.service ('test4', function () {
+    // do something
+  });
+
+  function private2 () {}
+   
+}) (angular.module('moduleName'));
+```
+
+
+These would be assembled like this:
+
+```
+(function (exports) {
+
+  exports.service ('test', function () {
+    // do something
+  });
+
+  exports.factory ('test2', function () {
+    // do something
+  });
+
+  exports.constant ('X', 123);
+
+  var private1;
+  
+  exports.service ('test4', function () {
+    // do something
+  });
+
+  function private2 () {}
+   
+}) (angular.module('moduleName', []));
+```
+
+As you can see, the build tool had to unwrap the content of file 3, and then rename the module reference from `mod` to the preconfigured `exports`.
+
+> You can set your preferred name for module references in the task configuration.
+
+The example above would build just fine, although you may need to enable `renameModuleRefs`, otherwise the build will stop with a warning.  
+This is so because the renaming method used by the build tool is very basic, and sometimes it may rename other things with the same name that should not be renamed. So you should only enable this functionality if you take some care.   
+
+> I may consider, in the future, including a full javascript parser in the project to improve source code transformation, but for now, it works quite nicely as it is, and it's much faster this way. So, let's see if I can avoid doing that ;-)
+
+**I recommend that you always use the same variable name for module references.**
+It's safer that way.
+
+#### Don't assign module references to variables
+
+Don't do this:
+
+```
+var mod = angular.module('moduleName', []);
+```
+
+Instead, use the method explained in the previous topic.
+
 
 ## Release History
 
