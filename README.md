@@ -399,7 +399,7 @@ In order to obtain the best results with the build tool, some care should be tak
 
 #### Wrapped and unwrapped code
 
-The recommended practice is to always wrap your code, in each source file, like this:
+The recommended practice is to always wrap the code in each source file like this:
 
 ```js
 (function () {
@@ -449,7 +449,8 @@ Or like this:
 
 Code like the examples above will work just fine with the builder tool.
 
-Nevertheless, if your code consists only of module definitions, with no private functions or variables, you do not need to wrap it.  
+Nevertheless, if your code consists only of module definitions, with no private functions or variables, you **don't need** to wrap it.
+
 For example:
 
 ```js
@@ -476,21 +477,27 @@ angular.module ('moduleName', []).
     }
   });
 
+/** These are allowed too: */
+
 window.name = "Hello";
 console.log ("Hey!");
 ```
 
-In this example source file, the code is not wrapped, so the build tool will have to analyze it with more care, to make sure the code will run the same way in debug builds and in release builds.
+In this example source file, code is not wrapped, so the build tool will have to analyze it with more care. This **will be a little slower to build**.
 
-> In release builds, each module's code is wrapped in an isolated context, which doesn't happen on debug builds.
+The build tool will run the code in an isolated sandbox to analyze whether the code will run the same way on debug builds and on release builds.
+
+> On release builds, each module's code is wrapped in an isolated context.  
+> On debug builds, code runs as it is.
 
 Statements like those two lines at the end of the example above will be accepted, as they will perform the same way whether wrapped or not.
 
-But the following code will be rejected, as it would malfunction when transformed for a release build:
+But the following code will be rejected, as it could have unintended side effects when transformed for a release build:
 
 ```js
 // Dangerous code.
 
+// These variables may be used elsewhere, as they are global.
 var x = 1;
 e = 1;
 
@@ -500,6 +507,7 @@ angular.module('moduleName', []).
     return myPrivateFn3 ();
   });
 
+// This function may be called elsewhere, as it is global.
 function myPrivateFn3 () {
 }
 ```
@@ -511,9 +519,21 @@ When running on a release build, those identifiers **will not** be added to the 
 
 #### Split your modules into several files
 
-Don't create gigantic monolithic module files! The main reason for using a build tool is to be able to split your code into as many files as you need to make it more organized and simpler to understand.
+Don't create gigantic monolithic module files!
 
-One way to organize your code is to create a folder for each module. Inside that folder, you may create additional folders to group related functionality. You could also nest other modules inside some modules.
+The main reason for using a build tool is to be able to split your code into as many files as you need, to make it more organized and simpler to understand.
+
+One way to organize your code is to create a folder for each module.  
+Inside that folder, you may create additional folders to group related functionality.  
+You may also nest some modules inside others, if you need to.
+
+Split your module's code into as many files as you want.  
+You can put many services and directives per file, or you may create a file for each service or directive, or you can mix both approaches.  
+Do what feels best for you.
+
+**One thing you shouldn't do, though, is to mix declarations for more than one module in the same source file!**  
+
+> The build tools accepts no more than one single module reference per source file.
 
 Example directory structure (not mandatory):
 
@@ -563,6 +583,7 @@ angular.module ('moduleName', []).
 
 ```js
 angular.module ('moduleName').
+
   factory ('test2', function () {
     // do something
   });
@@ -612,9 +633,9 @@ These would be assembled like this:
 }) (angular.module('moduleName', []));
 ```
 
-As you can see, the build tool had to unwrap the content of file 3, and then rename the module reference from `mod` to the preconfigured `exports`.
+As you can see, the build tool had to unwrap the content of file 3, and then rename the module reference from `mod` to the preconfigured name `exports`.
 
-> You can set your preferred name for module references with the `moduleVar` task configuration option.
+> You can set your preferred name for module references using the `moduleVar` task configuration option.
 
 The example above would build just fine, although you may need to enable `renameModuleRefs`, otherwise the build will stop with a warning.  
 This is so because the renaming method used by the build tool is very basic, and sometimes it may rename other things with the same name that should not be renamed. So you should only enable this functionality if you take some care.   
@@ -641,6 +662,7 @@ Instead, use the method explained in the [first topic](#wrapped-and-unwrapped-co
 #### When the build fails, enable verbose mode
 
 More information is usually available when you run the `grunt` command with the `-v` option.
+
 You may also force it to ignore some errors by specifying the `--force` option on the command line.
 
 ## Release History
