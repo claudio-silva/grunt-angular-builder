@@ -106,19 +106,38 @@ var TASK_OPTIONS = {
    * Use the `debug` task argument instead.
    * @type {boolean}
    */
-  debug:            false
+  debug:            false,
+  /**
+   * A list of filenames or glob patterns that specify which javascript files should always be included in the build, even if they have no module declarations.
+   *
+   * Usually, when a script file is found in the set of the task's source files that doesn't contain a module declaration, that file is ignored.
+   * But, if the file name and path matches a file name or glob pattern specified here, it will still be included.
+   *
+   * Non-module files are output in the same order they were read, and <b>before</b> any module.
+   *
+   * As a best practice, if possible, specify a target or file group exclusively for standlaone script files.
+   *
+   * <b>Tip:</b> You can use append the resulting file to another one that resulted from a previous build step.
+   * That way, you will have more control on the order of the assembled files.
+   * @type {string|Array.<string>}
+   */
+  includeScripts:   null
 };
 
 var FILE_GROUP_OPTIONS = {
   /**
    * Target javascript file name.
    * The javascript build output will be saved to this path.
+   *
+   * <b>Note:</b> when multiple filegroups target the same file, only the first one will (re)create it, all others will append to it.
    * @type {string}
    */
   targetScript:       '',
   /**
    * Target CSS file name.
    * The packaged stylesheets will be saved to this path.
+   *
+   * <b>Note:</b> when multiple filegroups target the same file, only the first one will (re)create it, all others will append to it.
    * @type {string}
    */
   targetCSS:          '',
@@ -213,6 +232,19 @@ module.exports = function (grunt)
    */
   var loaded;
   /**
+   * A map of file names to boolean values that registers which files were already created on the output.
+   * When attempting to save a file, if another one with the same name already exists at the target location, the builder
+   * will erase the existing file before writing to it if the file is not registered here, otherwise it will append to it.
+   * @type {Object.<string,boolean>}
+   */
+  var created;
+  /**
+   * A list of scripts that have no module definitions but that are forced to still being included in the build.
+   * Each item contains the filename and the file content.
+   * @type {Array.<{path: string, content: string}>}
+   */
+  var standaloneScripts;
+  /**
    * Task-specific options set on the Gruntfile.
    * @type {TASK_OPTIONS}
    */
@@ -238,14 +270,16 @@ module.exports = function (grunt)
         grunt.fatal ("No source files were defined.");
 
       verbose = grunt.option ('verbose');
+      created = {};
 
       // Iterate over all specified file groups and collect all scripts.
 
       this.files.forEach (function (/** FILE_GROUP_OPTIONS */ fileGroup)
       {
-          // Reset source code analysis information for each file group, i.e. each group is an independent build.
+        // Reset source code analysis information for each file group, i.e. each group is an independent build.
         modules = {};
         loaded = {};
+        standaloneScripts = [];
 
         if (!fileGroup.targetScript)
           grunt.fatal ("No target script is defined.");
@@ -278,30 +312,38 @@ module.exports = function (grunt)
     var moduleHeader = extractModuleHeader (script);
     // Ignore irrelevant files.
     if (!moduleHeader) {
-      grunt.log.writeln ('Ignored file:'.cyan, path);
-      return;
+      if (!grunt.file.isMatch (options.includeScripts, path)) {
+        grunt.log.writeln ('Ignored file:'.cyan, path);
+        return;
+      }
+      standaloneScripts.push ({
+        path:    path,
+        content: script
+      });
     }
-    // Get information about the specified module.
-    var module = modules[moduleHeader.name];
-    // If this is the first time a specific module is mentioned, create the respective information record.
-    if (!module)
-      module = modules[moduleHeader.name] = new ModuleDef;
-    // Fill out the module definition record.
-    module.name = moduleHeader.name;
-    // The file is appending definitions to a module declared elsewhere.
-    if (moduleHeader.append) {
-      module.bodies.push (script);
-      // Append the file path to the bottom of the paths list.
-      module.filePaths.push (path);
-    }
-    // Otherwise, the file contains a module declaration.
     else {
-      if (module.head)
-        grunt.fatal ("Duplicate module definition: " + moduleHeader.name);
-      module.head = script;
-      // Add the file path to the top of the paths list.
-      module.filePaths.unshift (path);
-      module.requires = moduleHeader.requires;
+      // Get information about the specified module.
+      var module = modules[moduleHeader.name];
+      // If this is the first time a specific module is mentioned, create the respective information record.
+      if (!module)
+        module = modules[moduleHeader.name] = new ModuleDef;
+      // Fill out the module definition record.
+      module.name = moduleHeader.name;
+      // The file is appending definitions to a module declared elsewhere.
+      if (moduleHeader.append) {
+        module.bodies.push (script);
+        // Append the file path to the bottom of the paths list.
+        module.filePaths.push (path);
+      }
+      // Otherwise, the file contains a module declaration.
+      else {
+        if (module.head)
+          grunt.fatal ("Duplicate module definition: " + moduleHeader.name);
+        module.head = script;
+        // Add the file path to the top of the paths list.
+        module.filePaths.unshift (path);
+        module.requires = moduleHeader.requires;
+      }
     }
   }
 
@@ -315,9 +357,18 @@ module.exports = function (grunt)
   function buildDebugPackage (mainName, outputScriptFilename, outputCSSFilename)
   {
     var output = ['document.write (\''];
+
+    // Output the standalone scripts (if any).
+    if (standaloneScripts.length)
+      writeFile (outputScriptFileName, standaloneScripts.map (function (e)
+      {
+        return sprintf ('<script src=\"%\"></script>', e.path)
+      }).join ('\n'));
+
+    // Output the modules (if any).
     includeModule (mainName, output, buildDebugScriptForModule);
     output.push ('\');');
-    grunt.file.write (outputScriptFilename, output.join ('\\\n'));
+    writeFile (outputScriptFilename, output.join ('\\\n'));
   }
 
   /**
@@ -330,8 +381,33 @@ module.exports = function (grunt)
   function buildReleasePackage (mainName, outputScriptFileName, outputCSSFilename)
   {
     var output = [];
+
+    // Output the standalone scripts (if any).
+    if (standaloneScripts.length)
+      writeFile (outputScriptFileName, standaloneScripts.map (function (e) {return e.content}).join ('\n'));
+
+    // Output the modules (if any).
     includeModule (mainName, output, buildReleaseScriptForModule);
-    grunt.file.write (outputScriptFileName, output.join ('\n'));
+    writeFile (outputScriptFileName, output.join ('\n'));
+  }
+
+  function writeFile (path, content)
+  {
+    if (grunt.file.exists (path)) {
+      if (created [path]) {
+        // Append to existing file.
+        var data = grunt.file.read (path);
+        grunt.file.write (path, data + '\n' + content);
+      }
+      else {
+        // Re-create file.
+        grunt.file.delete (path);
+        grunt.file.write (path, content);
+      }
+    }
+    // Create file.
+    else grunt.file.write (path, content);
+    created [path] = true;
   }
 
   /**
