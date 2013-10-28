@@ -10,13 +10,16 @@ For release builds, it analyzes and assembles a project's source code into a sma
 
 For debug builds, it generates a loader script for the original javascript and CSS source files.
 
+You may also use this plugin for building javascript projects that are not AngularJS based. In that case, as the build-tool will not be able to automatically determine the relations between the source files, you will have to annotate them with buid-directives.  
+See the [Wiki](../../wiki) for more info.
+
 **WARNING: this project is in a early state. It's not recommended for use yet!**
 
 ## Features
 
 #### Javascript dependency management
 
-1. Allows you to structure your project in almost any file/directory organization you want.
+- Allows you to structure your project in almost any file/directory organization you want.
     - Each angular module can be spread over many source files, over many directories.
     - The only restriction is: you can't mix declarations for multiple modules in the same file.
 
@@ -34,14 +37,17 @@ For debug builds, it generates a loader script for the original javascript and C
 
 #### Stylesheets dependency management
 
-1. CSS stylesheets required by each module are concatenated into a single release file.
+- CSS stylesheets required by each module are concatenated into a single release file.
     - Only stylesheets referenced by modules included directly or indirectly in the application are included in the build.
     - The stylesheets are assembled in the same order as the modules loading order.
 
 #### Assets management
 
-1. Assets referred to on the included stylesheets are copied to a release location. All relative URLs on the assembled stylesheet will remain valid.
-    - Under that location, you may group assets by module or put them all under the same folder. Use any organization you like.
+- Assets referred to on the included stylesheets are copied to a release location.
+- A folder structure is created so that all relative asset URLs on the release stylesheet will remain valid.
+- You may group assets by module or put them all under the same folder. Use any organization you like.
+
+#### Debugging support
 
 - On debug builds, no assemblage or copying are performed but, instead, code is generated to make the browser read the original source files, in the correct loading order.
     - This allows debugging in the browser and faster write-save-refresh cycles.
@@ -49,7 +55,9 @@ For debug builds, it generates a loader script for the original javascript and C
 
 #### Other features
 
-1. This plugin **does not** minify the generated files. It preserves the original formatting and comments of the original files, so that the generated files can be distributed as human-friendly source code.  
+- _Build-directives_ are annotations wrapped in javascript documentation blocks that allow the source files to provide additional information to, or to influence, the build process. These allow a great deal of customization of the build process, with conditional inclusion/exclusion of files or source code fragments, and much more. 
+
+- The build tool **does not** minify the generated files. It preserves the original formatting and comments of the original files, so that the generated files can be distributed as human-friendly source code.  
     - Minification / optimization should be handled by other Grunt plugins.
 
 ---
@@ -64,6 +72,7 @@ The javascript source analyzer / builder is implemented, although further testin
 
 The next steps are:
 
+1. Build-directives support.
 1. CSS builder.
 2. Assets builder.
 
@@ -71,7 +80,7 @@ The next steps are:
 
 # Documentation
 
-Extended documentation is available on the [Wiki](wiki).
+Extended documentation is available on the [Wiki](../../wiki).
 
 ## Getting Started
 This plugin requires Grunt `~0.4.0`
@@ -142,7 +151,7 @@ To setup a debug build of your project, run the command:
 
 ### Advanced Use
 
-Read the [Configuring Tasks](wiki/Configuring-Tasks) wiki page for additional information and examples .
+Read the [Configuring Tasks](../../wiki/Configuring-Tasks) wiki page for additional information and examples .
 
 ## Release History
 
