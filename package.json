@@ -1,7 +1,7 @@
 {
   "name":         "grunt-angular-build-tool",
   "description":  "A Grunt plugin that generates an optimized build of an AngularJS project.",
-  "version":      "0.1.0-alpha",
+  "version":      "0.1.0",
   "engine":       "node 0.10.15",
   "author":       {
     "name":  "Cáudio Silva",
