@@ -1,6 +1,6 @@
 ## grunt-angular-build-tool
 
-> A build tool for AngularJS applications
+> A build tool for AngularJS applications.
 
 ### Summary
 
@@ -89,7 +89,7 @@ The next steps are:
 Extended documentation is available on the [Wiki](https://github.com/claudio-silva/grunt-angular-build-tool/wiki).
 
 ## Getting Started
-This plugin requires Grunt `~0.4.0`
+This plugin requires Grunt `~0.4.1`
 
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
@@ -103,19 +103,29 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-angular-build-tool');
 ```
 
-## angular-build-tool task
+## The "angular_build_tool" task
 
-_To run this task directly, use the `grunt angular-build-tool` command or the `grunt angular-build-tool::debug` command._
+### Overview
+In your project's Gruntfile, add a section named `angular_build_tool` to the data object passed into `grunt.initConfig()`.
 
-More information is usually available when you run the `grunt` command with the `-v` option.
+```js
+grunt.initConfig({
+  angular_build_tool: {
+    options: {
+      // Task-specific options go here.
+    },
+    your_target: {
+      // Target-specific file lists and/or options go here.
+    },
+  },
+})
+```
 
-You may also force it to ignore some errors by specifying the `--force` option on the command line.
-
-Before you can run any task, though, you must set up its configuration in the Gruntfile.
+The available options are explained in the [Configuring tasks](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuring-tasks) page.
 
 ### Basic Use
 
-This is the minimal recommended setup.
+This is the minimal recommended `Gruntfile.js`.
 
 ```js
 module.exports = function (grunt)
@@ -142,11 +152,19 @@ module.exports = function (grunt)
 };
 ```
 
-**There are many more configuration options available**. They are explained in the [Configuring tasks](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuring-tasks) page.
+### Running tasks
 
-#### The recommended tasks alias
+_To run the above task directly, use the `grunt angular-build-tool` command or the `grunt angular-build-tool::debug` command._
 
-Those two alias tasks registered at the bottom are customizable shortcuts to your build process. They can be expanded with additional subtasks provided by other Grunt plugins.
+If you define your own alias tasks with more complex build steps, run `grunt your-task-name` instead.
+
+> More information is usually available when you run the `grunt` command with the `-v` option.
+
+> You may also force Grunt to ignore some warnings and proceed by running `grunt` with the `--force` option.
+
+### The recommended tasks alias
+
+The example above includes two alias tasks registered at the bottom. These tasks are customizable shortcuts to your build process. They are a starting point for you to expand with additional subtasks provided by other Grunt plugins.
 
 To assemble a release build of your project, run the command:
 `grunt release`
@@ -160,13 +178,16 @@ For a debug build, run the command:
 
 If you wish to minify/optimize your build files, you can add the respective tasks to the `release` task list, __after__ the `angular-build-tool` task.
 
-If you wish to compile files from other languages to javascript (coffeescript, typescript, etc), they must be compiled prior to the build step, so you should add the respective tasks to the `release` task list __before__ the `angular-build-tool` task.
+If you wish to compile files from other languages to javascript (coffeescript, typescript, etc), they must be compiled prior to the build step, so you should add those tasks to the `release` task list __before__ the `angular-build-tool` task.
 
 If you use CSS preprocessors, you may have to add the respective tasks to both the `release` and the `debug` task lists.
 
 ### Advanced Use
 
 Read the [Configuration examples](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuration-examples) page for additional information and examples.
+
+## Contributing
+In lieu of a formal styleguide, take care to maintain the existing coding style. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
 

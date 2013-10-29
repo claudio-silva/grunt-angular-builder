@@ -326,7 +326,7 @@ module.exports = function (grunt)
     var modules = {};
     (options.externalModules || []).forEach (function (moduleName)
     {
-      var module = modules[moduleName] = new ModuleDef;
+      var module = modules[moduleName] = new ModuleDef ();
       module.name = moduleName;
       module.external = true;
     });
@@ -363,7 +363,7 @@ module.exports = function (grunt)
       var module = modules[moduleHeader.name];
       // If this is the first time a specific module is mentioned, create the respective information record.
       if (!module)
-        module = modules[moduleHeader.name] = new ModuleDef;
+        module = modules[moduleHeader.name] = new ModuleDef ();
       else if (!moduleHeader.append)
         fatal ("Can't redeclare the external module <cyan>%</cyan>", moduleHeader.name);
       // Fill out the module definition record.
@@ -402,7 +402,7 @@ module.exports = function (grunt)
     if (standaloneScripts.length)
       output.push (standaloneScripts.map (function (e)
       {
-        return sprintf ('<script src=\"%\"></script>', e.path)
+        return sprintf ('<script src=\"%\"></script>', e.path);
       }).join ('\\\n'));
 
     // Output the modules (if any).
@@ -425,7 +425,7 @@ module.exports = function (grunt)
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)
-      output.push (standaloneScripts.map (function (e) {return e.content}).join ('\n'));
+      output.push (standaloneScripts.map (function (e) {return e.content;}).join ('\n'));
 
     // Output the modules (if any).
     includeModule (mainName, output, buildReleaseScriptForModule);
@@ -540,10 +540,10 @@ module.exports = function (grunt)
         var moduleVar = m[1]
           , closureBody = m[2]
           , moduleDecl = m[3]
-          , moduleName = m[4]
-          , moduleDeps = m[5];
+          , moduleName = m[4];
+          //, moduleDeps = m[5];
 
-        if (moduleName && moduleName != module.name)
+        if (moduleName && moduleName !== module.name)
           warn ('Wrong module declaration: <cyan>%</cyan>', moduleName);
 
         // Remove the existing closure from the source code.
@@ -558,7 +558,7 @@ module.exports = function (grunt)
 
         // If the angular module is being passed as a parameter to the closure, rename that parameter to the
         // predefined name.
-        if (moduleVar && moduleDecl && moduleVar != options.moduleVar) {
+        if (moduleVar && moduleDecl && moduleVar !== options.moduleVar) {
           if (options.renameModuleRefs)
             source = source.replace (new RegExp (sprintf (MATCH_IDENTIFIER_EXP, moduleVar), 'g'), options.moduleVar);
           else warn ("Module reference <cyan>%</cyan> doesn't match the configuration setting <cyan>moduleVar='%'</cyan>." +
@@ -584,7 +584,7 @@ module.exports = function (grunt)
       // If the module expression defines no services/whatever, remove-it, as it will be regenerated outside the closure.
       return source.replace (declPattern, function (m)
       {
-        return m.substr (-1) == ')' ? options.moduleVar : '';
+        return m.substr (-1) === ')' ? options.moduleVar : '';
       });
     }
 
@@ -622,7 +622,7 @@ module.exports = function (grunt)
   function validateSourceCode (source, path)
   {
     var vm = require ('vm')
-      , mockupMethod = function () { return angularModuleMockup }
+      , mockupMethod = function () { return angularModuleMockup; }
       , angularModuleMockup = {
         animation:  mockupMethod,
         config:     mockupMethod,
@@ -657,7 +657,7 @@ module.exports = function (grunt)
       }
       , sandbox = {
         angular: {
-          module: function () { return angularModuleMockup }
+          module: function () { return angularModuleMockup; }
         },
         console: consoleMockup,
         window:  {}
@@ -708,7 +708,7 @@ module.exports = function (grunt)
           found = true;
           msg += '  Detected globals:'.yellow + NL;
         }
-        msg += (typeof e[1] == 'function' ? '    function '.blue : '    var      '.blue) + e[0].cyan + NL;
+        msg += (typeof e[1] === 'function' ? '    function '.blue : '    var      '.blue) + e[0].cyan + NL;
       });
     }
     warn (msg + '>>'.yellow);
@@ -739,7 +739,7 @@ module.exports = function (grunt)
       name:     m[1],
       append:   !m[2],
       requires: m[2] && JSON.parse (m[2].replace (/'/g, '"')) || []
-    }
+    };
   }
 
   /**

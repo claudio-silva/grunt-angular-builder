@@ -1,32 +1,42 @@
 {
-  "name":         "grunt-angular-build-tool",
-  "description":  "A Grunt plugin that generates an optimized build of an AngularJS project.",
-  "version":      "0.1.0",
-  "engine":       "node 0.10.15",
-  "author":       {
-    "name":  "Cáudio Silva",
+  "name":             "grunt-angular-build-tool",
+  "description":      "A build tool for AngularJS applications.",
+  "version":          "0.1.0",
+  "homepage":         "https://github.com/claudio/grunt-angular-build-tool",
+  "author":           {
+    "name":  "Cláudio Silva",
     "email": "claudio.silva@impactwave.com"
   },
-  "dependencies": {
-    "colors": "~0.6.0-1"
+  "repository":       {
+    "type": "git",
+    "url":  "https://github.com/claudio-silva/grunt-angular-build-tool.git"
   },
-  "tags":         [
-    "gruntplugin",
-    "angular",
-    "angularjs"
-  ],
-  "main":         "tasks/angular-build-tool.js",
-  "licenses":     [
+  "bugs":             {
+    "url": "https://github.com/claudio-silva/grunt-angular-build-tool/issues"
+  },
+  "licenses":         [
     {
       "type": "MIT",
       "url":  "https://github.com/claudio-silva/grunt-angular-build-tool/blob/master/LICENSE"
     }
   ],
-  "repository":   {
-    "type": "git",
-    "url":  "https://github.com/claudio-silva/grunt-angular-build-tool.git"
+  "main":             "Gruntfile.js",
+  "engines":          {
+    "node": ">= 0.8.0"
   },
-  "bugs":         {
-    "url": "https://github.com/claudio-silva/grunt-angular-build-tool/issues"
-  }
+  "dependencies":     {
+    "colors": "~0.6.0-1"
+  },
+  "devDependencies":  {
+    "grunt-contrib-jshint":   "~0.6.0",
+    "grunt":                  "~0.4.1"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.1"
+  },
+  "keywords":         [
+    "gruntplugin",
+    "angular",
+    "angularjs"
+  ]
 }
