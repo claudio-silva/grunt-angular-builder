@@ -142,7 +142,7 @@ module.exports = function (grunt)
 };
 ```
 
-**There are many more configuration options available**. They are explained in the [Configuring Tasks](../../wiki/Configuring-tasks) page.
+**There are many more configuration options available**. They are explained in the [Configuring tasks](../../wiki/Configuring-tasks) page.
 
 #### The recommended tasks alias
 
@@ -166,7 +166,7 @@ If you use CSS preprocessors, you may have to add the respective tasks to both t
 
 ### Advanced Use
 
-Read the [Configuring Tasks](../../wiki/Configuring-tasks) wiki page for additional information and examples .
+Read the [Configuration examples](../../wiki/Configuration-examples) wiki page for additional information and examples.
 
 ## Release History
 
