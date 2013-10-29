@@ -1,7 +1,7 @@
 {
   "name":             "grunt-angular-build-tool",
   "description":      "A build tool for AngularJS applications.",
-  "version":          "0.1.0",
+  "version":          "0.1.1",
   "homepage":         "https://github.com/claudio/grunt-angular-build-tool",
   "author":           {
     "name":  "Cláudio Silva",
