@@ -10,10 +10,6 @@ For release builds, it analyzes and assembles a project's source code into a sma
 
 For debug builds, it generates a loader script for the original javascript and CSS source files.
 
-You may also use this plugin for building javascript projects that are not AngularJS based, by manually defining inclusion patterns and the relationships between your files.
-
-**WARNING: this project is still in a early state. The API may still change. Use at your own risk!**
-
 ## Features
 
 #### Javascript dependency management
@@ -38,8 +34,6 @@ You may also use this plugin for building javascript projects that are not Angul
 
 - You can even build a project that is not AngularJS based at all.
 > On non-AngularJS projects, the build-tool will not be able to automatically determine the relations between the source files; you will have to annotate them with build-directives or configure forced inclusion patterns via task options. See the [Wiki](https://github.com/claudio-silva/grunt-angular-build-tool/wiki) for more info.
-
-
 
 #### Stylesheets dependency management
 
@@ -68,19 +62,14 @@ You may also use this plugin for building javascript projects that are not Angul
 
 ---
 
-### Status
-
-The javascript source analyzer / builder is implemented and working, although further testing is needed.
-
-**The project is under active development.** More functionality will be available very soon.
-
 ### Roadmap
 
-The next steps are:
-
+1. ~~Javascript builder.~~ [done]
 1. Build-directives support.
 1. CSS builder.
 2. Assets builder.
+
+**The project is under active development.** More functionality will be available very soon.
 
 ---
 
@@ -103,14 +92,14 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-angular-build-tool');
 ```
 
-## The "angular_build_tool" task
+## The "angular-build-tool" task
 
 ### Overview
-In your project's Gruntfile, add a section named `angular_build_tool` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `angular-build-tool` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  angular_build_tool: {
+  'angular-build-tool': {
     options: {
       // Task-specific options go here.
     },
@@ -154,13 +143,16 @@ module.exports = function (grunt)
 
 ### Running tasks
 
-_To run the above task directly, use the `grunt angular-build-tool` command or the `grunt angular-build-tool::debug` command._
+To run the above task:
+
+- For a releast build type `grunt angular-build-tool` on the command line;
+- For a debug build type either:
+    - `grunt angular-build-tool::debug`, or
+    - `grunt angular-build-tool --build=debug`.
 
 If you define your own alias tasks with more complex build steps, run `grunt your-task-name` instead.
 
-> More information is usually available when you run the `grunt` command with the `-v` option.
-
-> You may also force Grunt to ignore some warnings and proceed by running `grunt` with the `--force` option.
+> Tip: you can use the `--build=debug` option to convert into a _debug_ build any task alias that includes an angular-build-tool subtask.
 
 ### The recommended tasks alias
 
@@ -186,8 +178,29 @@ If you use CSS preprocessors, you may have to add the respective tasks to both t
 
 Read the [Configuration examples](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuration-examples) page for additional information and examples.
 
+### Debugging build failures
+
+ The build tool will display extended information when warnings or errors occur during the build process if you run the `grunt` command with the `-v` option.
+
+You may also force Grunt to ignore some warnings and continue building by running `grunt` with the `--force` option (not recommended, though).
+
 ## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Lint and test your code using [Grunt](http://gruntjs.com/).
+
+In lieu of a formal styleguide, take care to maintain the existing coding style.
+
+A linter is already present on the project, so just type `grunt` to run it.
+
+If possible, create some test cases on the `/test` folder and include them as individual tasks on the project's  Gruntfile.
+
+Always start developing from a stable version on the `master` branch.
+
+> Although the main development is made on the `dev` branch, it's too unstable to be a good starting point for your own work.
+
+Choose the latest tagged version and create a topic branch from it on your local repository.
+
+When your work is ready, submit a pull request.
+
+__Important:__ all contributions will be made available under the project's license.
 
 ## Release History
 
