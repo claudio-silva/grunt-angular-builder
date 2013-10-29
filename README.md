@@ -37,7 +37,7 @@ You may also use this plugin for building javascript projects that are not Angul
 - You may also force the inclusion of non-AngularJS code in the build.
 
 - You can even build a project that is not AngularJS based at all.
-> On non-AngularJS projects, the build-tool will not be able to automatically determine the relations between the source files; you will have to annotate them with build-directives or configure forced inclusion patterns via task options. See the [Wiki](../../wiki) for more info.
+> On non-AngularJS projects, the build-tool will not be able to automatically determine the relations between the source files; you will have to annotate them with build-directives or configure forced inclusion patterns via task options. See the [Wiki](https://github.com/claudio-silva/grunt-angular-build-tool/wiki) for more info.
 
 
 
@@ -86,7 +86,7 @@ The next steps are:
 
 # Documentation
 
-Extended documentation is available on the [Wiki](../../wiki).
+Extended documentation is available on the [Wiki](https://github.com/claudio-silva/grunt-angular-build-tool/wiki).
 
 ## Getting Started
 This plugin requires Grunt `~0.4.0`
@@ -142,7 +142,7 @@ module.exports = function (grunt)
 };
 ```
 
-**There are many more configuration options available**. They are explained in the [Configuring tasks](../../wiki/Configuring-tasks) page.
+**There are many more configuration options available**. They are explained in the [Configuring tasks](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuring-tasks) page.
 
 #### The recommended tasks alias
 
@@ -166,7 +166,7 @@ If you use CSS preprocessors, you may have to add the respective tasks to both t
 
 ### Advanced Use
 
-Read the [Configuration examples](../../wiki/Configuration-examples) wiki page for additional information and examples.
+Read the [Configuration examples](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuration-examples) page for additional information and examples.
 
 ## Release History
 
