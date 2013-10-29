@@ -309,7 +309,7 @@ module.exports = function (grunt)
         fileGroup.src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
         // On debug mode, output a script that dynamically loads all the required source files.
-        if (options.debug === undefined ? this.flags.debug : options.debug)
+        if (this.flags.debug === undefined ? options.debug : this.flags.debug)
           buildDebugPackage (options.main, fileGroup.targetScript, fileGroup.targetCSS);
 
         // On release mode, output an optimized script.
@@ -390,46 +390,53 @@ module.exports = function (grunt)
    * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
    * source scripts in the correct order. This is used on debug builds.
    * @param {string} mainName Main module name.
-   * @param {string} outputScriptFilename Path to the output script.
-   * @param {string} outputCSSFilename Path to the output stylesheet.
+   * @param {string} targetScript Path to the output script.
+   * @param {string} targetStylesheet Path to the output stylesheet.
    */
-  function buildDebugPackage (mainName, outputScriptFilename, outputCSSFilename)
+  function buildDebugPackage (mainName, targetScript, targetStylesheet)
   {
+    grunt.log.writeln ("Generating the debug build...");
     var output = ['document.write (\''];
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)
-      writeFile (outputScriptFileName, standaloneScripts.map (function (e)
+      output.push (standaloneScripts.map (function (e)
       {
         return sprintf ('<script src=\"%\"></script>', e.path)
-      }).join ('\n'));
+      }).join ('\\\n'));
 
     // Output the modules (if any).
     includeModule (mainName, output, buildDebugScriptForModule);
     output.push ('\');');
-    writeFile (outputScriptFilename, output.join ('\\\n'));
+    writeFile (targetScript, output.join ('\\\n'));
   }
 
   /**
    * Saves all script files required by the specified module into a single output file, in the correct
    * loading order. This is used on release builds.
    * @param {string} mainName Main module name.
-   * @param {string} outputScriptFileName Path to the output script.
-   * @param {string} outputCSSFilename Path to the output stylesheet.
+   * @param {string} targetScript Path to the output script.
+   * @param {string} targetStylesheet Path to the output stylesheet.
    */
-  function buildReleasePackage (mainName, outputScriptFileName, outputCSSFilename)
+  function buildReleasePackage (mainName, targetScript, targetStylesheet)
   {
+    grunt.log.writeln ("Generating the release build...");
     var output = [];
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)
-      writeFile (outputScriptFileName, standaloneScripts.map (function (e) {return e.content}).join ('\n'));
+      output.push (standaloneScripts.map (function (e) {return e.content}).join ('\n'));
 
     // Output the modules (if any).
     includeModule (mainName, output, buildReleaseScriptForModule);
-    writeFile (outputScriptFileName, output.join ('\n'));
+    writeFile (targetScript, output.join ('\n'));
   }
 
+  /**
+   * Writes or appends content to a file.
+   * @param {string} path
+   * @param {string} content
+   */
   function writeFile (path, content)
   {
     if (grunt.file.exists (path)) {
