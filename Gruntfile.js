@@ -8,30 +8,56 @@
 
 'use strict';
 
-module.exports = function(grunt) {
+module.exports = function (grunt)
+{
 
   // Project configuration.
-  grunt.initConfig({
+  grunt.initConfig ({
+    conf: {
+      testDir: 'test/manual-tests'
+    },
 
     jshint: {
-      all: [
+      all:     [
         'Gruntfile.js',
         'tasks/*.js'
       ],
       options: {
         jshintrc: '.jshintrc'
       }
+    },
+
+    // Before generating any new files, remove any previously-created files.
+    clean:  {
+      tests: ['tmp', 'dist']
+    },
+
+    'angular-build-tool': {
+      options:            {
+        main: 'App'
+      },
+      'test-stylesheets': {
+        src:          '<%=conf.testDir%>/build-stylesheets/src/**/*.js',
+        targetScript: 'dist/test-build-stylesheets.js',
+        targetCSS:    'dist/test-build.stylesheets.css'
+      }
     }
+
 
   });
 
-  // Actually load this plugin's task(s).
-  //grunt.loadTasks('tasks');
+  // Load this plugin's task(s).
+  grunt.loadTasks ('tasks');
 
   // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks ('grunt-contrib-jshint');
+  grunt.loadNpmTasks ('grunt-contrib-clean');
 
   // By default, lint and run all tests.
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask ('default', ['jshint']);
+
+  // Test tasks below can also be executed with the command line option `--build debug` to generate debug builds.
+
+  grunt.registerTask ('test-stylesheets', ['clean', 'angular-build-tool:test-stylesheets']);
 
 };

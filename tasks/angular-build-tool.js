@@ -289,6 +289,12 @@ module.exports = function (grunt)
       created = {};
 
       var externals = setupExternalModules ();
+      /**
+       * Is this a debug build?
+       * Note: the debug build mode can be set via three different settings.
+       * @type {boolean}
+       */
+      var debugBuild = grunt.option('build') === 'debug' || (this.flags.debug === undefined ? options.debug : this.flags.debug);
 
       // Iterate over all specified file groups and collect all scripts.
 
@@ -308,8 +314,10 @@ module.exports = function (grunt)
         // Process the source files.
         fileGroup.src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
+        writeln ("Generating the <cyan>%</cyan> build...", debugBuild ? 'debug' : 'release');
+
         // On debug mode, output a script that dynamically loads all the required source files.
-        if (this.flags.debug === undefined ? options.debug : this.flags.debug)
+        if (debugBuild)
           buildDebugPackage (options.main, fileGroup.targetScript, fileGroup.targetCSS);
 
         // On release mode, output an optimized script.
@@ -395,7 +403,6 @@ module.exports = function (grunt)
    */
   function buildDebugPackage (mainName, targetScript, targetStylesheet)
   {
-    grunt.log.writeln ("Generating the debug build...");
     var output = ['document.write (\''];
 
     // Output the standalone scripts (if any).
@@ -420,7 +427,6 @@ module.exports = function (grunt)
    */
   function buildReleasePackage (mainName, targetScript, targetStylesheet)
   {
-    grunt.log.writeln ("Generating the release build...");
     var output = [];
 
     // Output the standalone scripts (if any).
@@ -758,6 +764,15 @@ module.exports = function (grunt)
   function warn ()
   {
     grunt.fail.warn (csprintf.apply (null, ['yellow'].concat ([].slice.call (arguments))));
+  }
+
+  /**
+   * Displays a message.
+   * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code>.
+   */
+  function writeln ()
+  {
+    grunt.log.writeln (csprintf.apply (null, ['white'].concat ([].slice.call (arguments))));
   }
 
   /**
