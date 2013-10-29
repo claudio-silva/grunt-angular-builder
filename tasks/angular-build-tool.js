@@ -115,11 +115,9 @@ var TASK_OPTIONS = {
   debug:            false,
   /**
    * A list of module names to ignore when building.
-   * Allows the source code to contain references to modules not present on the build.
+   * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that are loaded independently).
    *
    * If a module reference (for module access or for declaring a dependency) is found in the source code, which targets a module that is not declared anywhere in the build's source files, the build operation aborts when that module name is not present on this list.
-   * This is useful if your code makes references to modules that are loaded from a file other than the file being built.
-   * That happens, for instance, with 3rd party libraries that are loaded independently.
    * @type {Array.<string>}
    */
   externalModules:  null

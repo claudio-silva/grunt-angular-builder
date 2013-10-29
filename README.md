@@ -10,10 +10,9 @@ For release builds, it analyzes and assembles a project's source code into a sma
 
 For debug builds, it generates a loader script for the original javascript and CSS source files.
 
-You may also use this plugin for building javascript projects that are not AngularJS based. In that case, as the build-tool will not be able to automatically determine the relations between the source files, you will have to annotate them with buid-directives.  
-See the [Wiki](../../wiki) for more info.
+You may also use this plugin for building javascript projects that are not AngularJS based, by manually defining inclusion patterns and the relationships between your files.
 
-**WARNING: this project is in a early state. It's not recommended for use yet!**
+**WARNING: this project is still in a early state. The API may still change. Use at your own risk!**
 
 ## Features
 
@@ -34,6 +33,13 @@ See the [Wiki](../../wiki) for more info.
         - make sure no leakage to the javascript global scope occurs.
         
 - All required modules are assembled in the correct loading order.
+
+- You may also force the inclusion of non-AngularJS code in the build.
+
+- You can even build a project that is not AngularJS based at all.
+> On non-AngularJS projects, the build-tool will not be able to automatically determine the relations between the source files; you will have to annotate them with build-directives or configure forced inclusion patterns via task options. See the [Wiki](../../wiki) for more info.
+
+
 
 #### Stylesheets dependency management
 
@@ -64,7 +70,7 @@ See the [Wiki](../../wiki) for more info.
 
 ### Status
 
-The javascript source analyzer / builder is implemented, although further testing is needed.
+The javascript source analyzer / builder is implemented and working, although further testing is needed.
 
 **The project is under active development.** More functionality will be available very soon.
 
@@ -120,10 +126,9 @@ module.exports = function (grunt)
       options: {
         main: 'mainModuleName'
       },
-      application: {
+      app: {
         src:          'src/**/*.js',
-        targetScript: 'build/project.js',
-        targetCSS:    'build/project.css'
+        targetScript: 'build/project.js'
       }
     }
 
@@ -137,17 +142,27 @@ module.exports = function (grunt)
 };
 ```
 
+**There are many more configuration options available**. They are explained in the [Configuring Tasks](../../wiki/Configuring-Tasks) page.
+
+#### The recommended tasks alias
+
 Those two alias tasks registered at the bottom are customizable shortcuts to your build process. They can be expanded with additional subtasks provided by other Grunt plugins.
 
 To assemble a release build of your project, run the command:
 `grunt release`
 
-To setup a debug build of your project, run the command:
+For a debug build, run the command:
 `grunt debug`
 
-> If you wish to minify/optimize your build files, or use javascript/css preprocessors, you can add the respective tasks to the `release` task list, __after__ the `angular-build-tool` task.
+> These alias are just a suggestion. You may configure your Grunt tasks in any way you want.
 
-> If you wish to compile files from other languages (coffeescript, less, etc) prior to the build step, you should add the respective tasks to the `release` task list, __before__ the `angular-build-tool` task.
+### Integrating with other Grunt tasks
+
+If you wish to minify/optimize your build files, you can add the respective tasks to the `release` task list, __after__ the `angular-build-tool` task.
+
+If you wish to compile files from other languages to javascript (coffeescript, typescript, etc), they must be compiled prior to the build step, so you should add the respective tasks to the `release` task list __before__ the `angular-build-tool` task.
+
+If you use CSS preprocessors, you may have to add the respective tasks to both the `release` and the `debug` task lists.
 
 ### Advanced Use
 
