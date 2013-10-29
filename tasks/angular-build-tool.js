@@ -18,7 +18,8 @@ var colors = require ('colors');
 /**
  * Utility functions.
  */
-var util = require ('./lib/util');
+var util = require ('./lib/util')
+  , nodeUtil = require ('util');
 
 var tokenize = util.tokenize
   , getProperties = util.getProperties
@@ -76,7 +77,11 @@ ModuleDef.prototype = {
    * If no modules are required, the value will be an empty array.
    * @type {Array.<String>}
    */
-  requires:  null
+  requires:  null,
+  /**
+   * When true, the module is not included in the build but it's possibly referenced in the source code.
+   */
+  external:  false
 };
 
 var TASK_OPTIONS = {
@@ -87,9 +92,10 @@ var TASK_OPTIONS = {
   main:             '',
   /**
    * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous functions.
+   * The default value is a relatively uncommon name. You may select another if this one causes a conflict with existing code.
    * @type {string}
    */
-  moduleVar:        'exports',
+  moduleVar:        'declare',
   /**
    * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be renamed to <code>config.moduleVar</code>.
    *
@@ -108,20 +114,15 @@ var TASK_OPTIONS = {
    */
   debug:            false,
   /**
-   * A list of filenames or glob patterns that specify which javascript files should always be included in the build, even if they have no module declarations.
+   * A list of module names to ignore when building.
+   * Allows the source code to contain references to modules not present on the build.
    *
-   * Usually, when a script file is found in the set of the task's source files that doesn't contain a module declaration, that file is ignored.
-   * But, if the file name and path matches a file name or glob pattern specified here, it will still be included.
-   *
-   * Non-module files are output in the same order they were read, and <b>before</b> any module.
-   *
-   * As a best practice, if possible, specify a target or file group exclusively for standlaone script files.
-   *
-   * <b>Tip:</b> You can use append the resulting file to another one that resulted from a previous build step.
-   * That way, you will have more control on the order of the assembled files.
-   * @type {string|Array.<string>}
+   * If a module reference (for module access or for declaring a dependency) is found in the source code, which targets a module that is not declared anywhere in the build's source files, the build operation aborts when that module name is not present on this list.
+   * This is useful if your code makes references to modules that are loaded from a file other than the file being built.
+   * That happens, for instance, with 3rd party libraries that are loaded independently.
+   * @type {Array.<string>}
    */
-  includeScripts:   null
+  externalModules:  null
 };
 
 var FILE_GROUP_OPTIONS = {
@@ -147,7 +148,24 @@ var FILE_GROUP_OPTIONS = {
    * Urls on the exported stylesheets will be rebased to this folder.
    * @type {string}
    */
-  assetsTargetFolder: ''
+  assetsTargetFolder: '',
+  /**
+   * A list of filenames or glob patterns that specify which javascript files should always be included in the build, even if they have no module declarations.
+   *
+   * <b>Warning:</b> the files must also be matched by <code>src</code> to be included.
+   *
+   * <b>Note:</b> patterns without slashes will match against the basename of the path even if it contains slashes, eg. pattern <code>*.js</code> will match filepath <code>path/to/file.js</code>.
+   *
+   * Usually, when a script file is found in the set of source files which doesn't contain a module declaration, that file is ignored.
+   * But, if the file name and path matches a file name or glob pattern specified here, it will still be included.
+   *
+   * Non-module files are output in the same order they were read, and <b>before</b> any module.
+   *
+   * <b>Tip:</b> You can append the current step's result script to another one that resulted from a previous build step.
+   * If you specify a target or file group exclusively for standalone script files and append the result to other built files, you will have more control on the order of the assembled files.
+   * @type {string|Array.<string>|null}
+   */
+  forceInclude:       null
 };
 
 //------------------------------------------------------------------------------
@@ -264,28 +282,33 @@ module.exports = function (grunt)
       options = this.options (TASK_OPTIONS);
 
       if (!options.main)
-        grunt.fatal ("No main module is defined.");
+        fatal ("No main module is defined.");
 
       if (!this.files.length)
-        grunt.fatal ("No source files were defined.");
+        fatal ("No source files were defined.");
 
       verbose = grunt.option ('verbose');
       created = {};
+
+      var externals = setupExternalModules ();
 
       // Iterate over all specified file groups and collect all scripts.
 
       this.files.forEach (function (/** FILE_GROUP_OPTIONS */ fileGroup)
       {
         // Reset source code analysis information for each file group, i.e. each group is an independent build.
-        modules = {};
+
         loaded = {};
         standaloneScripts = [];
+        // Clone the external modules and use it as a starting point.
+        modules = nodeUtil._extend ({}, externals);
+
 
         if (!fileGroup.targetScript)
-          grunt.fatal ("No target script is defined.");
+          fatal ("No target script is defined.");
 
         // Process the source files.
-        fileGroup.src.forEach (loadScript);
+        fileGroup.src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
         // On debug mode, output a script that dynamically loads all the required source files.
         if (options.debug === undefined ? this.flags.debug : options.debug)
@@ -298,10 +321,26 @@ module.exports = function (grunt)
     });
 
   /**
-   * Loads the specified script file and scans it for module definitions.
-   * @param path
+   * Registers the configured external modules so that they can be ignored during the build output generation.
    */
-  function loadScript (path)
+  function setupExternalModules ()
+  {
+    var modules = {};
+    (options.externalModules || []).forEach (function (moduleName)
+    {
+      var module = modules[moduleName] = new ModuleDef;
+      module.name = moduleName;
+      module.external = true;
+    });
+    return modules;
+  }
+
+  /**
+   * Loads the specified script file and scans it for module definitions.
+   * @param {string|Array.<string>|null} forceInclude
+   * @param {string} path
+   */
+  function loadScript (forceInclude, path)
   {
     if (!grunt.file.exists (path)) {
       grunt.log.warn ('Source file "' + path + '" not found.');
@@ -312,7 +351,7 @@ module.exports = function (grunt)
     var moduleHeader = extractModuleHeader (script);
     // Ignore irrelevant files.
     if (!moduleHeader) {
-      if (!grunt.file.isMatch (options.includeScripts, path)) {
+      if (!forceInclude || !grunt.file.isMatch ({matchBase: true}, forceInclude, path)) {
         grunt.log.writeln ('Ignored file:'.cyan, path);
         return;
       }
@@ -327,6 +366,8 @@ module.exports = function (grunt)
       // If this is the first time a specific module is mentioned, create the respective information record.
       if (!module)
         module = modules[moduleHeader.name] = new ModuleDef;
+      else if (!moduleHeader.append)
+        fatal ("Can't redeclare the external module <cyan>%</cyan>", moduleHeader.name);
       // Fill out the module definition record.
       module.name = moduleHeader.name;
       // The file is appending definitions to a module declared elsewhere.
@@ -338,7 +379,7 @@ module.exports = function (grunt)
       // Otherwise, the file contains a module declaration.
       else {
         if (module.head)
-          grunt.fatal ("Duplicate module definition: " + moduleHeader.name);
+          fatal ("Duplicate module definition: <cyan>%</cyan>", moduleHeader.name);
         module.head = script;
         // Add the file path to the top of the paths list.
         module.filePaths.unshift (path);
@@ -421,7 +462,10 @@ module.exports = function (grunt)
   {
     var module = modules[moduleName];
     if (!module)
-      grunt.fatal ("Module " + moduleName + " was not found.");
+      fatal ("Module <cyan>%</cyan> was not found.", moduleName);
+    // Ignore the module if it's external.
+    if (module.external)
+      return;
     // Include required submodules first.
     if (module.requires) {
       module.requires.forEach (function (modName)
@@ -495,7 +539,7 @@ module.exports = function (grunt)
           , moduleDeps = m[5];
 
         if (moduleName && moduleName != module.name)
-          grunt.log.warn ('Wrong module declaration: ' + moduleName);
+          warn ('Wrong module declaration: <cyan>%</cyan>', moduleName);
 
         // Remove the existing closure from the source code.
 
@@ -512,11 +556,10 @@ module.exports = function (grunt)
         if (moduleVar && moduleDecl && moduleVar != options.moduleVar) {
           if (options.renameModuleRefs)
             source = source.replace (new RegExp (sprintf (MATCH_IDENTIFIER_EXP, moduleVar), 'g'), options.moduleVar);
-          else grunt.fail.warn (
-            csprintf ('yellow', "Module reference <cyan>%</cyan> doesn't match the configuration setting <cyan>moduleVar='%'</cyan>." +
-              NL + reportErrorLocation (path) +
-              info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
-              , moduleVar, options.moduleVar)
+          else warn ("Module reference <cyan>%</cyan> doesn't match the configuration setting <cyan>moduleVar='%'</cyan>." +
+            NL + reportErrorLocation (path) +
+            info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
+            , moduleVar, options.moduleVar
           );
           // Continue if --force.
         }
@@ -645,11 +688,11 @@ module.exports = function (grunt)
    */
   function warnAboutGlobalCode (sandbox, path)
   {
-    var msg = csprintf ('yellow', 'Code found on the global scope!'.red + NL +
+    var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
       reportErrorLocation (path) +
       info (
         'This kind of code will behave differently between release and debug builds.' + NL +
-          'You should wrap it in a self-invoking function.'
+          'You should wrap it in a self-invoking function and/or assign global variables/functions directly to the window object.'
       )
     );
     if (verbose) {
@@ -663,7 +706,7 @@ module.exports = function (grunt)
         msg += (typeof e[1] == 'function' ? '    function '.blue : '    var      '.blue) + e[0].cyan + NL;
       });
     }
-    grunt.fail.warn (msg + '>>'.yellow);
+    warn (msg + '>>'.yellow);
   }
 
   function reportErrorLocation (path)
@@ -692,6 +735,24 @@ module.exports = function (grunt)
       append:   !m[2],
       requires: m[2] && JSON.parse (m[2].replace (/'/g, '"')) || []
     }
+  }
+
+  /**
+   * Stops execution with an error message.
+   * Arguments are the same as the ones on <code>sprintf</code>.
+   */
+  function fatal ()
+  {
+    grunt.fail.fatal (csprintf.apply (null, ['red'].concat ([].slice.call (arguments))));
+  }
+
+  /**
+   * Displays an error message and, if --force is not enabled, stops execution.
+   * Arguments are the same as the ones on <code>sprintf</code>.
+   */
+  function warn ()
+  {
+    grunt.fail.warn (csprintf.apply (null, ['yellow'].concat ([].slice.call (arguments))));
   }
 
   /**
