@@ -1,4 +1,4 @@
-v0.1.0-alpha:
-  date: 2013-10-24
+v0.1.0
+  date: 2024-10-29
   changes:
-    - Initial commit.
+    - Javascript build support.
