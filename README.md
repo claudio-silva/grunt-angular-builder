@@ -11,33 +11,34 @@ To find out more about this project, read the [Introduction](https://github.com/
 
 _(check all that apply to your needs)_
 
-1. Analyze your AngularJS source code and "understand" the relationships between all your files?
+* Analyze your AngularJS source code and "understand" the relationships between all your files?
 
-2. Accept source code split into as many files as you want and spread over any directory structure you prefer?
+* Accept source code split into as many files as you want and spread over any directory structure you prefer?
 
-3. Assemble one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies?
+* Assemble one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies?
 
-4. Generate ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug)?
+* Generate ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug)?
 
-5. Allow you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers?
+* Allow you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers?
 
-6. Include in your build _only_ the modules that your app actually needs and discard dead code?
+* Include in your build _only_ the modules that your app actually needs and discard dead code?
 
-7. Automatically include all stylesheets and assets required by each module?
+* Automatically include all stylesheets and assets required by each module?
 
-8. Also include in the build non-AngularJS standalone scripts?
+* Also include in the build non-AngularJS standalone scripts?
 
-9. Recognize modules and libraries that are loaded independently and, therefore, are not part of the build?
+* Recognize modules and libraries that are loaded independently and, therefore, are not part of the build?
 
-10. Not only build complete applications but also build library projects, generating _readable_ redistributable source code files for them?
+* Not only build complete applications but also build library projects, generating _readable_ redistributable source code files for them?
 
-11. Allow fine-tuning the build process with optional configuration files present on some source folders?
+* Allow fine-tuning the build process with optional configuration files present on some source folders?
 
-12. Integrate easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps?
+* Integrate easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps?
 
-If you checked more than one option, this tool might just be the one you were looking for!
+If you checked several items, this tool might just be the one you were looking for!
 
-How about giving it a try on your next project?
+How about giving it a try on your next project?  
+You might start wondering how you could have lived without it!
 
 ---
 
@@ -187,11 +188,11 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
-[v0.1.1](./releases/tag/v0.1.1) / 2012-10-31  
+[v0.1.1](https://github.com/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.1) / 2012-10-31  
 
 - Documentation updates.
   
-[v0.1.0](/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.0) / 2012-10-29
+[v0.1.0](https://github.com/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.0) / 2012-10-29
 
 - Javascript build support.
 
