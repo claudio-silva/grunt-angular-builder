@@ -2,64 +2,41 @@
 
 > A build tool for AngularJS applications.
 
-### Why do I need a build tool?
+<br>
+To find out more about this project, read the [Introduction](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Introduction) page.
 
-If you are asking, then you don't ;-)
+### 12 Features at a glance
 
-Now, seriously, if all you're making is a small web application, then you're probably better off putting a bunch of `script` and `link` tags on the `head` of you HTML document, and fitting your code into a few javascript, HTML and CSS files. No need to complicate your life with all this _"build"_ nonsense! ;-)
+Wouldn't it be great if there was a build tool that could:  
+_(check all that apply to your needs)_
 
-### The case for build tools
+1. Analyze your AngularJS source code and "understand" the relationships between all your files?
 
-Any moderately to highly complex application needs code, _lots_ of code! And that means, dozens or hundreds of source files (unless you like editing large, monolithic files and spending most of your time scrolling and searching for things).
+- Accept source code split into as many files as you want and spread over any directory structure you prefer?
 
-Also, if you want to keep your project well organized, you'll feel the need to create a well thought out directory structure for it, which will probably be many levels deep.
-
-All those source files, in all those source folders, will need to be assembled to just a few files, at most, in order for the app to be delivered efficiently over HTTP, otherwise the browser will choke under a deluge of connections to the server to fetch all the required files.
-
-Furthermore, modern web development also means developers frequently take advantage of stylesheet preprocessors, compile-to-javascript languages, alternative HTML formats and many other tools to simplify, accelerate and enhance the development process.
-
-So, you'll need an automation tool that can perform all those tasks for you.
-
-### The case for an AngularJS build tool
-
-AngularJS is an amazing framework and one of the best for developing a modern web application. The only problem is, while Angular promotes modular development, it doesn't provide a solution for finding all the required source files of your app and loading them in the correct order. It lets that, humm, "trivial" task up to you to solve!...
-
-So, perhaps you find yourself in one of these scenarios:
-
-- you're manually defining your source files' include order and are fed up with it;
-
-- you tried to integrate AngularJS with RequireJS, Browserify or one of those other popular module loaders / optimizers /  packagers, but found it to be awkward adapting a module dependency resolution system with a very different philosophy to a framework that already has one (and just lacks the loading part);
-
-- you're using some hand-made custom solution but are not quite satisfied with it.
-
-Now, if only someone out there made a build tool perfectly adapted to the needs of an Angular developer...
-
-Well, that's what I thought. The problem is, I didn't find one. Oh, sure, I found many pieces that could be glued together into an ad hoc solution, but no specially crafted tool for this purpose entered my radar.
-
-So, I decided to make one!
-
-We are currently using it at our company for some large AngularJS projects in the area of Medical Care and Business Apps, and it made our life so much better! It's a real boost to development!
-
-I thought this could be very useful for other developers too, so I released it as an open source project.
-
-### Features at a glance
-
-You're in a hurry but want to know what this is all about?
-
-Wouldn't it be great if there was a build tool that could (check all that apply to your needs):
-
-- Analyze your AngularJS source code and "understand" the relationships between all your files?
 - Assemble one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies?
-- Accept source code split into as many files as your want and on any directory structure you like?
-- Generate ultra-fast debug builds that make your browser load the original source files in the correct order and allow you to debug them in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers?
-- Include in your build _only_ the modules that your app actually needs and discard dead code?
-- Automatically include all stylesheets and assets required by each module?
-- Integrate nicely with other Grunt plugins that perform minification, optimization, preprocessing and/or compilation of your source files?
-- Work with non-AngularJS code and integrate it easily into your application?
-- Build your project ignoring libraries that are loaded independently and therefore are not part of the build?
 
-If you checked more than one option, then this tool is right for you.  
-Give it a try!
+- Generate ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug)?
+
+- Allow you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers?
+
+- Include in your build _only_ the modules that your app actually needs and discard dead code?
+
+- Automatically include all stylesheets and assets required by each module?
+
+- Also include in the build non-AngularJS standalone scripts?
+
+- Recognize modules and libraries that are loaded independently and, therefore, are not part of the build?
+
+- Not only build complete applications but also build library projects, generating _readable_ redistributable source code files for them?
+
+- Allow fine-tuning the build process with optional configuration files present on some source folders?
+
+- Integrate easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps?
+
+If you checked more than one option, this tool might just be the one you were looking for!
+
+How about giving it a try on your next project?
 
 ---
 
