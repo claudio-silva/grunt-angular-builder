@@ -12,27 +12,27 @@ _(check all that apply to your needs)_
 
 1. Analyze your AngularJS source code and "understand" the relationships between all your files?
 
-- Accept source code split into as many files as you want and spread over any directory structure you prefer?
+2. Accept source code split into as many files as you want and spread over any directory structure you prefer?
 
-- Assemble one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies?
+3. Assemble one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies?
 
-- Generate ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug)?
+4. Generate ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug)?
 
-- Allow you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers?
+5. Allow you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers?
 
-- Include in your build _only_ the modules that your app actually needs and discard dead code?
+6. Include in your build _only_ the modules that your app actually needs and discard dead code?
 
-- Automatically include all stylesheets and assets required by each module?
+7. Automatically include all stylesheets and assets required by each module?
 
-- Also include in the build non-AngularJS standalone scripts?
+8. Also include in the build non-AngularJS standalone scripts?
 
-- Recognize modules and libraries that are loaded independently and, therefore, are not part of the build?
+9. Recognize modules and libraries that are loaded independently and, therefore, are not part of the build?
 
-- Not only build complete applications but also build library projects, generating _readable_ redistributable source code files for them?
+10. Not only build complete applications but also build library projects, generating _readable_ redistributable source code files for them?
 
-- Allow fine-tuning the build process with optional configuration files present on some source folders?
+11. Allow fine-tuning the build process with optional configuration files present on some source folders?
 
-- Integrate easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps?
+12. Integrate easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps?
 
 If you checked more than one option, this tool might just be the one you were looking for!
 
@@ -43,11 +43,12 @@ How about giving it a try on your next project?
 ### Roadmap
 
 1. ~~Javascript builder.~~ [done]
-1. Per directory build-config files support.
-1. CSS builder.
-2. Assets builder.
+2. Per directory build-config files support.
+3. CSS builder.
+4. Assets builder.
 
-**The project is under active development.** More functionality will be available very soon.
+**The project is under active development.**  
+More functionality will be available soon.
 
 ---
 
@@ -171,11 +172,11 @@ You may also force Grunt to ignore some warnings and continue building by runnin
 
 ## Contributing
 
-In lieu of a formal styleguide, take care to maintain the existing coding style.
+In lieu of a formal style-guide, take care to maintain the existing coding style.
 
 A linter is already present on the project, so just type `grunt` to run it.
 
-If it's apropriate, create some test cases on the `/test` folder and include them as individual tasks on the project's  Gruntfile.
+If it's appropriate, create some test cases on the `/test` folder and include them as individual tasks on the project's  Gruntfile.
 
 Always start developing by creating a topic branch on your forked repository from the latest tagged stable version on the `master` branch.
 
@@ -185,7 +186,13 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
-See the [CHANGELOG](https://github.com/claudio-silva/grunt-angular-build-tool/blob/master/CHANGELOG).
+[v0.1.1](releases/tag/v0.1.1) / 2012-10-31  
+
+- Documentation updates.
+  
+[v0.1.0](releases/tag/v0.1.0) / 2012-10-29
+
+- Javascript build support.
 
 ## Author
 
