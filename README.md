@@ -6,7 +6,7 @@
 
 If you are asking, then you don't ;-)
 
-Now, seriously, if all you're making is a small web application, then you're probably better off putting a bunch of `script` and `link` tags on the `head` of you HTML document, and fitting your code into a few javascript, HTML and CSS files. No need to complicated your life with all this _build_ nonsense! ;-)
+Now, seriously, if all you're making is a small web application, then you're probably better off putting a bunch of `script` and `link` tags on the `head` of you HTML document, and fitting your code into a few javascript, HTML and CSS files. No need to complicate your life with all this _"build"_ nonsense! ;-)
 
 ### The case for build tools
 
@@ -34,13 +34,13 @@ So, perhaps you find yourself in one of these scenarios:
 
 Now, if only someone out there made a build tool perfectly adapted to the needs of an Angular developer...
 
-Well, that's what I thought. The problem is, I didn't find one. Oh, sure, I found many pieces that could be glued together into an ad hoc solution, but no specially crafted tool for this purpose angered my radar.
+Well, that's what I thought. The problem is, I didn't find one. Oh, sure, I found many pieces that could be glued together into an ad hoc solution, but no specially crafted tool for this purpose entered my radar.
 
 So, I decided to make one!
 
-We are using it at our company for some large AngularJS projects in the area of Medical Care and Business Apps, and it made our life so much better! It's a real boost to development!
+We are currently using it at our company for some large AngularJS projects in the area of Medical Care and Business Apps, and it made our life so much better! It's a real boost to development!
 
-Perhaps it can benefit your project too! So I released it as an open source project.
+I thought this could be very useful for other developers too, so I released it as an open source project.
 
 ### Features at a glance
 
@@ -55,66 +55,18 @@ Wouldn't it be great if there was a build tool that could (check all that apply 
 - Include in your build _only_ the modules that your app actually needs and discard dead code?
 - Automatically include all stylesheets and assets required by each module?
 - Integrate nicely with other Grunt plugins that perform minification, optimization, preprocessing and/or compilation of your source files?
-- Can work with non-AngularJS code integrate it into your application?
-- Can build ignoring libraries that are loaded independently and therefor are not included on the build?
+- Work with non-AngularJS code and integrate it easily into your application?
+- Build your project ignoring libraries that are loaded independently and therefore are not part of the build?
 
-
-## Features
-
-#### Javascript dependency management
-
-- Allows you to structure your project in almost any file/directory organization you want.
-    - Each angular module can be spread over many source files, over many directories.
-    - The only restriction is: you can't mix declarations for multiple modules in the same file.
-
-- The build tool analyzes your code to determine which modules there are and which dependencies they have.
-    - Code from unused modules is excluded from the build. This allows you to include large libraries in your project but use only the parts you need.
-
-- The build tool assembles each module's source code into a single continuous code block per module.
-    - In the process, some code may be transformed in order to:
-        1. remove redundant module declarations;
-        - group, under the same javascript scope, code for the same module coming from multiple files;
-        - rearrange private module code to keep it under the same isolated javascript scope;
-        - make sure no leakage to the javascript global scope occurs.
-        
-- All required modules are assembled in the correct loading order.
-
-- You may also force the inclusion of non-AngularJS code in the build.
-
-- You can even build a project that is not AngularJS based at all.
-> On non-AngularJS projects, the build-tool will not be able to automatically determine the relations between the source files; you will have to annotate them with build-directives or configure forced inclusion patterns via task options. See the [Wiki](https://github.com/claudio-silva/grunt-angular-build-tool/wiki) for more info.
-
-#### Stylesheets dependency management
-
-- CSS stylesheets required by each module are concatenated into a single release file.
-    - Only stylesheets referenced by modules included directly or indirectly in the application are included in the build.
-    - The stylesheets are assembled in the same order as the modules loading order.
-
-#### Assets management
-
-- Assets referred to on the included stylesheets are copied to a release location.
-- A folder structure is created so that all relative asset URLs on the release stylesheet will remain valid.
-- You may group assets by module or put them all under the same folder. Use any organization you like.
-
-#### Debugging support
-
-- On debug builds, no assemblage or copying are performed but, instead, code is generated to make the browser read the original source files, in the correct loading order.
-    - This allows debugging in the browser and faster write-save-refresh cycles.
-    - You may continue editing your files and refreshing the browser without rebuilding (unless you create a new file or change module dependencies).
-
-#### Other features
-
-- _Build-directives_ are annotations wrapped in javascript documentation blocks that allow the source files to provide additional information to, or to influence, the build process. These allow a great deal of customization of the build process, with conditional inclusion/exclusion of files or source code fragments, and much more. 
-
-- The build tool **does not** minify the generated files. It preserves the original formatting and comments of the original files, so that the generated files can be distributed as human-friendly source code.  
-    - Minification / optimization should be handled by other Grunt plugins.
+If you checked more than one option, then this tool is right for you.  
+Give it a try!
 
 ---
 
 ### Roadmap
 
 1. ~~Javascript builder.~~ [done]
-1. Build-files support.
+1. Per directory build-config files support.
 1. CSS builder.
 2. Assets builder.
 
