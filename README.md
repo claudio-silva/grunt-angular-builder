@@ -23,15 +23,15 @@ This Grunt plugin:
 
 3. Assembles one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies.
 
-4. Generates ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug).
+4. Builds fast in debug mode by generating a single script that loads the original source files in the correct order (no minified or concatenated files in debug builds).
 
 5. Allows you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers.
 
-6. Includes in your build _only_ the modules that your app actually needs and discards dead code.
+6. Includes in the build _only_ the modules that your app actually needs and discards dead code.
 
-7. Automatically includes all stylesheets and assets required by each module.
+7. Includes in the build the stylesheets and assets each module requires and excludes those that are not used by your app.
 
-8. Can also include in the build non-AngularJS standalone scripts.
+8. Can also include in the build scripts that are not based on AngularJS.
 
 9. Recognizes modules and libraries that are loaded independently and, therefore, are not part of the build.
 
