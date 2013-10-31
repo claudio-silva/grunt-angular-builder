@@ -3,21 +3,21 @@
 > A build tool for AngularJS applications.
 
 <br>
-AngularJS is an amazing framework and one of the best for developing sophisticated web applications.
+AngularJS is an amazing framework and one of the best for developing highly sophisticated web applications.
 
-The only problem is, while Angular promotes modular development, it doesn't provide a solution for finding all the required source files of your app and loading them in the correct order. It lets that, humm... _"trivial"_ task, up for you to solve!...
+The only problem is, while Angular promotes modular development, it doesn't provide a solution for finding all the required source files of your app and loading them in the correct order. It lets that, humm... _"trivial"_ task up for you to solve!...
 
-Furthermore, you'll have to mange stylesheet and asset dependencies for all your modules manually.
+Furthermore, you'll have to mange your modules' stylesheet and asset dependencies manually.
 
-If you're already using Grunt, you may have come up with an _ad hoc_ solution to solve these problems (ex: by adapting your code so that it can be handled by an AMD or CommonJS loader), but it would be much better if a specially engineered Grunt plugin could better handle this in a truly practical, automated, simple and easy way.
+If you're already using Grunt, you may have come up with an _ad hoc_ solution to solve these problems (ex: by adapting your code so that it can be handled by an AMD or CommonJS loader), but wouldn't you rather have a specially engineered Grunt plugin handle all of that for you in a truly practical, automated, simple and easy way?
 
-That is precisely what the 'angular-build-tool' plugin does.
+That is precisely what the 'angular-build-tool' does.
 
 ### Features
 
 This Grunt plugin:
 
-1. Analyzes your AngularJS source code and "understands" the relationships between all your files.
+1. Analyzes your AngularJS source code and "understands" module dependencies and the relationships between your files. No need for AMD or CommonJS loaders.
 
 2. Accepts source code split into as many files as you want and spread over any directory structure you prefer.
 
@@ -35,9 +35,9 @@ This Grunt plugin:
 
 9. Recognizes modules and libraries that are loaded independently and, therefore, are not part of the build.
 
-10. Not only builds complete applications but also build library projects, generating _readable_ redistributable source code files for them.
+10. Not only builds complete applications but also builds library projects, generating _readable_ redistributable source code files for them.
 
-11. Allows fine-tuning the build process with optional configuration files present on some source folders.
+11. Allows each module to have its own build configuration file. Just drag-and-drop a module to your project and it's ready to build!
 
 12. Integrates easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps.
 
