@@ -3,42 +3,43 @@
 > A build tool for AngularJS applications.
 
 <br>
-To find out more about this project, read the [Introduction](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Introduction) page.
+AngularJS is an amazing framework and one of the best for developing sophisticated web applications.
+
+The only problem is, while Angular promotes modular development, it doesn't provide a solution for finding all the required source files of your app and loading them in the correct order. It lets that, humm... _"trivial"_ task, up for you to solve!...
+
+Furthermore, you'll have to mange stylesheet and asset dependencies for all your modules manually.
+
+If you're already using Grunt, you may have come up with an _ad hoc_ solution to solve these problems (ex: by adapting your code so that it can be handled by an AMD or CommonJS loader), but it would be much better if a specially engineered Grunt plugin could better handle this in a truly practical, automated, simple and easy way.
+
+That is precisely what the 'angular-build-tool' plugin does.
 
 ### Features
 
-**Wouldn't it be great if there was a build tool that could:**
+This Grunt plugin:
 
-_(check all that apply to your needs)_
+1. Analyzes your AngularJS source code and "understands" the relationships between all your files.
 
-* Analyze your AngularJS source code and "understand" the relationships between all your files?
+2. Accepts source code split into as many files as you want and spread over any directory structure you prefer.
 
-* Accept source code split into as many files as you want and spread over any directory structure you prefer?
+3. Assembles one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies.
 
-* Assemble one javascript file (or just a few) for production with all code assembled in the correct loading order required by your module's dependencies?
+4. Generates ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug).
 
-* Generate ultra-fast debug builds that make your browser load the original source files in the correct order (no need to minify and concatenate files during debug)?
+5. Allows you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers.
 
-* Allow you to debug the source code in the browser itself and see readable source code for any debug breakpoint or error location, with the correct original line numbers?
+6. Includes in your build _only_ the modules that your app actually needs and discards dead code.
 
-* Include in your build _only_ the modules that your app actually needs and discard dead code?
+7. Automatically includes all stylesheets and assets required by each module.
 
-* Automatically include all stylesheets and assets required by each module?
+8. Can also include in the build non-AngularJS standalone scripts.
 
-* Also include in the build non-AngularJS standalone scripts?
+9. Recognizes modules and libraries that are loaded independently and, therefore, are not part of the build.
 
-* Recognize modules and libraries that are loaded independently and, therefore, are not part of the build?
+10. Not only builds complete applications but also build library projects, generating _readable_ redistributable source code files for them.
 
-* Not only build complete applications but also build library projects, generating _readable_ redistributable source code files for them?
+11. Allows fine-tuning the build process with optional configuration files present on some source folders.
 
-* Allow fine-tuning the build process with optional configuration files present on some source folders?
-
-* Integrate easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps?
-
-If you checked several items, this tool might just be the one you were looking for!
-
-How about giving it a try on your next project?  
-You might start wondering how you could have lived without it!
+12. Integrates easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps.
 
 ---
 
