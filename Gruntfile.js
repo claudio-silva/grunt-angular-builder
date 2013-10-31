@@ -13,9 +13,6 @@ module.exports = function (grunt)
 
   // Project configuration.
   grunt.initConfig ({
-    conf: {
-      testDir: 'test/manual-tests'
-    },
 
     jshint: {
       all:     [
@@ -36,10 +33,14 @@ module.exports = function (grunt)
       options:            {
         main: 'App'
       },
+      'test-js-only': {
+        src:          'tests/js-only/**/*.js',
+        targetScript: 'dist/main.js'
+      },
       'test-stylesheets': {
-        src:          '<%=conf.testDir%>/build-stylesheets/src/**/*.js',
-        targetScript: 'dist/test-build-stylesheets.js',
-        targetCSS:    'dist/test-build.stylesheets.css'
+        src:          'tests/stylesheets/**/*.js',
+        targetScript: 'dist/main.js',
+        targetCSS:    'dist/main.css'
       }
     }
 
@@ -58,6 +59,7 @@ module.exports = function (grunt)
 
   // Test tasks below can also be executed with the command line option `--build debug` to generate debug builds.
 
+  grunt.registerTask ('test-js-only', ['clean', 'angular-build-tool:test-js-only']);
   grunt.registerTask ('test-stylesheets', ['clean', 'angular-build-tool:test-stylesheets']);
 
 };

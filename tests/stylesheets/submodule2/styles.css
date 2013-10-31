@@ -1,0 +1,9 @@
+h1 {
+  color: red;
+}
+
+button i {
+  background: url('assets/module2/check_alt_32x32.png') no-repeat left center;
+  width: 32px;
+  height: 32px;
+}
