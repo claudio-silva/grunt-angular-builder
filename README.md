@@ -5,9 +5,10 @@
 <br>
 To find out more about this project, read the [Introduction](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Introduction) page.
 
-### 12 Features at a glance
+### Features
 
-Wouldn't it be great if there was a build tool that could:  
+**Wouldn't it be great if there was a build tool that could:**
+
 _(check all that apply to your needs)_
 
 1. Analyze your AngularJS source code and "understand" the relationships between all your files?
@@ -186,11 +187,11 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
-[v0.1.1](releases/tag/v0.1.1) / 2012-10-31  
+[v0.1.1](./releases/tag/v0.1.1) / 2012-10-31  
 
 - Documentation updates.
   
-[v0.1.0](releases/tag/v0.1.0) / 2012-10-29
+[v0.1.0](/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.0) / 2012-10-29
 
 - Javascript build support.
 
