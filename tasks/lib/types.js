@@ -151,9 +151,9 @@ function ErrorException (fatal, msg)
 
 ErrorException.prototype = {
   /** @type {boolean} */
-  fatal:   false,
+  fatal: false,
   /** @type {Array} */
-  args:    null
+  args:  null
 };
 
 module.exports = {

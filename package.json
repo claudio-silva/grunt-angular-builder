@@ -1,41 +1,42 @@
 {
-  "name":             "grunt-angular-build-tool",
-  "description":      "A build tool for AngularJS applications.",
-  "version":          "0.1.1",
-  "homepage":         "https://github.com/claudio/grunt-angular-build-tool",
-  "author":           {
-    "name":  "Cláudio Silva",
+  "name": "grunt-angular-build-tool",
+  "description": "A build tool for AngularJS applications.",
+  "version": "0.1.1",
+  "homepage": "https://github.com/claudio/grunt-angular-build-tool",
+  "author": {
+    "name": "Cláudio Silva",
     "email": "claudio.silva@impactwave.com"
   },
-  "repository":       {
+  "repository": {
     "type": "git",
-    "url":  "https://github.com/claudio-silva/grunt-angular-build-tool.git"
+    "url": "https://github.com/claudio-silva/grunt-angular-build-tool.git"
   },
-  "bugs":             {
+  "bugs": {
     "url": "https://github.com/claudio-silva/grunt-angular-build-tool/issues"
   },
-  "licenses":         [
+  "licenses": [
     {
       "type": "MIT",
-      "url":  "https://github.com/claudio-silva/grunt-angular-build-tool/blob/master/LICENSE"
+      "url": "https://github.com/claudio-silva/grunt-angular-build-tool/blob/master/LICENSE"
     }
   ],
-  "main":             "Gruntfile.js",
-  "engines":          {
+  "main": "Gruntfile.js",
+  "engines": {
     "node": ">= 0.8.0"
   },
-  "dependencies":     {
+  "dependencies": {
     "colors": "~0.6.0-1"
   },
-  "devDependencies":  {
-    "grunt":                "~0.4.1",
+  "devDependencies": {
+    "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.6.0",
-    "grunt-contrib-clean":  "~0.4.1"
+    "grunt-contrib-clean": "~0.4.1",
+    "time-grunt": "~0.1.2"
   },
   "peerDependencies": {
     "grunt": "~0.4.1"
   },
-  "keywords":         [
+  "keywords": [
     "gruntplugin",
     "angular",
     "angularjs"

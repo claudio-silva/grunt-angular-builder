@@ -7,6 +7,16 @@
 'use strict';
 
 /**
+ * Get color and style in your node.js console.
+ * Note: requiring this here modifies the String prototype!
+ */
+var colors = require ('colors');
+
+//------------------------------------------------------------------------------
+// PUBLIC
+//------------------------------------------------------------------------------
+
+/**
  * Generates a regular expression for matching the specified source code syntax.
  * Use spaces to match optional white space on the source code.
  * Backticks are used instead of \ to allow for cleaner syntax on regexp strings. Ex: write '`n' instead of '\\n'.
@@ -53,7 +63,7 @@ exports.indent = function (text, level, indentStr)
 {
   return text.split (/\r?\n/).map (function (line)
   {
-    return line.trim () && ((indentStr || '  ').repeat (level || 1) + line)
+    return line.trim () && ((indentStr || '  ').repeat (level || 1) + line);
   }).join ('\n');
 };
 
@@ -88,7 +98,7 @@ exports.csprintf = function (baseColor, str)
   str = exports.sprintf.apply (null, [].slice.call (arguments, 1));
   str = str.replace (/<(\w+)>([\s\S]*?)<\/\1>/g, function (m, m1, m2)
   {
-    if (m1 == 'bold' || m1 == 'underline')
+    if (m1 === 'bold' || m1 === 'underline')
       m2 = m2[baseColor];
     return '±' + m2[m1] + '§';
   });
@@ -123,4 +133,10 @@ exports.debug = function ()
 String.prototype.repeat = function( num )
 {
   return new Array( num + 1 ).join( this );
-}
+};
+
+/**
+ * OS dependent line terminator.
+ * @type {string}
+ */
+exports.NL = process.platform === 'win32' ? '\r\n' : '\n';

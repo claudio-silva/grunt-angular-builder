@@ -11,17 +11,14 @@ var TASK_NAME = 'angular-build-tool';
 var TASK_DESCRIPTION = 'Generates an optimized build of an AngularJS project.';
 
 /**
- * Get color and style in your node.js console.
- * Note: requiring this here modifies the String prototype!
- */
-var colors = require ('colors');
-/**
  * Utility functions.
  */
 var util = require ('./lib/util')
   , nodeUtil = require ('util')
   , types = require ('./lib/types')
-  , sourceTrans = require ('./lib/sourceTrans');
+  , sourceTrans = require ('./lib/sourceTrans')
+  , sourceExtract = require ('./lib/sourceExtract')
+  , gruntUtil = require ('./lib/gruntUtil');
 
 var getProperties = util.getProperties
   , toList = util.toList
@@ -29,12 +26,13 @@ var getProperties = util.getProperties
   , sprintf = util.sprintf
   , csprintf = util.csprintf
   , debug = util.debug
-  , ModuleDef = types.ModuleDef;
-/**
- * OS dependent line terminator.
- * @type {string}
- */
-var NL;
+  , ModuleDef = types.ModuleDef
+  , fatal = gruntUtil.fatal
+  , warn = gruntUtil.warn
+  , info = gruntUtil.info
+  , reportErrorLocation = gruntUtil.reportErrorLocation
+  , writeln = gruntUtil.writeln
+  , NL = util.NL;
 
 //------------------------------------------------------------------------------
 // TASKS
@@ -79,8 +77,13 @@ module.exports = function (grunt)
    * @type {boolean}
    */
   var verbose;
+  /**
+   * Grunt's verbose output API.
+   * @type {Object}
+   */
+  var verboseOut = grunt.log.verbose;
 
-  NL = grunt.util.linefeed;
+  gruntUtil.init (grunt);
 
   grunt.registerMultiTask (TASK_NAME, TASK_DESCRIPTION,
     function ()
@@ -166,7 +169,7 @@ module.exports = function (grunt)
     }
     // Read the script and scan it for a module declaration.
     var script = grunt.file.read (path);
-    var moduleHeader = sourceTrans.extractModuleHeader (script);
+    var moduleHeader = sourceExtract.extractModuleHeader (script);
     // Ignore irrelevant files.
     if (!moduleHeader) {
       if (!forceInclude || !grunt.file.isMatch ({matchBase: true}, forceInclude, path)) {
@@ -324,10 +327,29 @@ module.exports = function (grunt)
   {
 // Append the module content to the output.
 
-    var head;
-// Fist process the head module declaration.
+    var head
+      , path = module.filePaths[0];
+
+    /**
+     * @private
+     * @param {boolean} success
+     * @param {Object} sandbox
+     */
+    function onValidation (success, sandbox) {
+      verboseOut.write ("Validating " + path.cyan + '...');
+      if (success)
+      // The code passed validation.
+        verboseOut.ok ();
+      else {
+        verboseOut.writeln ('FAILED'.yellow);
+        warnAboutGlobalCode (sandbox, path);
+        // If --force, continue.
+      }
+    }
+
+    // Fist process the head module declaration.
     try {
-      head = sourceTrans.optimize (module.head, module.filePaths[0]);
+      head = sourceTrans.optimize (module, module.head, path, options.moduleVar, options.renameModuleRefs, onValidation);
     }
     catch (ex) {
       (ex.fatal ? fatal : warn).apply (null, ex.args);
@@ -335,7 +357,7 @@ module.exports = function (grunt)
 
 // Prevent the creation of an empty (or comments-only) self-invoking function.
 // In that case, the head content will be output without a wrapping closure.
-    if (!module.bodies.length && head.match (MATCH_NO_SCRIPT)) {
+    if (!module.bodies.length && sourceExtract.matchWhiteSpaceOrComments (head)) {
       // Output the comments (if any).
       output.push (head);
       // Output a module declaration with no definifions.
@@ -346,10 +368,12 @@ module.exports = function (grunt)
       output.push ('(function (' + options.moduleVar + ') {\n');
       output.push (indent (head));
       for (var i = 0, m = module.bodies.length; i < m; ++i)
-        output.push (indent (optimize (module.bodies[i], module.filePaths[i + 1])));
+        output.push (indent (sourceTrans.optimize (module, module.bodies[i], module.filePaths[i + 1],
+          options.moduleVar, options.renameModuleRefs, onValidation)));
       //output.push.apply (output, module.bodies.map (optimize).map (indent));
       output.push (sprintf ("\n}) (angular.module ('%', %));\n\n\n", module.name, toList (module.requires)));
     }
+
   }
 
   /**
@@ -378,62 +402,6 @@ module.exports = function (grunt)
       });
     }
     warn (msg + '>>'.yellow);
-  }
-
-//------------------------------------------------------------------------------
-// PRIVATE UTILITY FUNCTIONS
-//------------------------------------------------------------------------------
-
-  /**
-   * @private
-   * Returns an error location description suitable for output.
-   * @param {string} path
-   * @returns {string}
-   */
-  function reportErrorLocation (path)
-  {
-    return csprintf ('yellow', '  File: <cyan>%</cyan>' + NL, path);
-  }
-
-  /**
-   * @private
-   * Stops execution with an error message.
-   * Arguments are the same as the ones on <code>sprintf</code>.
-   */
-  function fatal ()
-  {
-    grunt.fail.fatal (csprintf.apply (null, ['red'].concat ([].slice.call (arguments))));
-  }
-
-  /**
-   * @private
-   * Displays an error message and, if --force is not enabled, stops execution.
-   * Arguments are the same as the ones on <code>sprintf</code>.
-   */
-  function warn ()
-  {
-    grunt.fail.warn (csprintf.apply (null, ['yellow'].concat ([].slice.call (arguments))));
-  }
-
-  /**
-   * @private
-   * Displays a message.
-   * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code>.
-   */
-  function writeln ()
-  {
-    grunt.log.writeln (csprintf.apply (null, ['white'].concat ([].slice.call (arguments))));
-  }
-
-  /**
-   * @private
-   * Returns the given message colored grey if running in verbose mode otherwise, returns a generic short message.
-   * @param msg
-   * @returns {*}
-   */
-  function info (msg)
-  {
-    return (verbose ? indent (csprintf ('grey', msg)) : '  Use -v for more info.'.grey) + NL;
   }
 
 };

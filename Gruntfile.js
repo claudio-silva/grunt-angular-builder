@@ -10,6 +10,7 @@
 
 module.exports = function (grunt)
 {
+  require('time-grunt')(grunt);
 
   // Project configuration.
   grunt.initConfig ({
