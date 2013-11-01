@@ -19,213 +19,22 @@ var colors = require ('colors');
  * Utility functions.
  */
 var util = require ('./lib/util')
-  , nodeUtil = require ('util');
+  , nodeUtil = require ('util')
+  , types = require ('./lib/types')
+  , sourceTrans = require ('./lib/sourceTrans');
 
-var tokenize = util.tokenize
-  , getProperties = util.getProperties
+var getProperties = util.getProperties
   , toList = util.toList
   , indent = util.indent
   , sprintf = util.sprintf
   , csprintf = util.csprintf
-  , debug = util.debug;
+  , debug = util.debug
+  , ModuleDef = types.ModuleDef;
 /**
  * OS dependent line terminator.
  * @type {string}
  */
 var NL;
-
-//------------------------------------------------------------------------------
-// DECLARATIONS
-//------------------------------------------------------------------------------
-
-function ModuleDef ()
-{
-  this.bodies = [];
-  this.filePaths = [];
-}
-
-/**
- * A module definition record.
- * Contains all javascript defining the module, read from one or more source files.
- */
-ModuleDef.prototype = {
-  /**
-   * The module's name.
-   * @type {string}
-   */
-  name:      '',
-  /**
-   * Relative file paths to the source script files.
-   * The first entry corresponds to the file that starts the module definition.
-   * @type {Array.<string>}
-   */
-  filePaths: null,
-  /**
-   * The content of the file that starts the module definition.
-   * If null, the file was not yet read.
-   * @type {String|null}
-   */
-  head:      null,
-  /**
-   * The content of each additional file that appends definitions to the module.
-   * If there are no additional files for the module, the value will be an empty array.
-   * @type {Array.<String>}
-   */
-  bodies:    null,
-  /**
-   * List with the names of the required modules.
-   * If no modules are required, the value will be an empty array.
-   * @type {Array.<String>}
-   */
-  requires:  null,
-  /**
-   * When true, the module is not included in the build but it's possibly referenced in the source code.
-   */
-  external:  false
-};
-
-var TASK_OPTIONS = {
-  /**
-   * Main module name. Only this module and its dependencies will be exported.
-   * @type {string}
-   */
-  main:             '',
-  /**
-   * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous functions.
-   * The default value is a relatively uncommon name. You may select another if this one causes a conflict with existing code.
-   * @type {string}
-   */
-  moduleVar:        'declare',
-  /**
-   * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be renamed to <code>config.moduleVar</code>.
-   *
-   * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on <code>config.moduleVar</code>,
-   * a warning will be issued and the task may stop.
-   * @type {boolean}
-   */
-  renameModuleRefs: false,
-  /**
-   * Code packaging method.
-   * When false, generates a single optimized javascript file with all required source code in the correct loading order.
-   * When true, generates a set of &lt;script> tags to include all the required source files in the correct loading order.
-   * Note: The use of this setting as an option is, probably, not what you want.
-   * Use the `debug` task argument instead.
-   * @type {boolean}
-   */
-  debug:            false,
-  /**
-   * A list of module names to ignore when building.
-   * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that are loaded independently).
-   *
-   * If a module reference (for module access or for declaring a dependency) is found in the source code, which targets a module that is not declared anywhere in the build's source files, the build operation aborts when that module name is not present on this list.
-   * @type {Array.<string>}
-   */
-  externalModules:  null
-};
-
-var FILE_GROUP_OPTIONS = {
-  /**
-   * Target javascript file name.
-   * The javascript build output will be saved to this path.
-   *
-   * <b>Note:</b> when multiple filegroups target the same file, only the first one will (re)create it, all others will append to it.
-   * @type {string}
-   */
-  targetScript:       '',
-  /**
-   * Target CSS file name.
-   * The packaged stylesheets will be saved to this path.
-   *
-   * <b>Note:</b> when multiple filegroups target the same file, only the first one will (re)create it, all others will append to it.
-   * @type {string}
-   */
-  targetCSS:          '',
-  /**
-   * Target folder path for publishing assets.
-   * Relative paths for the source files as specified in stylesheet asset urls are preserved on the output, so the required folder structure will be recreated on the output target.
-   * Urls on the exported stylesheets will be rebased to this folder.
-   * @type {string}
-   */
-  assetsTargetFolder: '',
-  /**
-   * A list of filenames or glob patterns that specify which javascript files should always be included in the build, even if they have no module declarations.
-   *
-   * <b>Warning:</b> the files must also be matched by <code>src</code> to be included.
-   *
-   * <b>Note:</b> patterns without slashes will match against the basename of the path even if it contains slashes, eg. pattern <code>*.js</code> will match filepath <code>path/to/file.js</code>.
-   *
-   * Usually, when a script file is found in the set of source files which doesn't contain a module declaration, that file is ignored.
-   * But, if the file name and path matches a file name or glob pattern specified here, it will still be included.
-   *
-   * Non-module files are output in the same order they were read, and <b>before</b> any module.
-   *
-   * <b>Tip:</b> You can append the current step's result script to another one that resulted from a previous build step.
-   * If you specify a target or file group exclusively for standalone script files and append the result to other built files, you will have more control on the order of the assembled files.
-   * @type {string|Array.<string>|null}
-   */
-  forceInclude:       null
-};
-
-//------------------------------------------------------------------------------
-// PRIVATE DATA
-//------------------------------------------------------------------------------
-
-/**
- * Regular expression string that matches an angular module declaration in one of these formats:
- * angular.module('name',[dependencies]) or
- * angular.module('name')
- * @type {string}
- */
-var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? `)';
-/**
- * Regular expression that matches an angular module declaration.
- * @see MODULE_DECL_EXP
- * @type {RegExp}
- */
-var MATCH_MODULE_DECL = new RegExp (tokenize (MODULE_DECL_EXP), 'i');
-/**
- * Regular expression string that matches javascript block/line comments.
- * @type {string}
- */
-var MATCH_COMMENTS_EXP = '/`*[`s`S]*?`*/|//.*';
-/**
- * Matches source code consisting only of white space and javascript comments.
- * @type {RegExp}
- */
-var MATCH_NO_SCRIPT = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*$'));
-/**
- * Matches white space and javascript comments at the beginning of a file.
- * @type {RegExp}
- */
-var TRIM_COMMENTS_TOP = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*'));
-/**
- * Matches white space and javascript comments at the end of a file.
- * @type {RegExp}
- */
-var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (' ((' + MATCH_COMMENTS_EXP + ') )*$'));
-/**
- * Matches a self-invoking anonymous function that wraps all the remaining source code.
- * It assumes white space and comments have been already removed from both ends of the script.
- * It searches for one of these patterns:
- * <code>
- * (function () { ... }) ();
- * function (var) { ... }) (angular.module('name'));
- * function (var) { ... }) (angular.module('name', [dependencies]));
- * </code>
- * It also matches the following alternate self-invoking function syntax applied to any of the previous patterns:
- * <code>
- * !function () { ... } ();
- * </code>
- * @type {RegExp}
- */
-var MATCH_MODULE_CLOSURE = new RegExp (tokenize ('^[`(!]function `( (.+?)? `) `{ ([`s`S]*?) `} `)? `( (' + MODULE_DECL_EXP + ')? `) ;?$'), 'i');
-/**
- * Regular expression string that matches a javascript identifier.
- * Note: % will be replaced by the identifier.
- * Note: this is a poor man's identifier matcher! It may fail in many situations.
- * @type {string}
- */
-var MATCH_IDENTIFIER_EXP = '\\b%\\b';
 
 //------------------------------------------------------------------------------
 // TASKS
@@ -277,7 +86,7 @@ module.exports = function (grunt)
     function ()
     {
       // Merge task-specific and/or target-specific options with these defaults.
-      options = this.options (TASK_OPTIONS);
+      options = this.options (types.TASK_OPTIONS);
 
       if (!options.main)
         fatal ("No main module is defined.");
@@ -294,7 +103,7 @@ module.exports = function (grunt)
        * Note: the debug build mode can be set via three different settings.
        * @type {boolean}
        */
-      var debugBuild = grunt.option('build') === 'debug' || (this.flags.debug === undefined ? options.debug : this.flags.debug);
+      var debugBuild = grunt.option ('build') === 'debug' || (this.flags.debug === undefined ? options.debug : this.flags.debug);
 
       // Iterate over all specified file groups and collect all scripts.
 
@@ -328,12 +137,15 @@ module.exports = function (grunt)
 
   /**
    * Registers the configured external modules so that they can be ignored during the build output generation.
+   * @returns {Object.<string, ModuleDef>}
    */
   function setupExternalModules ()
   {
+    /** @type {Object.<string, ModuleDef>} */
     var modules = {};
     (options.externalModules || []).forEach (function (moduleName)
     {
+      /** @type {ModuleDef} */
       var module = modules[moduleName] = new ModuleDef ();
       module.name = moduleName;
       module.external = true;
@@ -354,7 +166,7 @@ module.exports = function (grunt)
     }
     // Read the script and scan it for a module declaration.
     var script = grunt.file.read (path);
-    var moduleHeader = extractModuleHeader (script);
+    var moduleHeader = sourceTrans.extractModuleHeader (script);
     // Ignore irrelevant files.
     if (!moduleHeader) {
       if (!forceInclude || !grunt.file.isMatch ({matchBase: true}, forceInclude, path)) {
@@ -510,97 +322,19 @@ module.exports = function (grunt)
    */
   function buildReleaseScriptForModule (module, output)
   {
-    /**
-     * Matches the start of a declaration for the current module.
-     * @type {RegExp}
-     */
-    var declPattern = new RegExp (
-      tokenize ('angular `. module `( ["\']' + module.name + '["\'] (?:, `[[`s`S]*?`])? `)(?: ; )?'),
-      'ig'
-    );
+// Append the module content to the output.
 
-    /**
-     * @private
-     * Optimizes the source code and also performs some checks on it, preparing it for a subsequent
-     * concatenation with other files from the same module.
-     * If the source is already wrapping code in a self-invoking function, it unwraps it and renames module
-     * references to match a future re-wrapping.
-     * Then it replaces references to angular.module(name) by a shorter form.
-     * @param {string} source
-     * @param {string} path The script's file name, for use on error messages.
-     * @returns {string}
-     */
-    function optimize (source, path)
-    {
-      /**
-       * Source code with all white space and comments removed from both ends.
-       * @type {string}
-       */
-      var clean = source.replace (TRIM_COMMENTS_TOP, '').replace (TRIM_COMMENTS_BOTTOM, '');
-      var m;
-
-      // Check if the script already encloses code inside a self-invoking closure.
-      if (m = clean.match (MATCH_MODULE_CLOSURE)) {
-
-        // Extract the function's body and some additional information about the module and how it's being declared.
-        var moduleVar = m[1]
-          , closureBody = m[2]
-          , moduleDecl = m[3]
-          , moduleName = m[4];
-          //, moduleDeps = m[5];
-
-        if (moduleName && moduleName !== module.name)
-          warn ('Wrong module declaration: <cyan>%</cyan>', moduleName);
-
-        // Remove the existing closure from the source code.
-
-        var p = source.indexOf (clean);
-        // Extract any comments found before the closure.
-        var before = source.substr (0, p);
-        // Extract any comments found after the closure.
-        var after = source.substr (p + clean.length);
-
-        source = before + closureBody + after;
-
-        // If the angular module is being passed as a parameter to the closure, rename that parameter to the
-        // predefined name.
-        if (moduleVar && moduleDecl && moduleVar !== options.moduleVar) {
-          if (options.renameModuleRefs)
-            source = source.replace (new RegExp (sprintf (MATCH_IDENTIFIER_EXP, moduleVar), 'g'), options.moduleVar);
-          else warn ("Module reference <cyan>%</cyan> doesn't match the configuration setting <cyan>moduleVar='%'</cyan>." +
-            NL + reportErrorLocation (path) +
-            info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
-            , moduleVar, options.moduleVar
-          );
-          // Continue if --force.
-        }
-
-      }
-      else {
-        /* The script has no self-invoking closure for module definition.
-         Now check if there is code (other than a module definition) lying at a root level on the script, like,
-         for instance, private functions.
-         That kind of code would behave differently between a release and a debug build, as in a release build
-         it will be wrapped in a self-invoking closure but, on a debug build, it will not.
-         */
-        validateSourceCode (clean, path);
-      }
-
-      // Replace angular module expressions inside the closure by variable references.
-      // If the module expression defines no services/whatever, remove-it, as it will be regenerated outside the closure.
-      return source.replace (declPattern, function (m)
-      {
-        return m.substr (-1) === ')' ? options.moduleVar : '';
-      });
+    var head;
+// Fist process the head module declaration.
+    try {
+      head = sourceTrans.optimize (module.head, module.filePaths[0]);
+    }
+    catch (ex) {
+      (ex.fatal ? fatal : warn).apply (null, ex.args);
     }
 
-    // Append the module content to the output.
-
-    // Fist process the head module declaration.
-    var head = optimize (module.head, module.filePaths[0]);
-
-    // Prevent the creation of an empty (or comments-only) self-invoking function.
-    // In that case, the head content will be output without a wrapping closure.
+// Prevent the creation of an empty (or comments-only) self-invoking function.
+// In that case, the head content will be output without a wrapping closure.
     if (!module.bodies.length && head.match (MATCH_NO_SCRIPT)) {
       // Output the comments (if any).
       output.push (head);
@@ -615,80 +349,6 @@ module.exports = function (grunt)
         output.push (indent (optimize (module.bodies[i], module.filePaths[i + 1])));
       //output.push.apply (output, module.bodies.map (optimize).map (indent));
       output.push (sprintf ("\n}) (angular.module ('%', %));\n\n\n", module.name, toList (module.requires)));
-    }
-  }
-
-  /**
-   * Checks if a block of javascript code performs any operation oother than defining a module.
-   * In order to do that, it executes the code in an isolated sandbox.
-   * If any function or variable is created on the global scope as a result from that execution, a waning is issued.
-   * @param {string} source Javascript code to be analized.
-   * @param {string} path The script's file name, for use on error messages.
-   */
-  function validateSourceCode (source, path)
-  {
-    var vm = require ('vm')
-      , mockupMethod = function () { return angularModuleMockup; }
-      , angularModuleMockup = {
-        animation:  mockupMethod,
-        config:     mockupMethod,
-        constant:   mockupMethod,
-        controller: mockupMethod,
-        directive:  mockupMethod,
-        factory:    mockupMethod,
-        filter:     mockupMethod,
-        provider:   mockupMethod,
-        run:        mockupMethod,
-        service:    mockupMethod,
-        value:      mockupMethod
-      }
-      , noop = function (x) {}
-      , consoleMockup = {
-        assert:         noop,
-        debug:          noop,
-        count:          noop,
-        error:          noop,
-        group:          noop,
-        groupCollapsed: noop,
-        groupEnd:       noop,
-        info:           noop,
-        log:            noop,
-        profile:        noop,
-        profileEnd:     noop,
-        time:           noop,
-        timeEnd:        noop,
-        timeStamp:      noop,
-        trace:          noop,
-        warn:           noop
-      }
-      , sandbox = {
-        angular: {
-          module: function () { return angularModuleMockup; }
-        },
-        console: consoleMockup,
-        window:  {}
-      };
-    try {
-      grunt.log.verbose.write ("Validating " + path.cyan + '...');
-      vm.runInNewContext (source, sandbox);
-      delete sandbox.angular;
-      delete sandbox.console;
-      delete sandbox.window;
-      // Check if the sandbox contains any property at all.
-      for (var prop in sandbox)
-        throw sandbox;
-      // The code passed validation.
-      grunt.log.verbose.ok ();
-    }
-    catch (e) {
-      // Code execution failed with an undefined reference or at least one new variable of function has been added to
-      // the global scope.
-      delete sandbox.angular;
-      delete sandbox.console;
-      delete sandbox.window;
-      grunt.log.verbose.writeln ('FAILED'.yellow);
-      warnAboutGlobalCode (sandbox, path);
-      // If --force, continue.
     }
   }
 
@@ -720,6 +380,16 @@ module.exports = function (grunt)
     warn (msg + '>>'.yellow);
   }
 
+//------------------------------------------------------------------------------
+// PRIVATE UTILITY FUNCTIONS
+//------------------------------------------------------------------------------
+
+  /**
+   * @private
+   * Returns an error location description suitable for output.
+   * @param {string} path
+   * @returns {string}
+   */
   function reportErrorLocation (path)
   {
     return csprintf ('yellow', '  File: <cyan>%</cyan>' + NL, path);
@@ -727,28 +397,6 @@ module.exports = function (grunt)
 
   /**
    * @private
-   * Searches for an angular module declaration and, if found, extracts the module's name and dependencies from it.
-   * Note: if the returned 'requires' property is undefined, that means the module declaration is appending
-   * definitions to a module defined elsewhere.
-   * Otherwise, the module declaration is beginning the module definition.
-   * @param {string} source Javascript source code.
-   * @returns {{name: *, requires: Array.<string>|undefined, append: boolean}|null} Null means the file does not contain any
-   * module definition.
-   */
-  function extractModuleHeader (source)
-  {
-    var m = source.match (MATCH_MODULE_DECL);
-    // Ignore the file if it has no angular module definition.
-    if (!m)
-      return null;
-    return {
-      name:     m[1],
-      append:   !m[2],
-      requires: m[2] && JSON.parse (m[2].replace (/'/g, '"')) || []
-    };
-  }
-
-  /**
    * Stops execution with an error message.
    * Arguments are the same as the ones on <code>sprintf</code>.
    */
@@ -758,6 +406,7 @@ module.exports = function (grunt)
   }
 
   /**
+   * @private
    * Displays an error message and, if --force is not enabled, stops execution.
    * Arguments are the same as the ones on <code>sprintf</code>.
    */
@@ -767,6 +416,7 @@ module.exports = function (grunt)
   }
 
   /**
+   * @private
    * Displays a message.
    * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code>.
    */
