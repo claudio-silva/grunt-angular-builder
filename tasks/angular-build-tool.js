@@ -32,7 +32,8 @@ var getProperties = util.getProperties
   , info = gruntUtil.info
   , reportErrorLocation = gruntUtil.reportErrorLocation
   , writeln = gruntUtil.writeln
-  , NL = util.NL;
+  , NL = util.NL
+  , OperationResult = types.OperationResult;
 
 //------------------------------------------------------------------------------
 // TASKS
@@ -325,38 +326,64 @@ module.exports = function (grunt)
    */
   function buildReleaseScriptForModule (module, output)
   {
-// Append the module content to the output.
-
-    var head
-      , path = module.filePaths[0];
-
     /**
-     * @private
-     * @param {boolean} success
-     * @param {Object} sandbox
+     * Calls sourceTrans.optimize() and handles the result.
+     * @param {string} source
+     * @param {string} path For error messages.
+     * @returns {string|undefined} The (un)optimized source code.
+     * @throws Error Sanity check.
      */
-    function onValidation (success, sandbox) {
-      verboseOut.write ("Validating " + path.cyan + '...');
-      if (success)
-      // The code passed validation.
-        verboseOut.ok ();
-      else {
-        verboseOut.writeln ('FAILED'.yellow);
-        warnAboutGlobalCode (sandbox, path);
-        // If --force, continue.
+    function optimize (source, path)
+    {
+      var result = sourceTrans.optimize (source, module.name, options.moduleVar);
+      if (typeof result === 'string')
+        return result;
+      var stat = sourceTrans.TRANS_STAT;
+      switch (result.status) {
+
+        case stat.OK:
+
+          return sourceTrans.renameModuleRefExps(module, result.data, options.moduleVar);
+
+        case stat.NO_CLOSURE_FOUND:
+
+          // The source code must be validate to make sure it's safe.
+          verboseOut.write ("Validating " + path.cyan + '...');
+          var valid = sourceTrans.validateUnwrappedCode (source);
+          if (valid)
+          // The code passed validation.
+            verboseOut.ok ();
+          else {
+            verboseOut.writeln ('FAILED'.yellow);
+            warnAboutGlobalCode (valid, path);
+            // If --force, continue.
+          }
+          // Return the source code unmodified.
+          return source;
+
+        case stat.RENAME_REQUIRED:
+
+          if (options.renameModuleRefs)
+            return sourceTrans.renameModuleVariableRefs (source, result.data, options.moduleVar);
+          else
+            warn ("The module variable reference <cyan>%</cyan> doesn't match the preset name on the config. setting <cyan>moduleVar='%'</cyan>.%%%",
+            result.data, options.moduleVar, NL, reportErrorLocation (path),
+            info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
+          );
+          // If --force, continue.
+          break;
+
+
+        default:
+          throw new Error ('Unknown status code ' + result);
       }
     }
 
     // Fist process the head module declaration.
-    try {
-      head = sourceTrans.optimize (module, module.head, path, options.moduleVar, options.renameModuleRefs, onValidation);
-    }
-    catch (ex) {
-      (ex.fatal ? fatal : warn).apply (null, ex.args);
-    }
+    var head = optimize (module.head, module.filePaths[0]);
 
-// Prevent the creation of an empty (or comments-only) self-invoking function.
-// In that case, the head content will be output without a wrapping closure.
+    // Prevent the creation of an empty (or comments-only) self-invoking function.
+    // In that case, the head content will be output without a wrapping closure.
     if (!module.bodies.length && sourceExtract.matchWhiteSpaceOrComments (head)) {
       // Output the comments (if any).
       output.push (head);
@@ -368,8 +395,7 @@ module.exports = function (grunt)
       output.push ('(function (' + options.moduleVar + ') {\n');
       output.push (indent (head));
       for (var i = 0, m = module.bodies.length; i < m; ++i)
-        output.push (indent (sourceTrans.optimize (module, module.bodies[i], module.filePaths[i + 1],
-          options.moduleVar, options.renameModuleRefs, onValidation)));
+        output.push (indent (optimize (module.bodies[i], module.filePaths[i + 1])));
       //output.push.apply (output, module.bodies.map (optimize).map (indent));
       output.push (sprintf ("\n}) (angular.module ('%', %));\n\n\n", module.name, toList (module.requires)));
     }

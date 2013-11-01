@@ -135,7 +135,7 @@ exports.trimComments = function (source)
  * @param {string} source
  * @returns {ModuleClosureInfo|boolean} False if no closure was found or if there is more code besides the closure.
  */
-exports.extractModuleClosure = function (source)
+exports.getModuleClosureInfo = function (source)
 {
   /** @type {Array.<string>} */
   var m;
@@ -162,3 +162,18 @@ exports.matchWhiteSpaceOrComments = function (source)
   return source.match (MATCH_NO_SCRIPT) !== null;
 };
 
+/**
+ * Remove the existing closure from the source code.
+ * @param {string} source The original source code.
+ * @param {string} clean Source code with white space and comments trimmed from both ends.
+ * @param {string} closureBody The full closure source code.
+ */
+exports.extractClosure = function (source, clean, closureBody) {
+  var p = source.indexOf (clean);
+  // Extract any comments found before the closure.
+  var before = source.substr (0, p);
+  // Extract any comments found after the closure.
+  var after = source.substr (p + clean.length);
+
+  return before + closureBody + after;
+};

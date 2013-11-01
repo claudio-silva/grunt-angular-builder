@@ -9,14 +9,11 @@
 var sandboxRun = require ('./sandboxRun')
   , types = require ('./types')
   , sourceExtract = require ('./sourceExtract')
-  , gruntUtil = require ('./gruntUtil')
   , util = require ('./util');
 
 var ErrorException = types.ErrorException
   , sprintf = util.sprintf
-  , NL = util.NL
-  , info = gruntUtil.info
-  , reportErrorLocation = gruntUtil.reportErrorLocation;
+  , OperationResult = types.OperationResult;
 
 //------------------------------------------------------------------------------
 // PRIVATE DATA
@@ -31,8 +28,28 @@ var ErrorException = types.ErrorException
 var MATCH_IDENTIFIER_EXP = '\\b%\\b';
 
 //------------------------------------------------------------------------------
-// PUBLIC FUNCTIONS
+// TYPES
 //------------------------------------------------------------------------------
+
+/**
+ * Error codes returned by some functions of the sourceTrans module.
+ * @enum
+ */
+var TRANS_STAT = {
+  OK:               0,
+  NO_CLOSURE_FOUND: -1,
+  RENAME_REQUIRED:  -2
+};
+
+//------------------------------------------------------------------------------
+// PUBLIC
+//------------------------------------------------------------------------------
+
+/**
+ * Error codes returned by some functions of the sourceTrans module.
+ * @type {{OK: number, NO_CLOSURE_FOUND: number, RENAME_REQUIRED: number}}
+ */
+exports.TRANS_STAT = TRANS_STAT;
 
 /**
  * Optimizes the source code and also performs some checks on it, preparing it for a subsequent
@@ -41,70 +58,90 @@ var MATCH_IDENTIFIER_EXP = '\\b%\\b';
  * references to match a future re-wrapping.
  * Then it replaces references to angular.module(name) by a shorter form.
  *
- * @param {ModuleDef} module
  * @param {string} source
- * @param {string} path The script's file name, for use on error messages.
- * @returns {string}
- * @throws {ErrorException}
+ * @param {string} moduleName
+ * @param {string} moduleVar
+ * @returns {OperationResult} Either the optimized source code or a status code if no optimization was performed.
  */
-exports.optimize = function (module, source, path, moduleVar, renameModuleRefs, onValidation)
+exports.optimize = function (source, moduleName, moduleVar)
 {
-  /** Matches the start of a declaration for the current module.*/
-  var declPattern = sourceExtract.moduleExtractionPattern (module.name);
   /**
    * Source code with all white space and comments removed from both ends.
    * @type {string}
    */
   var clean = sourceExtract.trimComments (source);
   // Extract the function's body and some additional information about the module and how it's being declared.
-  var modInfo = sourceExtract.extractModuleClosure (clean);
+  var modInfo = sourceExtract.getModuleClosureInfo (clean);
 
   // Check if the script already encloses code inside a self-invoking closure.
   if (modInfo) {
 
-    if (modInfo.moduleName && modInfo.moduleName !== module.name)
+    // Sanity check.
+    if (modInfo.moduleName && modInfo.moduleName !== moduleName)
       throw new ErrorException (false, 'Wrong module declaration: <cyan>%</cyan>', modInfo.moduleName);
 
-    // Remove the existing closure from the source code.
+    // Let's get that closure.
+    source = sourceExtract.extractClosure (source, clean, modInfo.closureBody);
 
-    var p = source.indexOf (clean);
-    // Extract any comments found before the closure.
-    var before = source.substr (0, p);
-    // Extract any comments found after the closure.
-    var after = source.substr (p + clean.length);
-
-    source = before + modInfo.closureBody + after;
-
-    // If the angular module is being passed as a parameter to the closure, rename that parameter to the
-    // predefined name.
-    if (modInfo.moduleVar && modInfo.moduleDecl && modInfo.moduleVar !== moduleVar) {
-      if (renameModuleRefs)
-        source = source.replace (new RegExp (sprintf (MATCH_IDENTIFIER_EXP, moduleVar), 'g'), moduleVar);
-      else new ErrorException (false, "Module reference <cyan>%</cyan> doesn't match the configuration setting <cyan>moduleVar='%'</cyan>." +
-        NL + reportErrorLocation (path) +
-        info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
-        , modInfo.moduleVar, moduleVar
-      );
-      // Continue if --force.
-    }
-
+    // If the angular module is already being passed as a parameter to the closure, and that parameter has a different
+    // name from the preset name for module references, rename that parameter to the predefined name.
+    if (modInfo.moduleVar && modInfo.moduleDecl && modInfo.moduleVar !== moduleVar)
+    // Let the caller decide what to do.
+      return {status: TRANS_STAT.RENAME_NOT_ALLOWED, data: modInfo.moduleVar};
+    return {status: TRANS_STAT.OK, data: source};
   }
-  else {
-    /* The script has no self-invoking closure for module definition.
-     Now check if there is code (other than a module definition) lying at a root level on the script, like,
-     for instance, private functions.
-     That kind of code would behave differently between a release and a debug build, as in a release build
-     it will be wrapped in a self-invoking closure but, on a debug build, it will not.
-     */
-    var sandbox = sandboxRun.detectInvalidSourceCode (clean);
-    onValidation (!sandbox, sandbox);
-  }
+  // No closure was detected.
+  return {status: TRANS_STAT.NO_CLOSURE_FOUND};
+};
 
-  // Replace angular module expressions inside the closure by variable references.
-  // If the module expression defines no services/whatever, remove-it, as it will be regenerated outside the closure.
+
+/**
+ * The script has no self-invoking closure for a module definition.
+ * Check if there is code (other than a module definition) lying at a root level on the script, like,
+ * for instance, private functions.
+ * That kind of code would behave differently between a release and a debug build, as in a release build
+ * it will be wrapped in a self-invoking closure but, on a debug build, it will not.
+ *
+ * @param {string} source
+ * @returns {Object|boolean} <code>True</code> if the source code is valid, otherwise an Object containing the detected
+ * symbols created in the global scope.
+ */
+exports.validateUnwrappedCode = function (source)
+{
+  var sandbox = sandboxRun.detectInvalidSourceCode (source);
+  return sandbox || true;
+};
+
+/**
+ * Replace angular module reference expressions (with syntax <code>angular.module(...)</code>) inside the closure by variable references.
+ * If the module expression defines no services/whatever, remove-it, as it will be regenerated outside the closure.
+ *
+ * @param {ModuleDef} module
+ * @param {string} source
+ * @param {string} moduleVar Variable name for module references.
+ * @returns {string}
+ */
+exports.renameModuleRefExps = function (module, source, moduleVar)
+{
+  /** Matches the start of a declaration for the current module.*/
+  var declPattern = sourceExtract.moduleExtractionPattern (module.name);
+
   return source.replace (declPattern, function (m)
   {
     return m.substr (-1) === ')' ? moduleVar : '';
   });
 };
 
+/**
+ * Renames angular module variable references inside the closure.
+ * If the module expression defines no services/whatever, remove-it, as it will be regenerated outside the closure.
+ *
+ * @param {string} source
+ * @param {string} oldVar Old variable name for module references.
+ * @param {string} moduleVar Variable name for module references.
+ * @returns {string}
+ */
+exports.renameModuleVariableRefs = function (source, oldVar, moduleVar)
+{
+  return source.replace (new RegExp (sprintf (MATCH_IDENTIFIER_EXP, oldVar), 'g'), moduleVar);
+};

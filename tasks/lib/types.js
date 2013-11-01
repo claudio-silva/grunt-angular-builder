@@ -7,6 +7,12 @@
 'use strict';
 
 /**
+ * A result that includes a status value and optional data.
+ * @typedef {{status: number, data:*}}
+ */
+var OperationResult;
+
+/**
  * A module definition record.
  * Contains all javascript defining the module, read from one or more source files.
  * @constructor
@@ -157,7 +163,8 @@ ErrorException.prototype = {
 };
 
 module.exports = {
-  ErrorException: ErrorException,
-  ModuleDef:      ModuleDef,
-  TASK_OPTIONS:   TASK_OPTIONS
+  OperationResult: OperationResult,
+  ErrorException:  ErrorException,
+  ModuleDef:       ModuleDef,
+  TASK_OPTIONS:    TASK_OPTIONS
 };
