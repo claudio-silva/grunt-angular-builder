@@ -7,16 +7,30 @@
 'use strict';
 
 var sandboxRun = require ('./sandboxRun')
-  , types = require ('./types')
   , sourceExtract = require ('./sourceExtract')
+  , types = require ('./types')
   , util = require ('./util');
 
-var ErrorException = types.ErrorException
-  , sprintf = util.sprintf
+var sprintf = util.sprintf
   , OperationResult = types.OperationResult;
 
 //------------------------------------------------------------------------------
-// PRIVATE DATA
+// TYPES
+//------------------------------------------------------------------------------
+
+/**
+ * Error codes returned by some functions of the sourceTrans module.
+ * @enum
+ */
+var TRANS_STAT = {
+  OK:                  0,
+  NO_CLOSURE_FOUND:    -1,
+  RENAME_REQUIRED:     -2,
+  INVALID_DECLARATION: -2
+};
+
+//------------------------------------------------------------------------------
+// PRIVATE
 //------------------------------------------------------------------------------
 
 /**
@@ -28,26 +42,12 @@ var ErrorException = types.ErrorException
 var MATCH_IDENTIFIER_EXP = '\\b%\\b';
 
 //------------------------------------------------------------------------------
-// TYPES
-//------------------------------------------------------------------------------
-
-/**
- * Error codes returned by some functions of the sourceTrans module.
- * @enum
- */
-var TRANS_STAT = {
-  OK:               0,
-  NO_CLOSURE_FOUND: -1,
-  RENAME_REQUIRED:  -2
-};
-
-//------------------------------------------------------------------------------
 // PUBLIC
 //------------------------------------------------------------------------------
 
 /**
  * Error codes returned by some functions of the sourceTrans module.
- * @type {{OK: number, NO_CLOSURE_FOUND: number, RENAME_REQUIRED: number}}
+ * @type {TRANS_STAT}
  */
 exports.TRANS_STAT = TRANS_STAT;
 
@@ -78,7 +78,7 @@ exports.optimize = function (source, moduleName, moduleVar)
 
     // Sanity check.
     if (modInfo.moduleName && modInfo.moduleName !== moduleName)
-      throw new ErrorException (false, 'Wrong module declaration: <cyan>%</cyan>', modInfo.moduleName);
+      return {status: TRANS_STAT.INVALID_DECLARATION, data: modInfo.moduleName};
 
     // Let's get that closure.
     source = sourceExtract.extractClosure (source, clean, modInfo.closureBody);

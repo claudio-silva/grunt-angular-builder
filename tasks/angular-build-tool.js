@@ -36,7 +36,21 @@ var getProperties = util.getProperties
   , OperationResult = types.OperationResult;
 
 //------------------------------------------------------------------------------
-// TASKS
+// TYPES
+//------------------------------------------------------------------------------
+
+/**
+ * Error codes returned by some functions in this module.
+ * @enum
+ */
+var STAT = {
+  OK:       0,
+  INDENTED: 1,
+
+};
+
+//------------------------------------------------------------------------------
+// TASK
 //------------------------------------------------------------------------------
 
 /**
@@ -158,6 +172,34 @@ module.exports = function (grunt)
   }
 
   /**
+   * Writes or appends content to a file.
+   * @param {string} path
+   * @param {string} content
+   */
+  function writeFile (path, content)
+  {
+    if (grunt.file.exists (path)) {
+      if (created [path]) {
+        // Append to existing file.
+        var data = grunt.file.read (path);
+        grunt.file.write (path, data + '\n' + content);
+      }
+      else {
+        // Re-create file.
+        grunt.file.delete (path);
+        grunt.file.write (path, content);
+      }
+    }
+    // Create file.
+    else grunt.file.write (path, content);
+    created [path] = true;
+  }
+
+  //------------------------------------------------------------------------------
+  // SCAN SOURCES
+  //------------------------------------------------------------------------------
+
+  /**
    * Loads the specified script file and scans it for module definitions.
    * @param {string|Array.<string>|null} forceInclude
    * @param {string} path
@@ -211,74 +253,6 @@ module.exports = function (grunt)
   }
 
   /**
-   * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
-   * source scripts in the correct order. This is used on debug builds.
-   * @param {string} mainName Main module name.
-   * @param {string} targetScript Path to the output script.
-   * @param {string} targetStylesheet Path to the output stylesheet.
-   */
-  function buildDebugPackage (mainName, targetScript, targetStylesheet)
-  {
-    var output = ['document.write (\''];
-
-    // Output the standalone scripts (if any).
-    if (standaloneScripts.length)
-      output.push (standaloneScripts.map (function (e)
-      {
-        return sprintf ('<script src=\"%\"></script>', e.path);
-      }).join ('\\\n'));
-
-    // Output the modules (if any).
-    includeModule (mainName, output, buildDebugScriptForModule);
-    output.push ('\');');
-    writeFile (targetScript, output.join ('\\\n'));
-  }
-
-  /**
-   * Saves all script files required by the specified module into a single output file, in the correct
-   * loading order. This is used on release builds.
-   * @param {string} mainName Main module name.
-   * @param {string} targetScript Path to the output script.
-   * @param {string} targetStylesheet Path to the output stylesheet.
-   */
-  function buildReleasePackage (mainName, targetScript, targetStylesheet)
-  {
-    var output = [];
-
-    // Output the standalone scripts (if any).
-    if (standaloneScripts.length)
-      output.push (standaloneScripts.map (function (e) {return e.content;}).join ('\n'));
-
-    // Output the modules (if any).
-    includeModule (mainName, output, buildReleaseScriptForModule);
-    writeFile (targetScript, output.join ('\n'));
-  }
-
-  /**
-   * Writes or appends content to a file.
-   * @param {string} path
-   * @param {string} content
-   */
-  function writeFile (path, content)
-  {
-    if (grunt.file.exists (path)) {
-      if (created [path]) {
-        // Append to existing file.
-        var data = grunt.file.read (path);
-        grunt.file.write (path, data + '\n' + content);
-      }
-      else {
-        // Re-create file.
-        grunt.file.delete (path);
-        grunt.file.write (path, content);
-      }
-    }
-    // Create file.
-    else grunt.file.write (path, content);
-    created [path] = true;
-  }
-
-  /**
    * Traces a dependency graph for the specified module and calls the given callback to process each required module
    * in the correct loading order.
    * @param {string} moduleName
@@ -306,6 +280,34 @@ module.exports = function (grunt)
     }
   }
 
+  //------------------------------------------------------------------------------
+  // DEBUG BUILD
+  //------------------------------------------------------------------------------
+
+  /**
+   * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
+   * source scripts in the correct order. This is used on debug builds.
+   * @param {string} mainName Main module name.
+   * @param {string} targetScript Path to the output script.
+   * @param {string} targetStylesheet Path to the output stylesheet.
+   */
+  function buildDebugPackage (mainName, targetScript, targetStylesheet)
+  {
+    var output = ['document.write (\''];
+
+    // Output the standalone scripts (if any).
+    if (standaloneScripts.length)
+      output.push (standaloneScripts.map (function (e)
+      {
+        return sprintf ('<script src=\"%\"></script>', e.path);
+      }).join ('\\\n'));
+
+    // Output the modules (if any).
+    includeModule (mainName, output, buildDebugScriptForModule);
+    output.push ('\');');
+    writeFile (targetScript, output.join ('\\\n'));
+  }
+
   /**
    * Outputs code for the specified module on a debug build.
    * @param {ModuleDef} module
@@ -319,6 +321,30 @@ module.exports = function (grunt)
     });
   }
 
+  //------------------------------------------------------------------------------
+  // RELEASE BUILD
+  //------------------------------------------------------------------------------
+
+  /**
+   * Saves all script files required by the specified module into a single output file, in the correct
+   * loading order. This is used on release builds.
+   * @param {string} mainName Main module name.
+   * @param {string} targetScript Path to the output script.
+   * @param {string} targetStylesheet Path to the output stylesheet.
+   */
+  function buildReleasePackage (mainName, targetScript, targetStylesheet)
+  {
+    var output = [];
+
+    // Output the standalone scripts (if any).
+    if (standaloneScripts.length)
+      output.push (standaloneScripts.map (function (e) {return e.content;}).join ('\n'));
+
+    // Output the modules (if any).
+    includeModule (mainName, output, buildReleaseScriptForModule);
+    writeFile (targetScript, output.join ('\n'));
+  }
+
   /**
    * Outputs the specified module on a release build.
    * @param {ModuleDef} module
@@ -326,84 +352,120 @@ module.exports = function (grunt)
    */
   function buildReleaseScriptForModule (module, output)
   {
-    /**
-     * Calls sourceTrans.optimize() and handles the result.
-     * @param {string} source
-     * @param {string} path For error messages.
-     * @returns {string|undefined} The (un)optimized source code.
-     * @throws Error Sanity check.
-     */
-    function optimize (source, path)
-    {
-      var result = sourceTrans.optimize (source, module.name, options.moduleVar);
-      if (typeof result === 'string')
-        return result;
-      var stat = sourceTrans.TRANS_STAT;
-      switch (result.status) {
-
-        case stat.OK:
-
-          return sourceTrans.renameModuleRefExps(module, result.data, options.moduleVar);
-
-        case stat.NO_CLOSURE_FOUND:
-
-          // The source code must be validate to make sure it's safe.
-          verboseOut.write ("Validating " + path.cyan + '...');
-          var valid = sourceTrans.validateUnwrappedCode (source);
-          if (valid)
-          // The code passed validation.
-            verboseOut.ok ();
-          else {
-            verboseOut.writeln ('FAILED'.yellow);
-            warnAboutGlobalCode (valid, path);
-            // If --force, continue.
-          }
-          // Return the source code unmodified.
-          return source;
-
-        case stat.RENAME_REQUIRED:
-
-          if (options.renameModuleRefs)
-            return sourceTrans.renameModuleVariableRefs (source, result.data, options.moduleVar);
-          else
-            warn ("The module variable reference <cyan>%</cyan> doesn't match the preset name on the config. setting <cyan>moduleVar='%'</cyan>.%%%",
-            result.data, options.moduleVar, NL, reportErrorLocation (path),
-            info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
-          );
-          // If --force, continue.
-          break;
-
-
-        default:
-          throw new Error ('Unknown status code ' + result);
-      }
-    }
-
     // Fist process the head module declaration.
-    var head = optimize (module.head, module.filePaths[0]);
+    var head = optimize (module.head, module.filePaths[0], module);
 
     // Prevent the creation of an empty (or comments-only) self-invoking function.
     // In that case, the head content will be output without a wrapping closure.
-    if (!module.bodies.length && sourceExtract.matchWhiteSpaceOrComments (head)) {
+    if (!module.bodies.length && sourceExtract.matchWhiteSpaceOrComments (head.data)) {
       // Output the comments (if any).
-      output.push (head);
-      // Output a module declaration with no definifions.
-      output.push (sprintf ("angular.module ('%', %);\n\n\n", module.name, toList (module.requires)));
+      if (head.data.trim ())
+        output.push (head.data);
+      // Output a module declaration with no definitions.
+      output.push (sprintf ("angular.module ('%', %);%", module.name, toList (module.requires), options.moduleFooter));
     }
+    // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
     else {
-      // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
+      // Begin closure.
       output.push ('(function (' + options.moduleVar + ') {\n');
-      output.push (indent (head));
-      for (var i = 0, m = module.bodies.length; i < m; ++i)
-        output.push (indent (optimize (module.bodies[i], module.filePaths[i + 1])));
-      //output.push.apply (output, module.bodies.map (optimize).map (indent));
-      output.push (sprintf ("\n}) (angular.module ('%', %));\n\n\n", module.name, toList (module.requires)));
+      // Insert module declaration.
+      output.push (conditionalIndent (head));
+      // Insert additional module definitions.
+      for (var i = 0, m = module.bodies.length; i < m; ++i) {
+        var body = optimize (module.bodies[i], module.filePaths[i + 1], module);
+        output.push (conditionalIndent (body));
+      }
+      // End closure.
+      output.push (sprintf ("\n}) (angular.module ('%', %));%", module.name, toList (module.requires), options.moduleFooter));
     }
-
   }
 
   /**
-   * Isses a warning about code found on the global scope.
+   * Calls sourceTrans.optimize() and handles the result.
+   *
+   * @param {string} source
+   * @param {string} path For error messages.
+   * @param {ModuleDef} module
+   * @returns {OperationResult} The transformed source code.
+   * @throws Error Sanity check.
+   */
+  function optimize (source, path, module)
+  {
+    var result = sourceTrans.optimize (source, module.name, options.moduleVar);
+    var stat = sourceTrans.TRANS_STAT;
+    switch (result.status) {
+
+      case stat.OK:
+
+        //----------------------------------------------------------
+        // Module already enclosed in a closure with no arguments.
+        //----------------------------------------------------------
+        return {status: STAT.INDENTED, data: sourceTrans.renameModuleRefExps (module, result.data, options.moduleVar)};
+
+
+      case stat.NO_CLOSURE_FOUND:
+
+        //----------------------------------------------------------
+        // Unwrapped source code.
+        // It must be validated to make sure it's safe.
+        //----------------------------------------------------------
+        verboseOut.write ("Validating " + path.cyan + '...');
+        var valid = sourceTrans.validateUnwrappedCode (source);
+        if (valid)
+        // The code passed validation.
+          verboseOut.ok ();
+        else {
+          verboseOut.writeln ('FAILED'.yellow);
+          warnAboutGlobalCode (valid, path);
+          // If --force, continue.
+        }
+        // Either the code is valid or --force was used, so process it.
+        return {status: STAT.OK, data: sourceTrans.renameModuleRefExps (module, source, options.moduleVar)};
+
+
+      case stat.RENAME_REQUIRED:
+
+        //----------------------------------------------------------
+        // Module already enclosed in a closure, with its reference
+        // passed in as the function's argument.
+        //----------------------------------------------------------
+        if (options.renameModuleRefs)
+          return {status: STAT.OK, data: sourceTrans.renameModuleVariableRefs (source, result.data, options.moduleVar)};
+        else
+          warn ("The module variable reference <cyan>%</cyan> doesn't match the preset name on the config. setting <cyan>moduleVar='%'</cyan>.%%%",
+            result.data, options.moduleVar, NL, reportErrorLocation (path),
+            info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
+          );
+        // If --force, continue.
+        break;
+
+
+      case stat.INVALID_DECLARATION:
+
+        warn ('Wrong module declaration: <cyan>%</cyan>', result.data);
+        // If --force, continue.
+        break;
+
+
+      default:
+        throw new Error ('Unknown status code ' + result);
+    }
+    // Optimization failed. Return the unaltered source code.
+    return {status: STAT.OK, data: source};
+  }
+
+  /**
+   * Returns the given text indented unless it was already indented.
+   * @param {OperationResult} result
+   * @return {string}
+   */
+  function conditionalIndent (result)
+  {
+    return result.status === STAT.INDENTED ? result.data : indent (result.data);
+  }
+
+  /**
+   * Isses a warning about problematic code found on the global scope.
    * @param {Object} sandbox
    * @param {string} path
    */

@@ -121,16 +121,6 @@ exports.moduleExtractionPattern = function (moduleName)
 };
 
 /**
- * Returns the given ource code with all white space and comments removed from both ends.
- * @param {string} source
- * @returns {string}
- */
-exports.trimComments = function (source)
-{
-  return source.replace (TRIM_COMMENTS_TOP, '').replace (TRIM_COMMENTS_BOTTOM, '');
-};
-
-/**
  * If the give source code consists only of a module-defining closure, returns information about that closure.
  * @param {string} source
  * @returns {ModuleClosureInfo|boolean} False if no closure was found or if there is more code besides the closure.
@@ -153,16 +143,6 @@ exports.getModuleClosureInfo = function (source)
 };
 
 /**
- * Checks if the given source code consists only of white space and javascript comments.
- * @param {string} source
- * @returns {boolean}
- */
-exports.matchWhiteSpaceOrComments = function (source)
-{
-  return source.match (MATCH_NO_SCRIPT) !== null;
-};
-
-/**
  * Remove the existing closure from the source code.
  * @param {string} source The original source code.
  * @param {string} clean Source code with white space and comments trimmed from both ends.
@@ -177,3 +157,24 @@ exports.extractClosure = function (source, clean, closureBody) {
 
   return before + closureBody + after;
 };
+
+/**
+ * Checks if the given source code consists only of white space and javascript comments.
+ * @param {string} source
+ * @returns {boolean}
+ */
+exports.matchWhiteSpaceOrComments = function (source)
+{
+  return source.match (MATCH_NO_SCRIPT) !== null;
+};
+
+/**
+ * Returns the given ource code with all white space and comments removed from both ends.
+ * @param {string} source
+ * @returns {string}
+ */
+exports.trimComments = function (source)
+{
+  return source.replace (TRIM_COMMENTS_TOP, '').replace (TRIM_COMMENTS_BOTTOM, '');
+};
+

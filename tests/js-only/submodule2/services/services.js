@@ -1,5 +1,11 @@
-angular.module('Submodule2').
+angular.module ('Submodule2').
 
-  service ('test2', function () {
+  service ('test1', function ()
+{
+  // code ommited
+}).
+
+  service ('test2', function ()
+{
   // code ommited
 });

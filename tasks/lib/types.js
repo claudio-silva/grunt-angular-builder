@@ -99,7 +99,11 @@ var TASK_OPTIONS = {
    * If a module reference (for module access or for declaring a dependency) is found in the source code, which targets a module that is not declared anywhere in the build's source files, the build operation aborts when that module name is not present on this list.
    * @type {Array.<string>}
    */
-  externalModules:  null
+  externalModules:  null,
+  /**
+   * This string will be appended to each module definition block.
+   */
+  moduleFooter: '\n\n\n'
 };
 
 /**
@@ -148,23 +152,12 @@ var FILE_GROUP_OPTIONS = {
   forceInclude:       null
 };
 
-
-function ErrorException (fatal, msg)
-{
-  this.fatal = fatal;
-  this.args = [].slice.call (arguments, 1);
-}
-
-ErrorException.prototype = {
-  /** @type {boolean} */
-  fatal: false,
-  /** @type {Array} */
-  args:  null
-};
+//------------------------------------------------------------------------------
+// EXPORT
+//------------------------------------------------------------------------------
 
 module.exports = {
   OperationResult: OperationResult,
-  ErrorException:  ErrorException,
   ModuleDef:       ModuleDef,
   TASK_OPTIONS:    TASK_OPTIONS
 };
