@@ -38,6 +38,13 @@ module.exports = function (grunt)
         src:          'tests/js-only/**/*.js',
         targetScript: 'dist/main.js'
       },
+      'test-js-fail': {
+        options:            {
+          main: 'App2'
+        },
+        src:          'tests/js-only/**/*.js',
+        targetScript: 'dist/main.js'
+      },
       'test-stylesheets': {
         src:          'tests/stylesheets/**/*.js',
         targetScript: 'dist/main.js',
@@ -61,6 +68,7 @@ module.exports = function (grunt)
   // Test tasks below can also be executed with the command line option `--build debug` to generate debug builds.
 
   grunt.registerTask ('test-js-only', ['clean', 'angular-build-tool:test-js-only']);
+  grunt.registerTask ('test-js-fail', ['clean', 'angular-build-tool:test-js-fail']);
   grunt.registerTask ('test-stylesheets', ['clean', 'angular-build-tool:test-stylesheets']);
 
 };

@@ -15,16 +15,55 @@ var tokenize = util.tokenize;
 //------------------------------------------------------------------------------
 
 /**
- * Information about a module-defining closure.
- * @typedef {{
- *   moduleVar:   string,
- *   closureBody: string,
- *   moduleDecl:  string,
- *   moduleName:  string,
- *   moduleDeps:  string
- * }}
- */
-var ModuleClosureInfo;
+ * @name ModuleClosureInfo
+ * Information about a module definition enclosed in a self-calling function.
+ * Source code syntax:
+ * <code>
+ * (function (x) {
+ *   ...
+ * })(angular.module(...));
+ * </code>
+ *//**
+ * @name ModuleClosureInfo#moduleVar
+ * @type {string}
+ * Name of the closure parameter that receives a reference to the module.
+ *//**
+ * @name ModuleClosureInfo#closureBody
+ * @type {string}
+ * Source code inside the closure.
+ *//**
+ * @name ModuleClosureInfo#moduleDecl
+ * @type {string}
+ * Module declaration expression (<code>angular.module(...)</code>).
+ *//**
+ * @name ModuleClosureInfo#moduleName
+ * @type {string}
+ * The name of the module being declared.
+ *//**
+ * @name ModuleClosureInfo#moduleDeps
+ * @type {string}
+ * List of module dependencies.
+*/
+
+/**
+ * @name ModuleHeaderInfo
+ * Information parsed from a module reference with the syntax:
+ * <code>angular.module('name',[])</code> or
+ * <code>angular.module('name')</code>.
+ *//**
+ * @name ModuleHeaderInfo#name
+ * @type {string}
+ * Module name.
+ *//**
+ * @name ModuleHeaderInfo#requires
+ * @type {string[]|undefined}
+ * List of module dependencies.
+ *//**
+ * @name ModuleHeaderInfo#append
+ * @type {boolean}
+ * If <code>false</code> this module reference is declaring the module and its dependencies.
+ * If <code>true</code> this module reference is appending definitions to a module declared elsewhere.
+*/
 
 //------------------------------------------------------------------------------
 // PRIVATE DATA
@@ -91,7 +130,7 @@ var MATCH_MODULE_CLOSURE = new RegExp (tokenize ('^[`(!]function `( (.+?)? `) `{
  * Otherwise, the module declaration is beginning the module definition.
  *
  * @param {string} source Javascript source code.
- * @returns {{name: *, requires: Array.<string>|undefined, append: boolean}|null} Null means the file does not contain any
+ * @returns {ModuleHeaderInfo|null} Null means the file does not contain any
  * module definition.
  */
 exports.extractModuleHeader = function (source)
@@ -100,7 +139,7 @@ exports.extractModuleHeader = function (source)
   // Ignore the file if it has no angular module definition.
   if (!m)
     return null;
-  return {
+  return /** @type {ModuleHeaderInfo} */ {
     name:     m[1],
     append:   !m[2],
     requires: m[2] && JSON.parse (m[2].replace (/'/g, '"')) || []
@@ -131,7 +170,7 @@ exports.getModuleClosureInfo = function (source)
   var m;
   if (m = source.match (MATCH_MODULE_CLOSURE)) {
     // Extract the function's body and some additional information about the module and how it's being declared.
-    return {
+    return /** @type {ModuleClosureInfo} */{
       moduleVar:   m[1],
       closureBody: m[2],
       moduleDecl:  m[3],
@@ -148,7 +187,8 @@ exports.getModuleClosureInfo = function (source)
  * @param {string} clean Source code with white space and comments trimmed from both ends.
  * @param {string} closureBody The full closure source code.
  */
-exports.extractClosure = function (source, clean, closureBody) {
+exports.extractClosure = function (source, clean, closureBody)
+{
   var p = source.indexOf (clean);
   // Extract any comments found before the closure.
   var before = source.substr (0, p);

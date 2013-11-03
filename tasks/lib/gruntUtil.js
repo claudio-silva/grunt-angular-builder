@@ -74,11 +74,31 @@ exports.writeln = function ()
 };
 
 /**
+ * Displays the given message colored grey, but only if running in verbose mode.
+ * @param {string} msg
+ * @returns {string}
+ */
+exports.info = function ()
+{
+  if (verbose)
+    grunt.log.writeln (csprintf2('white',arguments));
+};
+
+/**
+ * Output additional error information for verbose mode.
  * Returns the given message colored grey if running in verbose mode otherwise, returns a generic short message.
  * @param {string} msg
  * @returns {string}
  */
-exports.info = function (msg)
+exports.getExplanation = function (msg)
 {
   return (verbose ? indent (csprintf ('grey', msg)) : '  Use -v for more info.'.grey) + NL;
 };
+
+//------------------------------------------------------------------------------
+// PRIVATE
+//------------------------------------------------------------------------------
+
+function csprintf2 (color, args) {
+  return csprintf.apply (null, [color].concat ([].slice.call (args)));
+}

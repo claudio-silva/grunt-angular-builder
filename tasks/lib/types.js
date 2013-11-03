@@ -26,35 +26,36 @@ function ModuleDef ()
 ModuleDef.prototype = {
   /**
    * The module's name.
-   * @type {string}
+   * @type {!string}
    */
   name:      '',
   /**
    * Relative file paths to the source script files.
    * The first entry corresponds to the file that starts the module definition.
-   * @type {Array.<string>}
+   * @type {string[]}
    */
   filePaths: null,
   /**
    * The content of the file that starts the module definition.
    * If null, the file was not yet read.
-   * @type {String|null}
+   * @type {?string}
    */
   head:      null,
   /**
    * The content of each additional file that appends definitions to the module.
    * If there are no additional files for the module, the value will be an empty array.
-   * @type {Array.<String>}
+   * @type {string[]}
    */
   bodies:    null,
   /**
    * List with the names of the required modules.
    * If no modules are required, the value will be an empty array.
-   * @type {Array.<String>}
+   * @type {string[]}
    */
   requires:  null,
   /**
    * When true, the module is not included in the build but it's possibly referenced in the source code.
+   * @type {boolean}
    */
   external:  false
 };

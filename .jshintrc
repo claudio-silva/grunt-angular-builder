@@ -1,14 +1,33 @@
 {
-  "curly": false,
-  "eqeqeq": true,
-  "immed": true,
-  "latedef": true,
-  "newcap": true,
-  "noarg": true,
-  "sub": true,
-  "undef": true,
-  "boss": true,
-  "eqnull": true,
-  "node": true,
-  "laxcomma": true
+  // Enforce
+  "bitwise":       true,      // prohibits the use of bitwise operators
+  "camelcase":     true,      // force all variable names to use either camelCase style or UPPER_CASE with underscores
+  "curly":         false,     // always put curly braces around blocks in loops and conditionals
+  "eqeqeq":        true,      // prohibits the use of == and != in favor of === and !==
+  "forin":         false,     // requires all for in loops to filter object's items
+  "freeze":        false,     // prohibits overwriting prototypes of native objects
+  "immed":         true,      // prohibits the use of immediate function invocations without wrapping them in parentheses
+  "indent":        false,     // enforces specific tab width for your code
+  "latedef":       "nofunc",  // prohibits the use of a variable or function before it was defined
+  "newcap":        true,      // requires you to capitalize names of constructor functions
+  "noarg":         true,      // prohibits the use of arguments.caller and arguments.callee
+  "noempty":       false,     // warns when you have an empty block in your code
+  "nonew":         true,      // prohibits the use of constructor functions for side-effects
+  "plusplus":      false,     // prohibits the use of unary increment and decrement operators
+  "quotmark":      true,      // enforces the consistency of quotation marks used throughout your code (true | single | double)
+  "undef":         true,      // prohibits the use of explicitly undeclared variables
+  "unused":        true,      // warns when you define and never use your variables
+  "strict":        false,     // requires all functions to run in ECMAScript 5's strict mode (prohibits the global scoped strict mode)
+  "trailing":      true,      // makes it an error to leave a trailing whitespace in your code
+  "maxparams":     5,         // set the max number of formal parameters allowed per function
+  "maxdepth":      5,         // limit how any block nesting levels there can be
+  "maxstatements": 25,        // max number of statements allowed per function
+  "maxcomplexity": 10,        // control cyclomatic complexity throughout your code
+  "maxlen":        120,       // max.length of a line
+
+  // Suppress
+  "laxcomma":      true,
+
+  // Environment
+  "node":          true
 }

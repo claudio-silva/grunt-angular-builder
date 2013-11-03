@@ -25,15 +25,15 @@ var getProperties = util.getProperties
   , indent = util.indent
   , sprintf = util.sprintf
   , csprintf = util.csprintf
-  , debug = util.debug
+  //, debug = util.debug
   , ModuleDef = types.ModuleDef
   , fatal = gruntUtil.fatal
   , warn = gruntUtil.warn
   , info = gruntUtil.info
+  , getExplanation = gruntUtil.getExplanation
   , reportErrorLocation = gruntUtil.reportErrorLocation
   , writeln = gruntUtil.writeln
-  , NL = util.NL
-  , OperationResult = types.OperationResult;
+  , NL = util.NL;
 
 //------------------------------------------------------------------------------
 // TYPES
@@ -45,8 +45,7 @@ var getProperties = util.getProperties
  */
 var STAT = {
   OK:       0,
-  INDENTED: 1,
-
+  INDENTED: 1
 };
 
 //------------------------------------------------------------------------------
@@ -65,14 +64,16 @@ module.exports = function (grunt)
    */
   var modules;
   /**
-   * A map of module names to boolean values that registers which modules were already emmited to/ referenced on the output.
+   * A map of module names to boolean values that registers which modules were already
+   * emmited to/ referenced on the output.
    * @type {Object.<string,boolean>}
    */
   var loaded;
   /**
    * A map of file names to boolean values that registers which files were already created on the output.
-   * When attempting to save a file, if another one with the same name already exists at the target location, the builder
-   * will erase the existing file before writing to it if the file is not registered here, otherwise it will append to it.
+   * When attempting to save a file, if another one with the same name already exists at the target location,
+   * the builder will erase the existing file before writing to it if the file is not registered here, otherwise
+   * it will append to it.
    * @type {Object.<string,boolean>}
    */
   var created;
@@ -107,10 +108,10 @@ module.exports = function (grunt)
       options = this.options (types.TASK_OPTIONS);
 
       if (!options.main)
-        fatal ("No main module is defined.");
+        fatal ('No main module is defined.');
 
       if (!this.files.length)
-        fatal ("No source files were defined.");
+        fatal ('No source files were defined.');
 
       verbose = grunt.option ('verbose');
       created = {};
@@ -121,7 +122,8 @@ module.exports = function (grunt)
        * Note: the debug build mode can be set via three different settings.
        * @type {boolean}
        */
-      var debugBuild = grunt.option ('build') === 'debug' || (this.flags.debug === undefined ? options.debug : this.flags.debug);
+      var debugBuild = grunt.option ('build') === 'debug' ||
+        (this.flags.debug === undefined ? options.debug : this.flags.debug);
 
       // Iterate over all specified file groups and collect all scripts.
 
@@ -136,12 +138,12 @@ module.exports = function (grunt)
 
 
         if (!fileGroup.targetScript)
-          fatal ("No target script is defined.");
+          fatal ('No target script is defined.');
 
         // Process the source files.
         fileGroup.src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
-        writeln ("Generating the <cyan>%</cyan> build...", debugBuild ? 'debug' : 'release');
+        writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
 
         // On debug mode, output a script that dynamically loads all the required source files.
         if (debugBuild)
@@ -171,6 +173,100 @@ module.exports = function (grunt)
     return modules;
   }
 
+  //------------------------------------------------------------------------------
+  // SCAN SOURCES
+  //------------------------------------------------------------------------------
+
+  /**
+   * Loads the specified script file and scans it for module definitions.
+   * @param {string|Array.<string>|null} forceInclude
+   * @param {string} path
+   */
+  function loadScript (forceInclude, path)
+  {
+    if (!grunt.file.exists (path)) {
+      warn ('Source file "' + path + '" not found.');
+      return;
+    }
+    // Read the script and scan it for a module declaration.
+    var script = grunt.file.read (path);
+    var moduleHeader = sourceExtract.extractModuleHeader (script);
+    // Ignore irrelevant files.
+    if (!moduleHeader) {
+      if (!forceInclude || !grunt.file.isMatch ({matchBase: true}, forceInclude, path)) {
+        info ('Ignored file:'.cyan, path);
+        return;
+      }
+      standaloneScripts.push ({
+        path:    path,
+        content: script
+      });
+    }
+    else {
+      // Get information about the specified module.
+      var module = modules[moduleHeader.name];
+      // If this is the first time a specific module is mentioned, create the respective information record.
+      if (!module)
+        module = modules[moduleHeader.name] = new ModuleDef ();
+      // Skip the file if it defines an external module.
+      else if (module.external)
+        return;
+      // Reject additional attempts to redeclare a module (only appending is allowed).
+      else if (!moduleHeader.append)
+        fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
+      // Fill out the module definition record.
+      module.name = moduleHeader.name;
+      // The file is appending definitions to a module declared elsewhere.
+      if (moduleHeader.append) {
+        module.bodies.push (script);
+        // Append the file path to the bottom of the paths list.
+        module.filePaths.push (path);
+      }
+      // Otherwise, the file contains a module declaration.
+      else {
+        if (module.head)
+          fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
+        module.head = script;
+        // Add the file path to the top of the paths list.
+        module.filePaths.unshift (path);
+        module.requires = moduleHeader.requires;
+      }
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  // BUILD (COMMON)
+  //------------------------------------------------------------------------------
+
+  /**
+   * Traces a dependency graph for the specified module and calls the given callback
+   * to process each required module in the correct loading order.
+   * @param {string} moduleName
+   * @param {Array.<string>} output
+   * @param {function(ModuleDef, Array.<string>)} processHook
+   */
+  function includeModule (moduleName, output, processHook)
+  {
+    info ('Including module %.', moduleName);
+    var module = modules[moduleName];
+    if (!module)
+      fatal ('Module <cyan>%</cyan> was not found.', moduleName);
+    // Ignore the module if it's external.
+    if (module.external)
+      return;
+    // Include required submodules first.
+    if (module.requires) {
+      module.requires.forEach (function (modName)
+      {
+        includeModule (modName, output, processHook);
+      });
+    }
+    if (!loaded[module.name]) {
+      loaded[module.name] = true;
+      processHook (module, output);
+    }
+  }
+
   /**
    * Writes or appends content to a file.
    * @param {string} path
@@ -193,91 +289,6 @@ module.exports = function (grunt)
     // Create file.
     else grunt.file.write (path, content);
     created [path] = true;
-  }
-
-  //------------------------------------------------------------------------------
-  // SCAN SOURCES
-  //------------------------------------------------------------------------------
-
-  /**
-   * Loads the specified script file and scans it for module definitions.
-   * @param {string|Array.<string>|null} forceInclude
-   * @param {string} path
-   */
-  function loadScript (forceInclude, path)
-  {
-    if (!grunt.file.exists (path)) {
-      grunt.log.warn ('Source file "' + path + '" not found.');
-      return;
-    }
-    // Read the script and scan it for a module declaration.
-    var script = grunt.file.read (path);
-    var moduleHeader = sourceExtract.extractModuleHeader (script);
-    // Ignore irrelevant files.
-    if (!moduleHeader) {
-      if (!forceInclude || !grunt.file.isMatch ({matchBase: true}, forceInclude, path)) {
-        grunt.log.writeln ('Ignored file:'.cyan, path);
-        return;
-      }
-      standaloneScripts.push ({
-        path:    path,
-        content: script
-      });
-    }
-    else {
-      // Get information about the specified module.
-      var module = modules[moduleHeader.name];
-      // If this is the first time a specific module is mentioned, create the respective information record.
-      if (!module)
-        module = modules[moduleHeader.name] = new ModuleDef ();
-      else if (!moduleHeader.append)
-        fatal ("Can't redeclare the external module <cyan>%</cyan>", moduleHeader.name);
-      // Fill out the module definition record.
-      module.name = moduleHeader.name;
-      // The file is appending definitions to a module declared elsewhere.
-      if (moduleHeader.append) {
-        module.bodies.push (script);
-        // Append the file path to the bottom of the paths list.
-        module.filePaths.push (path);
-      }
-      // Otherwise, the file contains a module declaration.
-      else {
-        if (module.head)
-          fatal ("Duplicate module definition: <cyan>%</cyan>", moduleHeader.name);
-        module.head = script;
-        // Add the file path to the top of the paths list.
-        module.filePaths.unshift (path);
-        module.requires = moduleHeader.requires;
-      }
-    }
-  }
-
-  /**
-   * Traces a dependency graph for the specified module and calls the given callback to process each required module
-   * in the correct loading order.
-   * @param {string} moduleName
-   * @param {Array.<string>} output
-   * @param {function(ModuleDef, Array.<string>)} processHook
-   */
-  function includeModule (moduleName, output, processHook)
-  {
-    var module = modules[moduleName];
-    if (!module)
-      fatal ("Module <cyan>%</cyan> was not found.", moduleName);
-    // Ignore the module if it's external.
-    if (module.external)
-      return;
-    // Include required submodules first.
-    if (module.requires) {
-      module.requires.forEach (function (modName)
-      {
-        includeModule (modName, output, processHook);
-      });
-    }
-    if (!loaded[module.name]) {
-      loaded[module.name] = true;
-      processHook (module, output);
-    }
   }
 
   //------------------------------------------------------------------------------
@@ -362,7 +373,7 @@ module.exports = function (grunt)
       if (head.data.trim ())
         output.push (head.data);
       // Output a module declaration with no definitions.
-      output.push (sprintf ("angular.module ('%', %);%", module.name, toList (module.requires), options.moduleFooter));
+      output.push (sprintf ('angular.module ('%', %);%', module.name, toList (module.requires), options.moduleFooter));
     }
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
     else {
@@ -376,7 +387,8 @@ module.exports = function (grunt)
         output.push (conditionalIndent (body));
       }
       // End closure.
-      output.push (sprintf ("\n}) (angular.module ('%', %));%", module.name, toList (module.requires), options.moduleFooter));
+      output.push (sprintf ('\n}) (angular.module (\'%\', %));%', module.name,
+        toList (module.requires), options.moduleFooter));
     }
   }
 
@@ -409,7 +421,7 @@ module.exports = function (grunt)
         // Unwrapped source code.
         // It must be validated to make sure it's safe.
         //----------------------------------------------------------
-        verboseOut.write ("Validating " + path.cyan + '...');
+        verboseOut.write ('Validating ' + path.cyan + '...');
         var valid = sourceTrans.validateUnwrappedCode (source);
         if (valid)
         // The code passed validation.
@@ -432,9 +444,9 @@ module.exports = function (grunt)
         if (options.renameModuleRefs)
           return {status: STAT.OK, data: sourceTrans.renameModuleVariableRefs (source, result.data, options.moduleVar)};
         else
-          warn ("The module variable reference <cyan>%</cyan> doesn't match the preset name on the config. setting <cyan>moduleVar='%'</cyan>.%%%",
+          warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config. setting <cyan>moduleVar=\'%\'</cyan>.%%%',
             result.data, options.moduleVar, NL, reportErrorLocation (path),
-            info ("Either rename the variable or enable <cyan>renameModuleRefs</cyan>.")
+            getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
           );
         // If --force, continue.
         break;
@@ -448,7 +460,7 @@ module.exports = function (grunt)
 
 
       default:
-        throw new Error ('Unknown status code ' + result);
+        throw new Error ('Optimize failed. It returned ' + JSON.stringify (result));
     }
     // Optimization failed. Return the unaltered source code.
     return {status: STAT.OK, data: source};
@@ -473,9 +485,10 @@ module.exports = function (grunt)
   {
     var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
       reportErrorLocation (path) +
-      info (
+      getExplanation (
         'This kind of code will behave differently between release and debug builds.' + NL +
-          'You should wrap it in a self-invoking function and/or assign global variables/functions directly to the window object.'
+          'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
+          'directly to the window object.'
       )
     );
     if (verbose) {
