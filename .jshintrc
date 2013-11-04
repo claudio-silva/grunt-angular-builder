@@ -14,9 +14,9 @@
   "noempty":       false,     // warns when you have an empty block in your code
   "nonew":         true,      // prohibits the use of constructor functions for side-effects
   "plusplus":      false,     // prohibits the use of unary increment and decrement operators
-  "quotmark":      true,      // enforces the consistency of quotation marks used throughout your code (true | single | double)
+  "quotmark":      false,     // enforces the consistency of quotation marks used throughout your code (true | single | double)
   "undef":         true,      // prohibits the use of explicitly undeclared variables
-  "unused":        true,      // warns when you define and never use your variables
+  "unused":        true,      // warns when you define and never use your variables (true | false | strict)
   "strict":        false,     // requires all functions to run in ECMAScript 5's strict mode (prohibits the global scoped strict mode)
   "trailing":      true,      // makes it an error to leave a trailing whitespace in your code
   "maxparams":     5,         // set the max number of formal parameters allowed per function
@@ -27,6 +27,7 @@
 
   // Suppress
   "laxcomma":      true,
+  "multistr":      true,
 
   // Environment
   "node":          true

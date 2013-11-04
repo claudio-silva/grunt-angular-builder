@@ -1,5 +1,5 @@
 
 
-angular.module ('App', ['Submodule1']);
+angular.module ('App', ['Submodule1', 'Library1']);
 
 

@@ -8,11 +8,9 @@
 
 var sandboxRun = require ('./sandboxRun')
   , sourceExtract = require ('./sourceExtract')
-  , types = require ('./types')
   , util = require ('./util');
 
-var sprintf = util.sprintf
-  , OperationResult = types.OperationResult;
+var sprintf = util.sprintf;
 
 //------------------------------------------------------------------------------
 // TYPES
@@ -26,7 +24,7 @@ var TRANS_STAT = {
   OK:                  0,
   NO_CLOSURE_FOUND:    -1,
   RENAME_REQUIRED:     -2,
-  INVALID_DECLARATION: -2
+  INVALID_DECLARATION: -3
 };
 
 //------------------------------------------------------------------------------
@@ -78,7 +76,7 @@ exports.optimize = function (source, moduleName, moduleVar)
 
     // Sanity check.
     if (modInfo.moduleName && modInfo.moduleName !== moduleName)
-      return {status: TRANS_STAT.INVALID_DECLARATION, data: modInfo.moduleName};
+      return /** @type {OperationResult} */ {status: TRANS_STAT.INVALID_DECLARATION, data: modInfo.moduleName};
 
     // Let's get that closure.
     source = sourceExtract.extractClosure (source, clean, modInfo.closureBody);
@@ -87,11 +85,14 @@ exports.optimize = function (source, moduleName, moduleVar)
     // name from the preset name for module references, rename that parameter to the predefined name.
     if (modInfo.moduleVar && modInfo.moduleDecl && modInfo.moduleVar !== moduleVar)
     // Let the caller decide what to do.
-      return {status: TRANS_STAT.RENAME_NOT_ALLOWED, data: modInfo.moduleVar};
-    return {status: TRANS_STAT.OK, data: source};
+      return /** @type {OperationResult} */ {
+        status: TRANS_STAT.RENAME_REQUIRED,
+        data: modInfo
+      };
+    return /** @type {OperationResult} */ {status: TRANS_STAT.OK, data: source};
   }
   // No closure was detected.
-  return {status: TRANS_STAT.NO_CLOSURE_FOUND};
+  return /** @type {OperationResult} */ {status: TRANS_STAT.NO_CLOSURE_FOUND};
 };
 
 
@@ -113,7 +114,8 @@ exports.validateUnwrappedCode = function (source)
 };
 
 /**
- * Replace angular module reference expressions (with syntax <code>angular.module(...)</code>) inside the closure by variable references.
+ * Replace angular module reference expressions (with syntax <code>angular.module(...)</code>) inside the closure by
+ * variable references.
  * If the module expression defines no services/whatever, remove-it, as it will be regenerated outside the closure.
  *
  * @param {ModuleDef} module

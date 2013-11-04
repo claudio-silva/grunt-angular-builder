@@ -9,6 +9,7 @@
 var util = require ('./util');
 
 var csprintf = util.csprintf
+  , icsprintf = util.icsprintf
   , indent = util.indent
   , NL = util.NL;
 
@@ -48,40 +49,43 @@ exports.reportErrorLocation = function (path)
 
 /**
  * Stops execution with an error message.
- * Arguments are the same as the ones on <code>sprintf</code>.
+ * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code> does.
+ * Default color is red.
  */
 exports.fatal = function ()
 {
-  grunt.fail.fatal (csprintf.apply (null, ['red'].concat ([].slice.call (arguments))));
+  grunt.fail.fatal (icsprintf('red',arguments));
 };
 
 /**
  * Displays an error message and, if --force is not enabled, stops execution.
- * Arguments are the same as the ones on <code>sprintf</code>.
+ * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code> does.
+ * Default color is yellow.
  */
 exports.warn = function ()
 {
-  grunt.fail.warn (csprintf.apply (null, ['yellow'].concat ([].slice.call (arguments))));
+  grunt.fail.warn (icsprintf('yellow',arguments));
 };
 
 /**
  * Displays a message.
- * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code>.
+ * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code> does.
+ * Default color is white.
  */
 exports.writeln = function ()
 {
-  grunt.log.writeln (csprintf.apply (null, ['white'].concat ([].slice.call (arguments))));
+  grunt.log.writeln (icsprintf('white',arguments));
 };
 
 /**
  * Displays the given message colored grey, but only if running in verbose mode.
- * @param {string} msg
- * @returns {string}
+ * Arguments are the same as the ones on <code>sprintf</code> but supports color tags like <code>csprintf</code> does.
+ * Default color is white.
  */
 exports.info = function ()
 {
   if (verbose)
-    grunt.log.writeln (csprintf2('white',arguments));
+    grunt.log.writeln (icsprintf('white',arguments));
 };
 
 /**
@@ -94,11 +98,3 @@ exports.getExplanation = function (msg)
 {
   return (verbose ? indent (csprintf ('grey', msg)) : '  Use -v for more info.'.grey) + NL;
 };
-
-//------------------------------------------------------------------------------
-// PRIVATE
-//------------------------------------------------------------------------------
-
-function csprintf2 (color, args) {
-  return csprintf.apply (null, [color].concat ([].slice.call (args)));
-}

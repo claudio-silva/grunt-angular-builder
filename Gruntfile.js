@@ -10,7 +10,7 @@
 
 module.exports = function (grunt)
 {
-  require('time-grunt')(grunt);
+  require ('time-grunt') (grunt);
 
   // Project configuration.
   grunt.initConfig ({
@@ -18,7 +18,7 @@ module.exports = function (grunt)
     jshint: {
       all:     [
         'Gruntfile.js',
-        'tasks/*.js'
+        'tasks/**/*.js'
       ],
       options: {
         jshintrc: '.jshintrc'
@@ -31,21 +31,33 @@ module.exports = function (grunt)
     },
 
     'angular-build-tool': {
-      options:            {
-        main: 'App'
-      },
-      'test-js-only': {
-        src:          'tests/js-only/**/*.js',
-        targetScript: 'dist/main.js'
-      },
-      'test-js-fail': {
+      'test-js-app':      {
         options:            {
-          main: 'App2'
+          main: 'App',
+          externalModules: 'Library1'
         },
         src:          'tests/js-only/**/*.js',
         targetScript: 'dist/main.js'
       },
+      'test-js-lib':      {
+        options:      {
+          main:             'Library1',
+          renameModuleRefs: true
+        },
+        src:          'tests/js-only/**/*.js',
+        targetScript: 'dist/library1.js'
+      },
+      'test-js-fail':     {
+        options:      {
+          main: 'Library2'
+        },
+        src:          'tests/js-only/**/*.js',
+        targetScript: 'dist/library2.js'
+      },
       'test-stylesheets': {
+        options:            {
+          main: 'App'
+        },
         src:          'tests/stylesheets/**/*.js',
         targetScript: 'dist/main.js',
         targetCSS:    'dist/main.css'
@@ -67,7 +79,8 @@ module.exports = function (grunt)
 
   // Test tasks below can also be executed with the command line option `--build debug` to generate debug builds.
 
-  grunt.registerTask ('test-js-only', ['clean', 'angular-build-tool:test-js-only']);
+  grunt.registerTask ('test-js-app', ['clean', 'angular-build-tool:test-js-app']);
+  grunt.registerTask ('test-js-lib', ['clean', 'angular-build-tool:test-js-lib']);
   grunt.registerTask ('test-js-fail', ['clean', 'angular-build-tool:test-js-fail']);
   grunt.registerTask ('test-stylesheets', ['clean', 'angular-build-tool:test-stylesheets']);
 

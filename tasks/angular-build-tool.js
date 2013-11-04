@@ -25,7 +25,7 @@ var getProperties = util.getProperties
   , indent = util.indent
   , sprintf = util.sprintf
   , csprintf = util.csprintf
-  //, debug = util.debug
+//, debug = util.debug
   , ModuleDef = types.ModuleDef
   , fatal = gruntUtil.fatal
   , warn = gruntUtil.warn
@@ -163,7 +163,8 @@ module.exports = function (grunt)
   {
     /** @type {Object.<string, ModuleDef>} */
     var modules = {};
-    (options.externalModules || []).forEach (function (moduleName)
+    ((typeof options.externalModules === 'string' ? [options.externalModules] : options.externalModules) || []).
+      forEach (function (moduleName)
     {
       /** @type {ModuleDef} */
       var module = modules[moduleName] = new ModuleDef ();
@@ -194,7 +195,7 @@ module.exports = function (grunt)
     // Ignore irrelevant files.
     if (!moduleHeader) {
       if (!forceInclude || !grunt.file.isMatch ({matchBase: true}, forceInclude, path)) {
-        info ('Ignored file:'.cyan, path);
+        info ('Ignored file: %', path.cyan);
         return;
       }
       standaloneScripts.push ({
@@ -202,35 +203,60 @@ module.exports = function (grunt)
         content: script
       });
     }
-    else {
-      // Get information about the specified module.
-      var module = modules[moduleHeader.name];
-      // If this is the first time a specific module is mentioned, create the respective information record.
-      if (!module)
-        module = modules[moduleHeader.name] = new ModuleDef ();
-      // Skip the file if it defines an external module.
-      else if (module.external)
-        return;
-      // Reject additional attempts to redeclare a module (only appending is allowed).
-      else if (!moduleHeader.append)
-        fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
-      // Fill out the module definition record.
-      module.name = moduleHeader.name;
-      // The file is appending definitions to a module declared elsewhere.
-      if (moduleHeader.append) {
-        module.bodies.push (script);
-        // Append the file path to the bottom of the paths list.
-        module.filePaths.push (path);
-      }
-      // Otherwise, the file contains a module declaration.
-      else {
-        if (module.head)
-          fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
-        module.head = script;
-        // Add the file path to the top of the paths list.
-        module.filePaths.unshift (path);
-        module.requires = moduleHeader.requires;
-      }
+    else setupModuleInfo (moduleHeader, script, path);
+  }
+
+  /**
+   * Store information about the specified module retrieved from the given source code on the specified file.
+   * @param {ModuleHeaderInfo} moduleHeader
+   * @param {string} fileContent
+   * @param {string} filePath
+   */
+  function setupModuleInfo (moduleHeader, fileContent, filePath)
+  {
+    var STAT = sourceExtract.EXTRACT_STAT;
+    switch (moduleHeader.status) {
+
+      case STAT.OK:
+
+        // Get information about the specified module.
+        var module = modules[moduleHeader.name];
+        // If this is the first time a specific module is mentioned, create the respective information record.
+        if (!module)
+          module = modules[moduleHeader.name] = new ModuleDef ();
+        // Skip the file if it defines an external module.
+        else if (module.external)
+          return;
+        // Reject additional attempts to redeclare a module (only appending is allowed).
+        else if (!moduleHeader.append)
+          fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
+        // Fill out the module definition record.
+        module.name = moduleHeader.name;
+        // The file is appending definitions to a module declared elsewhere.
+        if (moduleHeader.append) {
+          module.bodies.push (fileContent);
+          // Append the file path to the bottom of the paths list.
+          module.filePaths.push (filePath);
+        }
+        // Otherwise, the file contains a module declaration.
+        else {
+          if (module.head)
+            fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
+          module.head = fileContent;
+          // Add the file path to the top of the paths list.
+          module.filePaths.unshift (filePath);
+          module.requires = moduleHeader.requires;
+        }
+        break;
+
+      case STAT.MULTIPLE_MODULES:
+
+        fatal ('Definitions for multiple modules were found on the same file.' + NL + reportErrorLocation(filePath));
+        break;
+
+      case STAT.MULTIPLE_DECLS:
+
+        fatal ('More than one module declaration was found on the same file.' + NL + reportErrorLocation(filePath));
     }
   }
 
@@ -245,9 +271,8 @@ module.exports = function (grunt)
    * @param {Array.<string>} output
    * @param {function(ModuleDef, Array.<string>)} processHook
    */
-  function includeModule (moduleName, output, processHook)
+  function traceModule (moduleName, output, processHook)
   {
-    info ('Including module %.', moduleName);
     var module = modules[moduleName];
     if (!module)
       fatal ('Module <cyan>%</cyan> was not found.', moduleName);
@@ -258,10 +283,12 @@ module.exports = function (grunt)
     if (module.requires) {
       module.requires.forEach (function (modName)
       {
-        includeModule (modName, output, processHook);
+        traceModule (modName, output, processHook);
       });
     }
+    // Ignore references to already loaded modules.
     if (!loaded[module.name]) {
+      info ('Including module <cyan>%</cyan>.', moduleName);
       loaded[module.name] = true;
       processHook (module, output);
     }
@@ -305,6 +332,7 @@ module.exports = function (grunt)
   function buildDebugPackage (mainName, targetScript, targetStylesheet)
   {
     var output = ['document.write (\''];
+    targetStylesheet = targetStylesheet; // momentarily disable jsHint warning
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)
@@ -314,7 +342,7 @@ module.exports = function (grunt)
       }).join ('\\\n'));
 
     // Output the modules (if any).
-    includeModule (mainName, output, buildDebugScriptForModule);
+    traceModule (mainName, output, includeModuleInDebugBuild);
     output.push ('\');');
     writeFile (targetScript, output.join ('\\\n'));
   }
@@ -324,7 +352,7 @@ module.exports = function (grunt)
    * @param {ModuleDef} module
    * @param {Array.<string>} output
    */
-  function buildDebugScriptForModule (module, output)
+  function includeModuleInDebugBuild (module, output)
   {
     module.filePaths.forEach (function (path)
     {
@@ -346,13 +374,14 @@ module.exports = function (grunt)
   function buildReleasePackage (mainName, targetScript, targetStylesheet)
   {
     var output = [];
+    targetStylesheet = targetStylesheet; // momentarily disable jsHint warning
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)
       output.push (standaloneScripts.map (function (e) {return e.content;}).join ('\n'));
 
     // Output the modules (if any).
-    includeModule (mainName, output, buildReleaseScriptForModule);
+    traceModule (mainName, output, includeModuleInReleaseBuild);
     writeFile (targetScript, output.join ('\n'));
   }
 
@@ -361,7 +390,7 @@ module.exports = function (grunt)
    * @param {ModuleDef} module
    * @param {Array.<string>} output
    */
-  function buildReleaseScriptForModule (module, output)
+  function includeModuleInReleaseBuild (module, output)
   {
     // Fist process the head module declaration.
     var head = optimize (module.head, module.filePaths[0], module);
@@ -373,7 +402,9 @@ module.exports = function (grunt)
       if (head.data.trim ())
         output.push (head.data);
       // Output a module declaration with no definitions.
-      output.push (sprintf ('angular.module ('%', %);%', module.name, toList (module.requires), options.moduleFooter));
+      output.push (sprintf ('angular.module (\'%\', %);%', module.name,
+        toList (module.requires), options.moduleFooter)
+      );
     }
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
     else {
@@ -412,7 +443,10 @@ module.exports = function (grunt)
         //----------------------------------------------------------
         // Module already enclosed in a closure with no arguments.
         //----------------------------------------------------------
-        return {status: STAT.INDENTED, data: sourceTrans.renameModuleRefExps (module, result.data, options.moduleVar)};
+        return /** @type {OperationResult} */ {
+          status: STAT.INDENTED,
+          data:   sourceTrans.renameModuleRefExps (module, options.indent + result.data, options.moduleVar)
+        };
 
 
       case stat.NO_CLOSURE_FOUND:
@@ -432,7 +466,10 @@ module.exports = function (grunt)
           // If --force, continue.
         }
         // Either the code is valid or --force was used, so process it.
-        return {status: STAT.OK, data: sourceTrans.renameModuleRefExps (module, source, options.moduleVar)};
+        return /** @type {OperationResult} */ {
+          status: STAT.OK,
+          data:   sourceTrans.renameModuleRefExps (module, source, options.moduleVar)
+        };
 
 
       case stat.RENAME_REQUIRED:
@@ -441,15 +478,20 @@ module.exports = function (grunt)
         // Module already enclosed in a closure, with its reference
         // passed in as the function's argument.
         //----------------------------------------------------------
-        if (options.renameModuleRefs)
-          return {status: STAT.OK, data: sourceTrans.renameModuleVariableRefs (source, result.data, options.moduleVar)};
-        else
-          warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config. setting <cyan>moduleVar=\'%\'</cyan>.%%%',
-            result.data, options.moduleVar, NL, reportErrorLocation (path),
+        /** @type {ModuleClosureInfo} */
+        var modInfo = result.data;
+        if (!options.renameModuleRefs) {
+          warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config setting ' +
+            '<cyan>moduleVar=\'%\'</cyan>.%%%',
+            modInfo.moduleVar, options.moduleVar, NL, reportErrorLocation (path),
             getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
           );
-        // If --force, continue.
-        break;
+          // If --force, continue.
+        }
+        return /** @type {OperationResult} */ {
+          status: STAT.OK,
+          data:   sourceTrans.renameModuleVariableRefs (modInfo.closureBody, modInfo.moduleVar, options.moduleVar)
+        };
 
 
       case stat.INVALID_DECLARATION:
@@ -463,7 +505,7 @@ module.exports = function (grunt)
         throw new Error ('Optimize failed. It returned ' + JSON.stringify (result));
     }
     // Optimization failed. Return the unaltered source code.
-    return {status: STAT.OK, data: source};
+    return /** @type {OperationResult} */ {status: STAT.OK, data: source};
   }
 
   /**
@@ -473,7 +515,7 @@ module.exports = function (grunt)
    */
   function conditionalIndent (result)
   {
-    return result.status === STAT.INDENTED ? result.data : indent (result.data);
+    return result.status === STAT.INDENTED ? result.data : indent (result.data, 1, options.indent);
   }
 
   /**

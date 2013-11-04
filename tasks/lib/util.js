@@ -6,11 +6,11 @@
  */
 'use strict';
 
-/**
+/*
  * Get color and style in your node.js console.
  * Note: requiring this here modifies the String prototype!
  */
-var colors = require ('colors');
+require ('colors');
 
 //------------------------------------------------------------------------------
 // PUBLIC
@@ -49,14 +49,15 @@ exports.getProperties = function (obj)
  */
 exports.toList = function (array)
 {
-  return array.length ? "['" + array.join ("', '") + "']" : '[]';
+  return array.length ? "['" + array.join ("', '") + "']" : "[]";
 };
 
 /**
  * Indents each line in the given text.
  * @param {string} text The text to be indented.
  * @param {number} [level=1] Indentation depth level.
- * @param {string} [indentStr="&nbsp;&nbsp;"] A white space string that represents each indentation level (ex. spaces or tabs).
+ * @param {string} [indentStr="&nbsp;&nbsp;"] A white space string that represents each indentation level
+ * (ex. spaces or tabs).
  * @return {string}
  */
 exports.indent = function (text, level, indentStr)
@@ -89,12 +90,15 @@ exports.sprintf = function (str)
  * Placeholders are represented by the symbol %.
  * To colorize, use markup with the syntax: <code>&lt;color_name>text&lt;/color_name></code>
  * Warning: do not nest color tags!
- * @param {string} baseColor The base color for the string. Segments with other colors will resume the base color where they end.
+ * @param {string} baseColor The base color for the string. Segments with other colors will resume the base color where
+ * they end.
  * @param {string} str The string to be formatted.
+ * @param {...string|...number} args Values for each placeholder in <code>str</code>.
  * @returns {string}
  */
-exports.csprintf = function (baseColor, str)
+exports.csprintf = function (baseColor, str, args)
 {
+  /*jshint unused:false */
   str = exports.sprintf.apply (null, [].slice.call (arguments, 1));
   str = str.replace (/<(\w+)>([\s\S]*?)<\/\1>/g, function (m, m1, m2)
   {
@@ -108,6 +112,19 @@ exports.csprintf = function (baseColor, str)
     return s ? s[baseColor] : s;
   });
   return str[baseColor];
+};
+
+/**
+ * @private
+ * Similar to <code>csprintf</code> but supports an <code>args</code> argument that should receive a function's
+ * <code>arguments</code> array-like object.
+ *
+ * @param {string} baseColor Color name.
+ * @param {Object} args Should be a function's <code>arguments</code> array-like object.
+ * @returns {string}
+ */
+exports.icsprintf = function (baseColor, args) {
+  return exports.csprintf.apply (null, [baseColor].concat ([].slice.call (args)));
 };
 
 /**

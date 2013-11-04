@@ -8,7 +8,8 @@
 
 var util = require ('./util');
 
-var tokenize = util.tokenize;
+var tokenize = util.tokenize
+  , sprintf = util.sprintf;
 
 //------------------------------------------------------------------------------
 // TYPES
@@ -43,13 +44,17 @@ var tokenize = util.tokenize;
  * @name ModuleClosureInfo#moduleDeps
  * @type {string}
  * List of module dependencies.
-*/
+ */
 
 /**
  * @name ModuleHeaderInfo
  * Information parsed from a module reference with the syntax:
  * <code>angular.module('name',[])</code> or
  * <code>angular.module('name')</code>.
+ *//**
+ * @name ModuleHeaderInfo#status
+ * @type {EXTRACT_STAT}
+ * The result status.
  *//**
  * @name ModuleHeaderInfo#name
  * @type {string}
@@ -63,7 +68,17 @@ var tokenize = util.tokenize;
  * @type {boolean}
  * If <code>false</code> this module reference is declaring the module and its dependencies.
  * If <code>true</code> this module reference is appending definitions to a module declared elsewhere.
-*/
+ */
+
+/**
+ * Error codes returned by some functions of the sourceTrans module.
+ * @enum
+ */
+var EXTRACT_STAT = {
+  OK:               0,
+  MULTIPLE_MODULES: -1,
+  MULTIPLE_DECLS:   -2
+};
 
 //------------------------------------------------------------------------------
 // PRIVATE DATA
@@ -77,12 +92,6 @@ var tokenize = util.tokenize;
  */
 var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? `)';
 /**
- * Regular expression that matches an angular module declaration.
- * @see MODULE_DECL_EXP
- * @type {RegExp}
- */
-var MATCH_MODULE_DECL = new RegExp (tokenize (MODULE_DECL_EXP), 'i');
-/**
  * Regular expression string that matches javascript block/line comments.
  * @type {string}
  */
@@ -91,17 +100,17 @@ var MATCH_COMMENTS_EXP = '/`*[`s`S]*?`*/|//.*';
  * Matches source code consisting only of white space and javascript comments.
  * @type {RegExp}
  */
-var MATCH_NO_SCRIPT = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*$'));
+var MATCH_NO_SCRIPT = new RegExp (tokenize (sprintf ('^ ((%) )*$', MATCH_COMMENTS_EXP)));
 /**
  * Matches white space and javascript comments at the beginning of a file.
  * @type {RegExp}
  */
-var TRIM_COMMENTS_TOP = new RegExp (tokenize ('^ ((' + MATCH_COMMENTS_EXP + ') )*'));
+var TRIM_COMMENTS_TOP = new RegExp (tokenize (sprintf ('^ ((%) )*', MATCH_COMMENTS_EXP)));
 /**
  * Matches white space and javascript comments at the end of a file.
  * @type {RegExp}
  */
-var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (' ((' + MATCH_COMMENTS_EXP + ') )*$'));
+var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (sprintf (' ((%) )*$', MATCH_COMMENTS_EXP)));
 /**
  * Matches a self-invoking anonymous function that wraps all the remaining source code.
  * It assumes white space and comments have been already removed from both ends of the script.
@@ -117,11 +126,18 @@ var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (' ((' + MATCH_COMMENTS_EXP + ')
  * </code>
  * @type {RegExp}
  */
-var MATCH_MODULE_CLOSURE = new RegExp (tokenize ('^[`(!]function `( (.+?)? `) `{ ([`s`S]*?) `} `)? `( (' + MODULE_DECL_EXP + ')? `) ;?$'), 'i');
+var MATCH_MODULE_CLOSURE = new RegExp (tokenize (sprintf (
+  '^[`(!]function `( (.+?)? `) `{ ([`s`S]*?) `} `)? `( (%)? `) ;?$', MODULE_DECL_EXP)), 'i');
 
 //------------------------------------------------------------------------------
-// PUBLIC FUNCTIONS
+// PUBLIC
 //------------------------------------------------------------------------------
+
+/**
+ * Error codes returned by some functions of the sourceExtract module.
+ * @type {EXTRACT_STAT}
+ */
+exports.EXTRACT_STAT = EXTRACT_STAT;
 
 /**
  * Searches for an angular module declaration and, if found, extracts the module's name and dependencies from it.
@@ -135,13 +151,29 @@ var MATCH_MODULE_CLOSURE = new RegExp (tokenize ('^[`(!]function `( (.+?)? `) `{
  */
 exports.extractModuleHeader = function (source)
 {
-  var m = source.match (MATCH_MODULE_DECL);
+  var R = new RegExp (tokenize (MODULE_DECL_EXP), 'ig');
+  var all = [], m;
+  while ((m = R.exec (source)) !== null)
+    all.push (m);
   // Ignore the file if it has no angular module definition.
-  if (!m)
+  if (!all.length)
     return null;
+  var moduleName = all[0][1]
+    , headerIndex = false;
+  for (var i = 0, x = all.length; i < x; ++i) {
+    if (all[i][1] !== moduleName)
+      return {status: EXTRACT_STAT.MULTIPLE_MODULES};
+    if (all[i][2] !== undefined) {
+      if (headerIndex === false)
+        headerIndex = i;
+      else return {status: EXTRACT_STAT.MULTIPLE_DECLS};
+    }
+  }
+  m = all[headerIndex || 0];
   return /** @type {ModuleHeaderInfo} */ {
-    name:     m[1],
-    append:   !m[2],
+    status:   EXTRACT_STAT.OK,
+    name:     moduleName,
+    append:   headerIndex === false,
     requires: m[2] && JSON.parse (m[2].replace (/'/g, '"')) || []
   };
 };
@@ -168,7 +200,7 @@ exports.getModuleClosureInfo = function (source)
 {
   /** @type {Array.<string>} */
   var m;
-  if (m = source.match (MATCH_MODULE_CLOSURE)) {
+  if ((m = source.match (MATCH_MODULE_CLOSURE))) {
     // Extract the function's body and some additional information about the module and how it's being declared.
     return /** @type {ModuleClosureInfo} */{
       moduleVar:   m[1],
