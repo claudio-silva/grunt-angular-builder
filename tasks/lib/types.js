@@ -78,10 +78,21 @@ var TASK_OPTIONS = {
    *
    * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on
    * <code>config.moduleVar</code>,
-   * a warning will be issued and the task may stop.
+   * a warning will be issued and the task may stop, unless the `--force` option is specified.
    * @type {boolean}
    */
   renameModuleRefs: false,
+  /**
+   * When `false`, required assets are copied to the assets target folder.
+   *
+   * When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk
+   * space.
+   *
+   * If your operating system does not support symlinks, or if you want to archive or upload the build output, use
+   * `false`.
+   * @type {boolean}
+   */
+  symlinkAssets: false,
   /**
    * Code packaging method.
    *
@@ -110,10 +121,14 @@ var TASK_OPTIONS = {
   /**
    * Indentation white space for one level.
    * You may, for instance, configure it for tabs or additional spaces.
+   * @type {string}
    */
   indent: '  ',
   /**
    * This string will be appended to each module definition block.
+   * Use this to increase the readability of the generated script by visually separating each module from the previous
+   * one.
+   * @type {string}
    */
   moduleFooter: '\n\n\n'
 };

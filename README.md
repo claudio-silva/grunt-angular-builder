@@ -189,6 +189,12 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.1.2](https://github.com/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.2) / 2012-11-04  
+
+- Major internal refactoring.
+- Bug fixes.
+- More options.
+  
 [v0.1.1](https://github.com/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.1) / 2012-10-31  
 
 - Documentation updates.
