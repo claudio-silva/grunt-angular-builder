@@ -1,17 +1,15 @@
-## grunt-angular-build-tool
+## angular-builder
 
-> A build tool for AngularJS applications.
+> Assembles all files of an AngularJS project into an optimized, release-ready set.
 
 <br>
-AngularJS is an amazing framework and one of the best for developing highly sophisticated web applications.
+AngularJS is an amazing framework, but while it promotes modular development, it doesn't provide a solution for automatically finding all the required source files of your app and then loading them in the correct order. It lets that, humm... _"trivial"_ task up for you to solve!...
 
-The only problem is, while Angular promotes modular development, it doesn't provide a solution for finding all the required source files of your app and loading them in the correct order. It lets that, humm... _"trivial"_ task up for you to solve!...
-
-Furthermore, you'll have to mange your modules' stylesheet and asset dependencies manually.
+Furthermore, you'll have to manually manage your modules' stylesheet and asset dependencies, and also manually load additional non-angular scripts and stylesheets needed by your application.
 
 If you're already using Grunt, you may have come up with an _ad hoc_ solution to solve these problems (ex: by adapting your code so that it can be handled by an AMD or CommonJS loader), but wouldn't you rather have a specially engineered Grunt plugin handle all of that for you in a truly practical, automated, simple and easy way?
 
-That is precisely what the 'angular-build-tool' does.
+That is precisely what 'angular-builder' does.
 
 ### Features
 
@@ -57,7 +55,7 @@ More functionality will be available soon.
 
 # Documentation
 
-Extended documentation is available on the [Wiki](https://github.com/claudio-silva/grunt-angular-build-tool/wiki).
+Extended documentation is available on the [Wiki](https://github.com/claudio-silva/grunt-angular-builder/wiki).
 
 ## Getting Started
 
@@ -72,23 +70,23 @@ If you haven't used [Grunt](http://gruntjs.com) before, be sure to check out the
 Once you're familiar with that process, you may install this plugin with this command:
 
 ```shell
-npm install grunt-angular-build-tool --save-dev
+npm install grunt-angular-builder --save-dev
 ```
 
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-grunt.loadNpmTasks('grunt-angular-build-tool');
+grunt.loadNpmTasks('grunt-angular-builder');
 ```
 
-## The "angular-build-tool" task
+## The "angular-builder" task
 
 ### Overview
-In your project's Gruntfile, add a section named `angular-build-tool` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `angular-builder` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  'angular-build-tool': {
+  'angular-builder': {
     options: {
       // Task-specific options go here.
     },
@@ -99,7 +97,7 @@ grunt.initConfig({
 })
 ```
 
-The available options are explained in the [Configuring tasks](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuring-tasks) page.
+The available options are explained in the [Configuring tasks](https://github.com/claudio-silva/grunt-angular-builder/wiki/Configuring-tasks) page.
 
 ### Basic Use
 
@@ -110,7 +108,7 @@ module.exports = function (grunt)
 {
   grunt.initConfig ({
 
-    'angular-build-tool': {
+    'angular-builder': {
       options: {
         main: 'mainModuleName'
       },
@@ -122,10 +120,10 @@ module.exports = function (grunt)
 
   });
   
-  grunt.loadNpmTasks ('grunt-angular-build-tool');
+  grunt.loadNpmTasks ('grunt-angular-builder');
   
-  grunt.registerTask ('release', ['angular-build-tool']);
-  grunt.registerTask ('debug', ['angular-build-tool::debug']);
+  grunt.registerTask ('release', ['angular-builder']);
+  grunt.registerTask ('debug', ['angular-builder::debug']);
 
 };
 ```
@@ -134,14 +132,14 @@ module.exports = function (grunt)
 
 To run the above task:
 
-- For a releast build, type `grunt angular-build-tool` on the command line;
+- For a releast build, type `grunt angular-builder` on the command line;
 - For a debug build, type either:
-    - `grunt angular-build-tool::debug`, or
-    - `grunt angular-build-tool --build=debug`.
+    - `grunt angular-builder::debug`, or
+    - `grunt angular-builder --build=debug`.
 
 If you define your own alias tasks with more complex build steps, run `grunt your-task-name` instead.
 
-> Tip: you can use the `--build=debug` option to convert any task alias into a _debug_ build (assuming it includes an angular-build-tool subtask).
+> Tip: you can use the `--build=debug` option to convert any task alias into a _debug_ build (assuming it includes an angular-builder subtask).
 
 ### The recommended tasks alias
 
@@ -157,15 +155,15 @@ For a debug build, run the command:
 
 ### Integrating with other Grunt tasks
 
-If you wish to minify/optimize your build files, you can add the respective tasks to the `release` task list, __after__ the `angular-build-tool` task.
+If you wish to minify/optimize your build files, you can add the respective tasks to the `release` task list, __after__ the `angular-builder` task.
 
-If you wish to compile files from other languages to javascript (coffeescript, typescript, etc), they must be compiled prior to the build step, so you should add those tasks to the `release` task list __before__ the `angular-build-tool` task.
+If you wish to compile files from other languages to javascript (coffeescript, typescript, etc), they must be compiled prior to the build step, so you should add those tasks to the `release` task list __before__ the `angular-builder` task.
 
 If you use CSS preprocessors, you may have to add the respective tasks to both the `release` and the `debug` task lists.
 
 ### Advanced Use
 
-Read the [Configuration examples](https://github.com/claudio-silva/grunt-angular-build-tool/wiki/Configuration-examples) page for additional information and examples.
+Read the [Configuration examples](https://github.com/claudio-silva/grunt-angular-builder/wiki/Configuration-examples) page for additional information and examples.
 
 ### Debugging build failures
 
@@ -189,17 +187,17 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
-[v0.1.2](https://github.com/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.2) / 2012-11-04  
+[v0.1.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.2) / 2012-11-04  
 
 - Major internal refactoring.
 - Bug fixes.
 - More options.
   
-[v0.1.1](https://github.com/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.1) / 2012-10-31  
+[v0.1.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.1) / 2012-10-31  
 
 - Documentation updates.
   
-[v0.1.0](https://github.com/claudio-silva/grunt-angular-build-tool/releases/tag/v0.1.0) / 2012-10-29
+[v0.1.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.0) / 2012-10-29
 
 - Javascript build support.
 

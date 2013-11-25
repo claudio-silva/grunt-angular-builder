@@ -6,9 +6,9 @@
  */
 'use strict';
 
-var TASK_NAME = 'angular-build-tool';
+var TASK_NAME = 'angular-builder';
 
-var TASK_DESCRIPTION = 'Generates an optimized build of an AngularJS project.';
+var TASK_DESCRIPTION = 'Assembles all files of an AngularJS project into an optimized, release-ready set.';
 
 /**
  * Utility functions.
@@ -251,12 +251,12 @@ module.exports = function (grunt)
 
       case STAT.MULTIPLE_MODULES:
 
-        fatal ('Definitions for multiple modules were found on the same file.' + NL + reportErrorLocation(filePath));
+        fatal ('Definitions for multiple modules were found on the same file.' + NL + reportErrorLocation (filePath));
         break;
 
       case STAT.MULTIPLE_DECLS:
 
-        fatal ('More than one module declaration was found on the same file.' + NL + reportErrorLocation(filePath));
+        fatal ('More than one module declaration was found on the same file.' + NL + reportErrorLocation (filePath));
     }
   }
 

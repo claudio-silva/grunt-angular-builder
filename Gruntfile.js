@@ -1,6 +1,6 @@
 /*
- * grunt-angular-build-tool
- * https://github.com/claudio-silva/grunt-angular-build-tool
+ * grunt-angular-builder
+ * https://github.com/claudio-silva/grunt-angular-builder
  *
  * Copyright (c) 2013 Cláudio Silva
  * Licensed under the MIT license.
@@ -30,7 +30,7 @@ module.exports = function (grunt)
       tests: ['tmp', 'dist']
     },
 
-    'angular-build-tool': {
+    'angular-builder': {
       'test-js-app':      {
         options:            {
           main: 'App',
@@ -79,9 +79,9 @@ module.exports = function (grunt)
 
   // Test tasks below can also be executed with the command line option `--build debug` to generate debug builds.
 
-  grunt.registerTask ('test-js-app', ['clean', 'angular-build-tool:test-js-app']);
-  grunt.registerTask ('test-js-lib', ['clean', 'angular-build-tool:test-js-lib']);
-  grunt.registerTask ('test-js-fail', ['clean', 'angular-build-tool:test-js-fail']);
-  grunt.registerTask ('test-stylesheets', ['clean', 'angular-build-tool:test-stylesheets']);
+  grunt.registerTask ('test-js-app', ['clean', 'angular-builder:test-js-app']);
+  grunt.registerTask ('test-js-lib', ['clean', 'angular-builder:test-js-lib']);
+  grunt.registerTask ('test-js-fail', ['clean', 'angular-builder:test-js-fail']);
+  grunt.registerTask ('test-stylesheets', ['clean', 'angular-builder:test-stylesheets']);
 
 };
