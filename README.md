@@ -1,8 +1,17 @@
 ## angular-builder
+> A project builder for AngularJS applications.
 
-> Assembles all files of an AngularJS project into an optimized, release-ready set.
 
-<br>
+### What is a "project builder"?
+
+A builder is an automated tool that processes your project's source files to either generate a release build or a debug build.
+
+Release build | Debug build
+--------------|------------
+The project's source files are transformed and assembled into an optimized, release-ready, small set of files. | A loader is generated for automatically loading all the required source files in the correct order.
+
+### Why is there a need for a builder?
+
 AngularJS is an amazing framework, but while it promotes modular development, it doesn't provide a solution for automatically finding all the required source files of your app and then loading them in the correct order. It lets that, humm... _"trivial"_ task up for you to solve!...
 
 Furthermore, you'll have to manually manage your modules' stylesheet and asset dependencies, and also manually load additional non-angular scripts and stylesheets needed by your application.
@@ -43,15 +52,17 @@ This Grunt plugin:
 
 ### Roadmap
 
-1. ~~Javascript builder.~~ [done]
-2. Per directory build-config files support.
-3. CSS builder.
-4. Assets builder.
+**The project is under active development!**  
 
-**The project is under active development.**  
-More functionality will be available soon.
+~ | Status     | Feature
+--|------------|-------------------------
+1 | Done       | Javascript release and debug builder.
+2 | In progress| Angular-require (similar to AMD but with better integration with AngularJS).
+3 | To do      | Per directory build-config files support.
+4 | To do      | CSS builder.
+5 | To do      | Assets builder.
+6 | To do      | Optimized preprocessors integration for compile-to-js and compile-to-css languages.
 
----
 
 # Documentation
 

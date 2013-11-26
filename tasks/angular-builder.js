@@ -8,7 +8,7 @@
 
 var TASK_NAME = 'angular-builder';
 
-var TASK_DESCRIPTION = 'Assembles all files of an AngularJS project into an optimized, release-ready set.';
+var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.';
 
 /**
  * Utility functions.
