@@ -1,7 +1,7 @@
 ## angular-builder
 > A project builder for AngularJS applications.
 
-
+<br>
 ### What is a "project builder"?
 
 A builder is an automated tool that processes your project's source files to either generate a release build or a debug build.
@@ -48,20 +48,18 @@ This Grunt plugin:
 
 12. Integrates easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps.
 
----
-
 ### Roadmap
 
 **The project is under active development!**  
 
-~ | Status     | Feature
---|------------|-------------------------
-1 | Done       | Javascript release and debug builder.
-2 | In progress| Angular-require (similar to AMD but with better integration with AngularJS).
-3 | To do      | Per directory build-config files support.
-4 | To do      | CSS builder.
-5 | To do      | Assets builder.
-6 | To do      | Optimized preprocessors integration for compile-to-js and compile-to-css languages.
+   | Status     | Feature
+---|------------|------------
+ 1 | Done       | Javascript release and debug builder.
+ 2 | In progress| Angular-require (similar to AMD but with better integration with AngularJS).
+ 3 | To do      | Per directory build-config files support.
+ 4 | To do      | CSS builder.
+ 5 | To do      | Assets builder.
+ 6 | To do      | Optimized preprocessors integration for compile-to-js and compile-to-css languages.
 
 
 # Documentation
