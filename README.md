@@ -53,13 +53,13 @@ This Grunt plugin:
 **The project is under active development!**  
 
    | Status     | Feature
----|------------|------------
+---|:-----------|:-----------
  1 | Done       | Javascript release and debug builder.
- 2 | In progress| Angular-require (similar to AMD but with better integration with AngularJS).
+ 2 | In progress| Angular-require (similar to AMD but better integrated into AngularJS).
  3 | To do      | Per directory build-config files support.
  4 | To do      | CSS builder.
  5 | To do      | Assets builder.
- 6 | To do      | Optimized preprocessors integration for compile-to-js and compile-to-css languages.
+ 6 | To do      | Optimized preprocessors integration for compile-to-js/css languages.
 
 
 # Documentation
