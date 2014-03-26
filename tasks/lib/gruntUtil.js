@@ -118,12 +118,20 @@ exports.sortFiles = function (filePaths)
       folders[dir] = [];
     folders[dir].push (file);
   });
+  var prevFolder = false, fileStack = [];
   for (var folder in folders)
   {
+    if (prevFolder && folder.indexOf(prevFolder) < 0) {
+      while (fileStack.length)
+        out.push (fileStack.shift());
+    }
+    prevFolder = folder;
     folders[folder].forEach (function (file)
     {
-      out.push (folder + path.sep + file);
+      fileStack.push(folder + path.sep + file);
     });
   }
+  while (fileStack.length)
+    out.push (fileStack.shift());
   return out;
 };

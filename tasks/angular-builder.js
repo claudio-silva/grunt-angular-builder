@@ -142,7 +142,6 @@ module.exports = function (grunt)
 
         // Process the source files.
         var src = gruntUtil.sortFiles (fileGroup.src);
-        console.log(fileGroup.src, src);
         src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
         writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
@@ -230,7 +229,7 @@ module.exports = function (grunt)
         else if (module.external)
           return;
         // Reject additional attempts to redeclare a module (only appending is allowed).
-        else if (!moduleHeader.append)
+        else if (module.head && !moduleHeader.append)
           fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
         // Fill out the module definition record.
         module.name = moduleHeader.name;
