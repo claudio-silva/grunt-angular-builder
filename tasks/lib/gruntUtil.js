@@ -32,7 +32,8 @@ var verbose;
  * You MUST call this function before using any other function in this module.
  * @param gruntInstance
  */
-exports.init = function (gruntInstance) {
+exports.init = function (gruntInstance)
+{
   grunt = gruntInstance;
   verbose = grunt.option ('verbose');
 };
@@ -54,7 +55,7 @@ exports.reportErrorLocation = function (path)
  */
 exports.fatal = function ()
 {
-  grunt.fail.fatal (icsprintf('red',arguments));
+  grunt.fail.fatal (icsprintf ('red', arguments));
 };
 
 /**
@@ -64,7 +65,7 @@ exports.fatal = function ()
  */
 exports.warn = function ()
 {
-  grunt.fail.warn (icsprintf('yellow',arguments));
+  grunt.fail.warn (icsprintf ('yellow', arguments));
 };
 
 /**
@@ -74,7 +75,7 @@ exports.warn = function ()
  */
 exports.writeln = function ()
 {
-  grunt.log.writeln (icsprintf('white',arguments));
+  grunt.log.writeln (icsprintf ('white', arguments));
 };
 
 /**
@@ -85,7 +86,7 @@ exports.writeln = function ()
 exports.info = function ()
 {
   if (verbose)
-    grunt.log.writeln (icsprintf('white',arguments));
+    grunt.log.writeln (icsprintf ('white', arguments));
 };
 
 /**
@@ -97,4 +98,32 @@ exports.info = function ()
 exports.getExplanation = function (msg)
 {
   return (verbose ? indent (csprintf ('grey', msg)) : '  Use -v for more info.'.grey) + NL;
+};
+
+/**
+ * Sorts an aray of file paths so that, for each folder, files in subfolders come before all of that folder's own files.
+ * @param {string[]} filePaths
+ * @return {string[]}
+ */
+exports.sortFiles = function (filePaths)
+{
+  var path = require ('path')
+    , folders = {}
+    , out = [];
+  filePaths.forEach (function (filename)
+  {
+    var dir = path.dirname (filename)
+      , file = path.basename (filename);
+    if (!folders[dir])
+      folders[dir] = [];
+    folders[dir].push (file);
+  });
+  for (var folder in folders)
+  {
+    folders[folder].forEach (function (file)
+    {
+      out.push (folder + path.sep + file);
+    });
+  }
+  return out;
 };

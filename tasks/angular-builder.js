@@ -141,7 +141,9 @@ module.exports = function (grunt)
           fatal ('No target script is defined.');
 
         // Process the source files.
-        fileGroup.src.forEach (loadScript.bind (null, fileGroup.forceInclude));
+        var src = gruntUtil.sortFiles (fileGroup.src);
+        console.log(fileGroup.src, src);
+        src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
         writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
 
