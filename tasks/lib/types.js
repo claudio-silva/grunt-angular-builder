@@ -130,7 +130,12 @@ var TASK_OPTIONS = {
    * one.
    * @type {string}
    */
-  moduleFooter: '\n\n\n'
+  moduleFooter: '\n\n\n',
+  /**
+   * Transform the generated debug URLs for the source files. It's a regexp match and replace.
+   * @type {{match:RegExp|string|false,replaceWith:string}}
+   */
+  rebaseDebugUrls: { match: false, replaceWith: '' }
 };
 
 /**

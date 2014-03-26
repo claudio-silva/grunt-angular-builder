@@ -332,7 +332,7 @@ module.exports = function (grunt)
   function buildDebugPackage (mainName, targetScript, targetStylesheet)
   {
     var output = ['document.write (\''];
-    targetStylesheet = targetStylesheet; // momentarily disable jsHint warning
+    targetStylesheet = targetStylesheet; // disable jsHint warning while this feature is not yet developed.
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)
@@ -354,8 +354,12 @@ module.exports = function (grunt)
    */
   function includeModuleInDebugBuild (module, output)
   {
+
+    var match = options.rebaseDebugUrls.match
+      , replace = options.rebaseDebugUrls.replaceWith;
     module.filePaths.forEach (function (path)
     {
+      path = match ? path.replace(match, replace) : path;
       output.push (sprintf ('<script src=\"%\"></script>', path));
     });
   }
