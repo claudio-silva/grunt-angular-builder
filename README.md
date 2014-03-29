@@ -193,6 +193,10 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.3.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.3.0) / 2014-03-29
+
+- Added support for multiple patterns on rebaseDebugUrls. Breaks compatibility with previous version.
+  
 [v0.2.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.2.0) / 2014-03-29
 
 - Bug fixes. Configuration (breaking) changes. Updated documentation.
