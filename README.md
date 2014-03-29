@@ -49,16 +49,14 @@ This Grunt plugin:
 
 ### Roadmap
 
-**The project is under active development!**  
+**The project is usable as it is (it is being used in real projects right now) but it is still under active development.**
 
    | Status     | Feature
 ---|:-----------|:-----------
  1 | Done       | Javascript release and debug builder.
- 2 | To do      | Angular-require (similar to AMD but better integrated into AngularJS).
- 3 | To do      | Per directory build-config files support.
- 4 | To do      | Integration with CSS building tasks.
- 5 | To do      | Integration with HTML templates building tasks.
- 6 | To do      | Assets builder.
+ 2 | To do      | Integration with CSS building tasks.
+ 3 | To do      | Integration with HTML templates building tasks.
+ 4 | To do      | Assets builder.
 
 # Documentation
 
