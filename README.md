@@ -118,8 +118,8 @@ module.exports = function (grunt)
         main: 'mainModuleName'
       },
       app: {
-        src:          'src/**/*.js',
-        targetScript: 'build/project.js'
+        src:  'src/**/*.js',
+        dest: 'build/project.js'
       }
     }
 
