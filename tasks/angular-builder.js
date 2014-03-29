@@ -137,7 +137,7 @@ module.exports = function (grunt)
         modules = nodeUtil._extend ({}, externals);
 
 
-        if (!fileGroup.targetScript)
+        if (!fileGroup.dest)
           fatal ('No target script is defined.');
 
         // Process the source files.
@@ -148,10 +148,10 @@ module.exports = function (grunt)
 
         // On debug mode, output a script that dynamically loads all the required source files.
         if (debugBuild)
-          buildDebugPackage (options.main, fileGroup.targetScript, fileGroup.targetCSS);
+          buildDebugPackage (options.main, fileGroup.dest);
 
         // On release mode, output an optimized script.
-        else buildReleasePackage (options.main, fileGroup.targetScript, fileGroup.targetCSS);
+        else buildReleasePackage (options.main, fileGroup.dest);
 
       }.bind (this));
     });
@@ -328,12 +328,10 @@ module.exports = function (grunt)
    * source scripts in the correct order. This is used on debug builds.
    * @param {string} mainName Main module name.
    * @param {string} targetScript Path to the output script.
-   * @param {string} targetStylesheet Path to the output stylesheet.
    */
-  function buildDebugPackage (mainName, targetScript, targetStylesheet)
+  function buildDebugPackage (mainName, targetScript)
   {
     var output = ['document.write (\''];
-    targetStylesheet = targetStylesheet; // disable jsHint warning while this feature is not yet developed.
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)
@@ -374,12 +372,10 @@ module.exports = function (grunt)
    * loading order. This is used on release builds.
    * @param {string} mainName Main module name.
    * @param {string} targetScript Path to the output script.
-   * @param {string} targetStylesheet Path to the output stylesheet.
    */
-  function buildReleasePackage (mainName, targetScript, targetStylesheet)
+  function buildReleasePackage (mainName, targetScript)
   {
     var output = [];
-    targetStylesheet = targetStylesheet; // momentarily disable jsHint warning
 
     // Output the standalone scripts (if any).
     if (standaloneScripts.length)

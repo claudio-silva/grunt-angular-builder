@@ -126,6 +126,7 @@ exports.sortFiles = function (filePaths)
         out.push (fileStack.shift());
     }
     prevFolder = folder;
+    /*jshint -W083 */
     folders[folder].forEach (function (file)
     {
       fileStack.push(folder + path.sep + file);

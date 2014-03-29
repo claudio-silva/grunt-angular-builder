@@ -67,11 +67,10 @@ var TASK_OPTIONS = {
   /**
    * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
    * functions.
-   * The default value is a relatively uncommon name. You may select another if this one causes a conflict with existing
-   * code.
+   * You may select another identifier if the default one causes a conflict with existing code.
    * @type {string}
    */
-  moduleVar:        'declare',
+  moduleVar:        'module',
   /**
    * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be renamed to
    * <code>config.moduleVar</code>.
@@ -92,7 +91,7 @@ var TASK_OPTIONS = {
    * `false`.
    * @type {boolean}
    */
-  symlinkAssets: false,
+  symlinkAssets:    true,
   /**
    * Code packaging method.
    *
@@ -123,47 +122,36 @@ var TASK_OPTIONS = {
    * You may, for instance, configure it for tabs or additional spaces.
    * @type {string}
    */
-  indent: '  ',
+  indent:           '  ',
   /**
    * This string will be appended to each module definition block.
    * Use this to increase the readability of the generated script by visually separating each module from the previous
    * one.
    * @type {string}
    */
-  moduleFooter: '\n\n\n',
+  moduleFooter:     '\n\n\n',
   /**
-   * Transform the generated debug URLs for the source files. It's a regexp match and replace.
+   * Transform the generated debug URLs of the source files. It's a regexp match and replace.
    * @type {{match:RegExp|string|false,replaceWith:string}}
    */
-  rebaseDebugUrls: { match: false, replaceWith: '' }
+  rebaseDebugUrls:  { match: false, replaceWith: '' },
+  /**
+   * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
+   * These stylesheets are those required by javascript files included in the build via build-directives.
+   * @type {string}
+   */
+  stylesheetsConfigProperty: 'angularStylesheets',
+  /**
+   * The name of the Gruntfile config property to where the list of required template paths will be exported.
+   * These HTML templates are those required by javascript files included in the build via build-directives.
+   * @type {string}
+   */
+  templatesConfigProperty: 'angularTemplates'
 };
 
 /**
  * @name FILE_GROUP_OPTIONS
  * Extended options for Grunt file groups.
- *//**
- * @name FILE_GROUP_OPTIONS#targetScript
- * @type {string}
- * Target javascript file name.
- * The javascript build output will be saved to this path.
- *
- * <b>Note:</b> when multiple filegroups target the same file, only the first one will (re)create it, all others will
- * append to it.
- *//**
- * @name FILE_GROUP_OPTIONS#targetCSS
- * @type {string}
- * Target CSS file name.
- * The packaged stylesheets will be saved to this path.
- *
- * <b>Note:</b> when multiple filegroups target the same file, only the first one will (re)create it, all others will
- * append to it.
- *//**
- * @name FILE_GROUP_OPTIONS#assetsTargetFolder
- * @type {string}
- * Target folder path for publishing assets.
- * Relative paths for the source files as specified in stylesheet asset urls are preserved on the output, so the
- * required folder structure will be recreated on the output target.
- * Urls on the exported stylesheets will be rebased to this folder.
  *//**
  * @name FILE_GROUP_OPTIONS#forceInclude
  * @type {string|string[]|null}
@@ -194,7 +182,8 @@ var TASK_OPTIONS = {
  * Result status code. 0 = OK, other values depend on the context this is being used on.
  * @name OperationResult#status
  * @type {number}
- *//**
+ */
+/**
  * Optional output data from the function that returned this record.
  * @name OperationResult#data
  * @type {*}
@@ -205,6 +194,6 @@ var TASK_OPTIONS = {
 //------------------------------------------------------------------------------
 
 module.exports = {
-  ModuleDef:       ModuleDef,
-  TASK_OPTIONS:    TASK_OPTIONS
+  ModuleDef:    ModuleDef,
+  TASK_OPTIONS: TASK_OPTIONS
 };

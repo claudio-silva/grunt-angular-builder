@@ -32,35 +32,34 @@ module.exports = function (grunt)
 
     'angular-builder': {
       'test-js-app':      {
-        options:            {
-          main: 'App',
+        options: {
+          main:            'App',
           externalModules: 'Library1'
         },
-        src:          'tests/js-only/**/*.js',
-        targetScript: 'dist/main.js'
+        src:     'tests/js-only/**/*.js',
+        dest:    'dist/main.js'
       },
       'test-js-lib':      {
-        options:      {
+        options: {
           main:             'Library1',
           renameModuleRefs: true
         },
-        src:          'tests/js-only/**/*.js',
-        targetScript: 'dist/library1.js'
+        src:     'tests/js-only/**/*.js',
+        dest:    'dist/library1.js'
       },
       'test-js-fail':     {
-        options:      {
+        options: {
           main: 'Library2'
         },
-        src:          'tests/js-only/**/*.js',
-        targetScript: 'dist/library2.js'
+        src:     'tests/js-only/**/*.js',
+        dest:    'dist/library2.js'
       },
       'test-stylesheets': {
-        options:            {
+        options:   {
           main: 'App'
         },
-        src:          'tests/stylesheets/**/*.js',
-        targetScript: 'dist/main.js',
-        targetCSS:    'dist/main.css'
+        src:       'tests/stylesheets/**/*.js',
+        dest:      'dist/main.js'
       }
     }
 

@@ -9,7 +9,7 @@
 /**
  * Checks if a block of javascript code performs any operation other than defining a module.
  * In order to do that, it executes the code in an isolated sandbox.
- * If any function or variable is created on the global scope as a result from that execution, a waning is issued.
+ * If any function or variable is created on the global scope as a result from that execution, a warning is issued.
  * @param {string} source Javascript code to be analized.
  * @return {false|Object} Returns false if the code is valid, otherwise returns an object with detected global scope
  * properties as keys.

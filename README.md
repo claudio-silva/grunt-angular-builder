@@ -1,20 +1,21 @@
 ## angular-builder
 > A project builder for AngularJS applications.
 
-<br>
 ### What is a "project builder"?
 
-A builder is an automated tool that processes your project's source files to either generate a release build or a debug build.
+A builder is an automated tool that processes your project's source files to assemble your source code into one or more distribution files that can be efficiently and correctly loaded by a browser.
+
+It can generate two types of build:
 
 Release build | Debug build
 --------------|------------
-The project's source files are transformed and assembled into an optimized, release-ready, small set of files. | A loader is generated for automatically loading all the required source files in the correct order.
+The project's source files are transformed and assembled into a single optimized file. | A loader is generated for automatically loading all the required source files in the correct order.
 
 ### Why is there a need for a builder?
 
 AngularJS is an amazing framework, but while it promotes modular development, it doesn't provide a solution for automatically finding all the required source files of your app and then loading them in the correct order. It lets that, humm... _"trivial"_ task up for you to solve!...
 
-Furthermore, you'll have to manually manage your modules' stylesheet and asset dependencies, and also manually load additional non-angular scripts and stylesheets needed by your application.
+Furthermore, you'll have to manually manage your modules' stylesheet and asset dependencies, and also manually load additional non-angular scripts needed by your application.
 
 If you're already using Grunt, you may have come up with an _ad hoc_ solution to solve these problems (ex: by adapting your code so that it can be handled by an AMD or CommonJS loader), but wouldn't you rather have a specially engineered Grunt plugin handle all of that for you in a truly practical, automated, simple and easy way?
 
@@ -44,9 +45,7 @@ This Grunt plugin:
 
 10. Not only builds complete applications but also builds library projects, generating _readable_ redistributable source code files for them.
 
-11. Allows each module to have its own build configuration file. Just drag-and-drop a module to your project and it's ready to build!
-
-12. Integrates easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps.
+11. Integrates easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps.
 
 ### Roadmap
 
@@ -55,12 +54,11 @@ This Grunt plugin:
    | Status     | Feature
 ---|:-----------|:-----------
  1 | Done       | Javascript release and debug builder.
- 2 | In progress| Angular-require (similar to AMD but better integrated into AngularJS).
+ 2 | To do      | Angular-require (similar to AMD but better integrated into AngularJS).
  3 | To do      | Per directory build-config files support.
- 4 | To do      | CSS builder.
- 5 | To do      | Assets builder.
- 6 | To do      | Optimized preprocessors integration for compile-to-js/css languages.
-
+ 4 | To do      | Integration with CSS building tasks.
+ 5 | To do      | Integration with HTML templates building tasks.
+ 6 | To do      | Assets builder.
 
 # Documentation
 
@@ -168,7 +166,8 @@ If you wish to minify/optimize your build files, you can add the respective task
 
 If you wish to compile files from other languages to javascript (coffeescript, typescript, etc), they must be compiled prior to the build step, so you should add those tasks to the `release` task list __before__ the `angular-builder` task.
 
-If you use CSS preprocessors, you may have to add the respective tasks to both the `release` and the `debug` task lists.
+Build-directives embedded in your source javascript files can direct the Builder to generate lists of stylesheets and templates that are **actually** required by your modules, in the correct loading order. These file path arrays can then be used by other Grunt tasks to build the required files.  
+Read the Wiki for more information.
 
 ### Advanced Use
 
@@ -196,21 +195,25 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
-[v0.1.3](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.3) / 2012-11-25  
+[v0.2.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.2.0) / 2014-03-29
+
+- Bug fixes. Configuration (breaking) changes. Updated documentation.
+  
+[v0.1.3](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.3) / 2013-11-25  
 
 - The project was renamed.
   
-[v0.1.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.2) / 2012-11-04  
+[v0.1.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.2) / 2013-11-04  
 
 - Major internal refactoring.
 - Bug fixes.
 - More options.
   
-[v0.1.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.1) / 2012-10-31  
+[v0.1.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.1) / 2013-10-31  
 
 - Documentation updates.
   
-[v0.1.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.0) / 2012-10-29
+[v0.1.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.0) / 2013-10-29
 
 - Javascript build support.
 
