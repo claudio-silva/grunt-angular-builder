@@ -131,10 +131,10 @@ var TASK_OPTIONS = {
    */
   moduleFooter:     '\n\n\n',
   /**
-   * Transform the generated debug URLs of the source files. It's a regexp match and replace.
-   * @type {{match:RegExp|string|false,replaceWith:string}}
+   * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
+   * @type {{match:RegExp|string,replaceWith:string}[]|null}
    */
-  rebaseDebugUrls:  { match: false, replaceWith: '' },
+  rebaseDebugUrls:  null,
   /**
    * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
    * These stylesheets are those required by javascript files included in the build via build-directives.

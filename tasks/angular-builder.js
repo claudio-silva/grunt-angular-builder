@@ -354,11 +354,13 @@ module.exports = function (grunt)
   function includeModuleInDebugBuild (module, output)
   {
 
-    var match = options.rebaseDebugUrls.match
-      , replace = options.rebaseDebugUrls.replaceWith;
+    var rep = options.rebaseDebugUrls;
     module.filePaths.forEach (function (path)
     {
-      path = match ? path.replace(match, replace) : path;
+      if (rep)
+        for (var i = 0, m = rep.length; i < m; ++i)
+          path = path.replace(rep[i].match, rep[i].replaceWith);
+      console.log("PORRA",path);
       output.push (sprintf ('<script src=\"%\"></script>', path));
     });
   }
