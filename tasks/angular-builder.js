@@ -153,6 +153,8 @@ module.exports = function (grunt)
         // On release mode, output an optimized script.
         else buildReleasePackage (options.main, fileGroup.dest);
 
+        exportRequiredResources (options.main);
+
       }.bind (this));
     });
 
@@ -320,6 +322,31 @@ module.exports = function (grunt)
   }
 
   //------------------------------------------------------------------------------
+  // EXPORT REQUIRED RESOURCES
+  //------------------------------------------------------------------------------
+
+  function exportRequiredResources (mainName)
+  {
+    var scripts = []
+      , stylesheets = []
+      , templates = [];
+
+    // Export paths of application-required scripts.
+
+    if (standaloneScripts.length)
+      util.arrayAppend (scripts, standaloneScripts.map (function (e)
+      {
+        return e.path;
+      }));
+    loaded = []; // Reset tracer.
+    traceModule (mainName, null, function (module)
+    {
+      util.arrayAppend (scripts, module.filePaths);
+    });
+    grunt.config (options.scriptsConfigProperty, scripts);
+  }
+
+  //------------------------------------------------------------------------------
   // DEBUG BUILD
   //------------------------------------------------------------------------------
 
@@ -359,8 +386,8 @@ module.exports = function (grunt)
     {
       if (rep)
         for (var i = 0, m = rep.length; i < m; ++i)
-          path = path.replace(rep[i].match, rep[i].replaceWith);
-      console.log("PORRA",path);
+          path = path.replace (rep[i].match, rep[i].replaceWith);
+      console.log ("PORRA", path);
       output.push (sprintf ('<script src=\"%\"></script>', path));
     });
   }
@@ -406,7 +433,7 @@ module.exports = function (grunt)
         output.push (head.data);
       // Output a module declaration with no definitions.
       output.push (sprintf ('angular.module (\'%\', %);%', module.name,
-        toList (module.requires), options.moduleFooter)
+          toList (module.requires), options.moduleFooter)
       );
     }
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
@@ -485,7 +512,7 @@ module.exports = function (grunt)
         var modInfo = result.data;
         if (!options.renameModuleRefs) {
           warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config setting ' +
-            '<cyan>moduleVar=\'%\'</cyan>.%%%',
+              '<cyan>moduleVar=\'%\'</cyan>.%%%',
             modInfo.moduleVar, options.moduleVar, NL, reportErrorLocation (path),
             getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
           );
@@ -529,12 +556,12 @@ module.exports = function (grunt)
   function warnAboutGlobalCode (sandbox, path)
   {
     var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
-      reportErrorLocation (path) +
-      getExplanation (
-        'This kind of code will behave differently between release and debug builds.' + NL +
-          'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
-          'directly to the window object.'
-      )
+        reportErrorLocation (path) +
+        getExplanation (
+            'This kind of code will behave differently between release and debug builds.' + NL +
+            'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
+            'directly to the window object.'
+        )
     );
     if (verbose) {
       var found = false;

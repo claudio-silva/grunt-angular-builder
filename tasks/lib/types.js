@@ -140,13 +140,19 @@ var TASK_OPTIONS = {
    * These stylesheets are those required by javascript files included in the build via build-directives.
    * @type {string}
    */
-  stylesheetsConfigProperty: 'angularStylesheets',
+  stylesheetsConfigProperty: 'requiredStylesheets',
   /**
    * The name of the Gruntfile config property to where the list of required template paths will be exported.
    * These HTML templates are those required by javascript files included in the build via build-directives.
    * @type {string}
    */
-  templatesConfigProperty: 'angularTemplates'
+  templatesConfigProperty: 'requiredTemplates',
+  /**
+   * The name of the Gruntfile config property to where the list of required script paths will be exported.
+   * These scripts are all those that are actually required by your project, including forced includes.
+   * @type {string}
+   */
+  scriptsConfigProperty: 'requiredScripts'
 };
 
 /**

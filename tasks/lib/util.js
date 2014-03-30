@@ -153,6 +153,16 @@ String.prototype.repeat = function( num )
 };
 
 /**
+ * Appends the second array into the first one, in-place.
+ * @param {Array} target
+ * @param {Array} src
+ * @returns {Number}
+ */
+exports.arrayAppend = function (target, src) {
+  return Array.prototype.push.apply (target, src);
+};
+
+/**
  * OS dependent line terminator.
  * @type {string}
  */
