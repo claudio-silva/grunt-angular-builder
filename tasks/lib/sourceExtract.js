@@ -175,7 +175,7 @@ exports.extractModuleHeader = function (source)
     name:     moduleName,
     append:   headerIndex === false,
     requires: m[2] &&
-        JSON.parse (m[2].replace (/(?:\/\*(?:[\s\S]*?)\*\/)|(?:([\s;])+\/\/(?:.*)$)/gm, '').replace (/'/g, '"')) || []
+        JSON.parse (m[2].replace (/\/\*[\s\S]*\*\/|\/\/.*$/gm, '').replace (/'/g, '"')) || []
   };
 };
 
