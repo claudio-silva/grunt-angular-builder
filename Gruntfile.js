@@ -54,6 +54,13 @@ module.exports = function (grunt)
         src:     'tests/js-only/**/*.js',
         dest:    'dist/library2.js'
       },
+      'test-js-comments':     {
+        options: {
+          main: 'Library3'
+        },
+        src:     'tests/js-only/**/*.js',
+        dest:    'dist/library3.js'
+      },
       'test-stylesheets': {
         options:   {
           main: 'App'
@@ -81,6 +88,7 @@ module.exports = function (grunt)
   grunt.registerTask ('test-js-app', ['clean', 'angular-builder:test-js-app']);
   grunt.registerTask ('test-js-lib', ['clean', 'angular-builder:test-js-lib']);
   grunt.registerTask ('test-js-fail', ['clean', 'angular-builder:test-js-fail']);
+  grunt.registerTask ('test-js-comments', ['clean', 'angular-builder:test-js-comments']);
   grunt.registerTask ('test-stylesheets', ['clean', 'angular-builder:test-stylesheets']);
 
 };
