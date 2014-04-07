@@ -63,14 +63,14 @@ var TASK_OPTIONS = {
    * Main module name. Only this module and its dependencies will be exported.
    * @type {string}
    */
-  main:             '',
+  main:                      '',
   /**
    * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
    * functions.
    * You may select another identifier if the default one causes a conflict with existing code.
    * @type {string}
    */
-  moduleVar:        'module',
+  moduleVar:                 'module',
   /**
    * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be renamed to
    * <code>config.moduleVar</code>.
@@ -80,7 +80,7 @@ var TASK_OPTIONS = {
    * a warning will be issued and the task may stop, unless the `--force` option is specified.
    * @type {boolean}
    */
-  renameModuleRefs: false,
+  renameModuleRefs:          false,
   /**
    * When `false`, required assets are copied to the assets target folder.
    *
@@ -91,7 +91,7 @@ var TASK_OPTIONS = {
    * `false`.
    * @type {boolean}
    */
-  symlinkAssets:    true,
+  symlinkAssets:             true,
   /**
    * Code packaging method.
    *
@@ -105,7 +105,7 @@ var TASK_OPTIONS = {
    * Use the `debug` task argument instead.
    * @type {boolean}
    */
-  debug:            false,
+  debug:                     false,
   /**
    * A list of module names to ignore when building.
    * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that
@@ -116,25 +116,25 @@ var TASK_OPTIONS = {
    * name is not present on this list.
    * @type {string|string[]}
    */
-  externalModules:  null,
+  externalModules:           null,
   /**
    * Indentation white space for one level.
    * You may, for instance, configure it for tabs or additional spaces.
    * @type {string}
    */
-  indent:           '  ',
+  indent:                    '  ',
   /**
    * This string will be appended to each module definition block.
    * Use this to increase the readability of the generated script by visually separating each module from the previous
    * one.
    * @type {string}
    */
-  moduleFooter:     '\n\n\n',
+  moduleFooter:              '\n\n\n',
   /**
    * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
    * @type {{match:RegExp|string,replaceWith:string}[]|null}
    */
-  rebaseDebugUrls:  null,
+  rebaseDebugUrls:           null,
   /**
    * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
    * These stylesheets are those required by javascript files included in the build via build-directives.
@@ -146,13 +146,13 @@ var TASK_OPTIONS = {
    * These HTML templates are those required by javascript files included in the build via build-directives.
    * @type {string}
    */
-  templatesConfigProperty: 'requiredTemplates',
+  templatesConfigProperty:   'requiredTemplates',
   /**
    * The name of the Gruntfile config property to where the list of required script paths will be exported.
    * These scripts are all those that are actually required by your project, including forced includes.
    * @type {string}
    */
-  scriptsConfigProperty: 'requiredScripts'
+  scriptsConfigProperty:     'requiredScripts'
 };
 
 /**
@@ -195,11 +195,33 @@ var TASK_OPTIONS = {
  * @type {*}
  */
 
+/**
+ * API for an Angular Builder plugin.
+ * @interface
+ */
+function PluginInterface ()
+{}
+
+/**
+ * Scans a module for relevant information.
+ * Invoked once for each required module in the application.
+ * @param {ModuleDef} module
+ */
+PluginInterface.prototype.trace = function (module) {module = null;};
+/**
+ * Builds the compilation output.
+ * Invoked once for each required module in the application.
+ * @param {ModuleDef} module The module.
+ */
+PluginInterface.prototype.build = function (module) {module = null;};
+
+
 //------------------------------------------------------------------------------
 // EXPORT
 //------------------------------------------------------------------------------
 
 module.exports = {
-  ModuleDef:    ModuleDef,
-  TASK_OPTIONS: TASK_OPTIONS
+  ModuleDef:       ModuleDef,
+  PluginInterface: PluginInterface,
+  TASK_OPTIONS:    TASK_OPTIONS
 };

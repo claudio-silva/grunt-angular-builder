@@ -327,9 +327,7 @@ module.exports = function (grunt)
 
   function exportRequiredResources (mainName)
   {
-    var scripts = []
-      , stylesheets = []
-      , templates = [];
+    var scripts = [];
 
     // Export paths of application-required scripts.
 
