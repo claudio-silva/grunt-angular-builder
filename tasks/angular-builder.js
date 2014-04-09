@@ -141,7 +141,7 @@ module.exports = function (grunt)
           fatal ('No target script is defined.');
 
         // Process the source files.
-        var src = gruntUtil.sortFiles (fileGroup.src);
+        var src = gruntUtil.sortFilesBeforeSubfolders (fileGroup.src);
         src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
         writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
@@ -385,7 +385,6 @@ module.exports = function (grunt)
       if (rep)
         for (var i = 0, m = rep.length; i < m; ++i)
           path = path.replace (rep[i].match, rep[i].replaceWith);
-      console.log ("PORRA", path);
       output.push (sprintf ('<script src=\"%\"></script>', path));
     });
   }

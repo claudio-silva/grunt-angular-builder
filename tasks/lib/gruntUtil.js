@@ -101,38 +101,86 @@ exports.getExplanation = function (msg)
 };
 
 /**
- * Sorts an aray of file paths so that, for each folder, files in subfolders come before all of that folder's own files.
- * @param {string[]} filePaths
- * @return {string[]}
+ * Sorts an array of file paths so that, for each folder, files in subfolders come BEFORE all of the folder's own files.
+ * @param {string[]} filePaths sorted by Grunt's native algoritm,
+ * @return {string[]} re-sorted filePaths
  */
-exports.sortFiles = function (filePaths)
+exports.sortFilesAfterSubfolders = function (filePaths)
+{
+  var out = []
+    , tree = createFileTree (filePaths);
+
+  // Iterate folders.
+
+  (function iterate (folderNode)
+  {
+    for (var folder in folderNode.subfolders)
+      if (folderNode.subfolders.hasOwnProperty (folder))
+        iterate (folderNode.subfolders[folder]);
+
+    folderNode.files.forEach (function (file)
+    {
+      out.push (file);
+    });
+  }) (tree);
+
+  return out;
+
+};
+
+/**
+ * Sorts an array of file paths so that, for each folder, files in subfolders come AFTER all of the folder's own files.
+ * @param {string[]} filePaths sorted by Grunt's native algoritm,
+ * @return {string[]} re-sorted filePaths
+ */
+exports.sortFilesBeforeSubfolders = function (filePaths)
+{
+  var out = []
+    , tree = createFileTree (filePaths);
+
+  (function iterate (folderNode)
+  {
+    folderNode.files.forEach (function (file)
+    {
+      out.push (file);
+    });
+
+    for (var folder in folderNode.subfolders)
+      if (folderNode.subfolders.hasOwnProperty (folder))
+        iterate (folderNode.subfolders[folder]);
+  }) (tree);
+
+  return out;
+};
+
+/**
+ * Generates a tree of folder names and file names from a (possibliy) unsorted linear list of file paths.
+ * @param {string[]} filePaths
+ * @returns {{files: string[], subfolders: {}}}
+ */
+function createFileTree (filePaths)
 {
   var path = require ('path')
-    , folders = {}
-    , out = [];
+    , root = {
+      files:      [],
+      subfolders: {}
+    };
+
   filePaths.forEach (function (filename)
   {
     var dir = path.dirname (filename)
-      , file = path.basename (filename);
-    if (!folders[dir])
-      folders[dir] = [];
-    folders[dir].push (file);
+      , folderPtr = root;
+    if (dir)
+      dir.split (path.sep).forEach (function (segment)
+      {
+        if (!folderPtr.subfolders[segment])
+          folderPtr.subfolders[segment] = {
+            files:      [],
+            subfolders: {}
+          };
+        folderPtr = folderPtr.subfolders[segment];
+      });
+    folderPtr.files.push (filename);
   });
-  var prevFolder = false, fileStack = [];
-  for (var folder in folders)
-  {
-    if (prevFolder && folder.indexOf(prevFolder) < 0) {
-      while (fileStack.length)
-        out.push (fileStack.shift());
-    }
-    prevFolder = folder;
-    /*jshint -W083 */
-    folders[folder].forEach (function (file)
-    {
-      fileStack.push(folder + path.sep + file);
-    });
-  }
-  while (fileStack.length)
-    out.push (fileStack.shift());
-  return out;
-};
+  return root;
+}
