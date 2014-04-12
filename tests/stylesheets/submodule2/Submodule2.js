@@ -1,3 +1,7 @@
+//# stylesheet ("styles.css")
+
+//#stylesheet ( 'styles2.css' )
+
 (function () {
 
   var myPrivateVar = 1;

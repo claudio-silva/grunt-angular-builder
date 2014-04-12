@@ -6,6 +6,10 @@
  */
 'use strict';
 
+/* jshint unused: vars */
+
+var NL = require ('./util').NL;
+
 /**
  * A module definition record.
  * Contains all javascript defining the module, read from one or more source files.
@@ -129,7 +133,7 @@ var TASK_OPTIONS = {
    * one.
    * @type {string}
    */
-  moduleFooter:              '\n\n\n',
+  moduleFooter:              NL + NL + NL,
   /**
    * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
    * @type {{match:RegExp|string,replaceWith:string}[]|null}
@@ -152,7 +156,30 @@ var TASK_OPTIONS = {
    * These scripts are all those that are actually required by your project, including forced includes.
    * @type {string}
    */
-  scriptsConfigProperty:     'requiredScripts'
+  scriptsConfigProperty:     'requiredScripts',
+
+  /**
+   * Defines the list of add-ons bundled with angular-builder.
+   * This is a list of add-on module names to be loaded.
+   * This is reserved for internal use, but could be overridden if you wish to completely replace the
+   * built-in behavior.
+   * @type {string[]}
+   * @const
+   */
+  bundledAddOns: [
+    './add-ons/exportPaths', // Always run this one first.
+    './add-ons/debugBuild',
+    './add-ons/releaseBuild',
+    './add-ons/stylesheets',
+    './add-ons/templates',
+    './add-ons/assets'
+  ],
+  /**
+   * A list of external add-on module names to be loaded.
+   * Use this to load 3rd party add-ons.
+   * @type {string[]|null}
+   */
+  addOns:        null
 };
 
 /**
@@ -179,6 +206,12 @@ var TASK_OPTIONS = {
  * step.
  * If you specify a target or file group exclusively for standalone script files and append the result to other built
  * files, you will have more control on the order of the assembled files.
+ *//**
+ * @name FILE_GROUP_OPTIONS#src
+ * @type {string[]|null}
+ *//**
+ * @name FILE_GROUP_OPTIONS#dest
+ * @type {string|null}
  */
 
 /**
@@ -197,31 +230,42 @@ var TASK_OPTIONS = {
 
 /**
  * API for an Angular Builder plugin.
+ * Note: implementing classes must have a compatible constructor.
  * @interface
+ * @param grunt The Grunt API.
+ * @param {TASK_OPTIONS} options Task configuration options.
+ * @param {boolean} debugBuild Debug mode flag.
  */
-function PluginInterface ()
+function AddOnInterface (grunt, options, debugBuild)
 {}
 
-/**
- * Scans a module for relevant information.
- * Invoked once for each required module in the application.
- * @param {ModuleDef} module
- */
-PluginInterface.prototype.trace = function (module) {module = null;};
-/**
- * Builds the compilation output.
- * Invoked once for each required module in the application.
- * @param {ModuleDef} module The module.
- */
-PluginInterface.prototype.build = function (module) {module = null;};
-
+AddOnInterface.prototype = {
+  /**
+   * Scans a module for relevant information.
+   * Invoked once for each required module in the application, in the order defined by
+   * the dependency graph.
+   * @param {ModuleDef} module Gives you access to the module's metadata and its source code.
+   */
+  trace: function (module) {},
+  /**
+   * Builds the compilation output.
+   * Invoked once.
+   * @param {string} targetScript Path to the output script.
+   * @param {string[]} tracedPaths Paths of all the required files (excluding standalone scripts),
+   * in the correct loading order.
+   * @param {Array.<{path: string, content: string}>} standaloneScripts
+   * A list of scripts that have no module definitions but that are forced to still being included in the build.
+   * Each item contains the filename and the file content.
+   */
+  build: function (targetScript, tracedPaths, standaloneScripts) {}
+};
 
 //------------------------------------------------------------------------------
 // EXPORT
 //------------------------------------------------------------------------------
 
 module.exports = {
-  ModuleDef:       ModuleDef,
-  PluginInterface: PluginInterface,
-  TASK_OPTIONS:    TASK_OPTIONS
+  ModuleDef:      ModuleDef,
+  AddOnInterface: AddOnInterface,
+  TASK_OPTIONS:   TASK_OPTIONS
 };

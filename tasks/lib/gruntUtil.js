@@ -184,3 +184,28 @@ function createFileTree (filePaths)
   });
   return root;
 }
+
+/**
+ * Writes or appends content to a file.
+ * When appending it adds a newline between the concatenated content.
+ * @param {string} path
+ * @param {string} content
+ * @param {boolean?} overwrite=false Overwrite an existing file contents instead of appending to them.
+ */
+exports.writeFile = function (path, content, overwrite)
+{
+  if (grunt.file.exists (path)) {
+    if (overwrite) {
+      // Re-create file.
+      grunt.file.delete (path);
+      grunt.file.write (path, content);
+    }
+    else {
+      // Append to existing file.
+      var data = grunt.file.read (path);
+      grunt.file.write (path, data + NL + content);
+    }
+  }
+  // Create file.
+  else grunt.file.write (path, content);
+};

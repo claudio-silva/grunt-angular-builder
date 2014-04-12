@@ -1,5 +1,0 @@
-{
-  "Submodule2" : {
-    "include": ["styles.css"]
-  }
-}

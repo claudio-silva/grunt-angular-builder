@@ -85,6 +85,14 @@ module.exports = function (grunt)
 
   // Test tasks below can also be executed with the command line option `--build debug` to generate debug builds.
 
+  grunt.registerTask ('test', ['clean',
+    'angular-builder:test-js-app',
+    'angular-builder:test-js-lib',
+    //'angular-builder:test-js-fail',
+    'angular-builder:test-js-comments',
+    'angular-builder:test-stylesheets'
+  ]);
+
   grunt.registerTask ('test-js-app', ['clean', 'angular-builder:test-js-app']);
   grunt.registerTask ('test-js-lib', ['clean', 'angular-builder:test-js-lib']);
   grunt.registerTask ('test-js-fail', ['clean', 'angular-builder:test-js-fail']);

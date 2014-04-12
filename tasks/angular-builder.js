@@ -16,41 +16,17 @@ var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.
 var util = require ('./lib/util')
   , nodeUtil = require ('util')
   , types = require ('./lib/types')
-  , sourceTrans = require ('./lib/sourceTrans')
   , sourceExtract = require ('./lib/sourceExtract')
   , gruntUtil = require ('./lib/gruntUtil');
 
-var getProperties = util.getProperties
-  , toList = util.toList
-  , indent = util.indent
-  , sprintf = util.sprintf
-  , csprintf = util.csprintf
-//, debug = util.debug
-  , ModuleDef = types.ModuleDef
+var ModuleDef = types.ModuleDef
   , fatal = gruntUtil.fatal
   , warn = gruntUtil.warn
   , info = gruntUtil.info
-  , getExplanation = gruntUtil.getExplanation
   , reportErrorLocation = gruntUtil.reportErrorLocation
   , writeln = gruntUtil.writeln
+  , arrayAppend = util.arrayAppend
   , NL = util.NL;
-
-//------------------------------------------------------------------------------
-// TYPES
-//------------------------------------------------------------------------------
-
-/**
- * Error codes returned by some functions in this module.
- * @enum
- */
-var STAT = {
-  OK:       0,
-  INDENTED: 1
-};
-
-//------------------------------------------------------------------------------
-// TASK
-//------------------------------------------------------------------------------
 
 /**
  * Exports a function that will be called by Grunt to register tasks for this plugin.
@@ -94,69 +70,123 @@ module.exports = function (grunt)
    */
   var verbose;
   /**
-   * Grunt's verbose output API.
-   * @type {Object}
+   * @type {Class[]}
    */
-  var verboseOut = grunt.log.verbose;
+  var addOnsClasses = [];
 
   gruntUtil.init (grunt);
 
-  grunt.registerMultiTask (TASK_NAME, TASK_DESCRIPTION,
-    function ()
+//------------------------------------------------------------------------------
+// GRUNT TASK
+//------------------------------------------------------------------------------
+
+  grunt.registerMultiTask (TASK_NAME, TASK_DESCRIPTION, function ()
+  {
+    //------------------
+    // SETUP
+    //------------------
+
+    // Merge task-specific and/or target-specific options with these defaults.
+    options = this.options (types.TASK_OPTIONS);
+
+    if (!options.main)
+      fatal ('No main module is defined.');
+
+    if (!this.files.length)
+      fatal ('No source files were defined.');
+
+    verbose = grunt.option ('verbose');
+    created = {};
+
+    var externals = setupExternalModules ();
+    /**
+     * Is this a debug build?
+     * Note: the debug build mode can be set via three different settings.
+     * @type {boolean}
+     */
+    var debugBuild = grunt.option ('build') === 'debug' ||
+      (this.flags.debug === undefined ? options.debug : this.flags.debug);
+
+    // Load add-ons.
+
+    options.bundledAddOns.forEach (function (name)
     {
-      // Merge task-specific and/or target-specific options with these defaults.
-      options = this.options (types.TASK_OPTIONS);
-
-      if (!options.main)
-        fatal ('No main module is defined.');
-
-      if (!this.files.length)
-        fatal ('No source files were defined.');
-
-      verbose = grunt.option ('verbose');
-      created = {};
-
-      var externals = setupExternalModules ();
-      /**
-       * Is this a debug build?
-       * Note: the debug build mode can be set via three different settings.
-       * @type {boolean}
-       */
-      var debugBuild = grunt.option ('build') === 'debug' ||
-        (this.flags.debug === undefined ? options.debug : this.flags.debug);
-
-      // Iterate over all specified file groups and collect all scripts.
-
-      this.files.forEach (function (/** FILE_GROUP_OPTIONS */ fileGroup)
-      {
-        // Reset source code analysis information for each file group, i.e. each group is an independent build.
-
-        loaded = {};
-        standaloneScripts = [];
-        // Clone the external modules and use it as a starting point.
-        modules = nodeUtil._extend ({}, externals);
-
-
-        if (!fileGroup.dest)
-          fatal ('No target script is defined.');
-
-        // Process the source files.
-        var src = gruntUtil.sortFilesBeforeSubfolders (fileGroup.src);
-        src.forEach (loadScript.bind (null, fileGroup.forceInclude));
-
-        writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
-
-        // On debug mode, output a script that dynamically loads all the required source files.
-        if (debugBuild)
-          buildDebugPackage (options.main, fileGroup.dest);
-
-        // On release mode, output an optimized script.
-        else buildReleasePackage (options.main, fileGroup.dest);
-
-        exportRequiredResources (options.main);
-
-      }.bind (this));
+      addOnsClasses.push (require (name));
     });
+
+    if (options.addOns)
+      options.addOns.forEach (function (name)
+      {
+        addOnsClasses.push (require (name));
+      });
+
+    //-------------------------
+    // Process each file group
+    //-------------------------
+
+    this.files.forEach (function (/** FILE_GROUP_OPTIONS */ fileGroup)
+    {
+      // Reset source code analysis information for each file group, i.e. each group is an independent build.
+
+      //------------------
+      // LOAD SOURCE CODE
+      //------------------
+
+      loaded = {}; // Reset tracer.
+      standaloneScripts = []; // Reset scripts.
+      // Clone the external modules and use it as a starting point.
+      modules = nodeUtil._extend ({}, externals);
+
+      if (!fileGroup.dest)
+        fatal ('No target script is defined.');
+
+      // Process the source files.
+      var src = gruntUtil.sortFilesBeforeSubfolders (fileGroup.src);
+      src.forEach (loadScript.bind (null, fileGroup.forceInclude));
+
+      //------------------
+      // LOAD ADD-ONS
+      //------------------
+
+      /**
+       * The list of loaded add-ons.
+       * @type {AddOnInterface[]}
+       */
+      var addOns = [];
+
+      addOnsClasses.forEach (function (AddOnClass)
+      {
+        //noinspection JSValidateTypes
+        addOns.push (new AddOnClass (grunt, options, debugBuild));
+      });
+
+      //------------------
+      // BUILD
+      //------------------
+
+      writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
+
+      /** @type {string[]} */
+      var tracedPaths = [];
+
+      // Trace the dependency graph and invoke each add-on.
+
+      traceModule (options.main, function (/*ModuleDef*/module)
+      {
+        arrayAppend (tracedPaths, module.filePaths);
+        addOns.forEach (function (/*AddOnInterface*/ addOn)
+        {
+          addOn.trace (module);
+        });
+      });
+
+      addOns.forEach (function (/*AddOnInterface*/ addOn)
+      {
+        addOn.build (fileGroup.dest, tracedPaths, standaloneScripts);
+      });
+
+    }.bind (this));
+  });
 
   /**
    * Registers the configured external modules so that they can be ignored during the build output generation.
@@ -271,10 +301,9 @@ module.exports = function (grunt)
    * Traces a dependency graph for the specified module and calls the given callback
    * to process each required module in the correct loading order.
    * @param {string} moduleName
-   * @param {Array.<string>} output
-   * @param {function(ModuleDef, Array.<string>)} processHook
+   * @param {function(ModuleDef)} processHook
    */
-  function traceModule (moduleName, output, processHook)
+  function traceModule (moduleName, processHook)
   {
     var module = modules[moduleName];
     if (!module)
@@ -286,292 +315,15 @@ module.exports = function (grunt)
     if (module.requires) {
       module.requires.forEach (function (modName)
       {
-        traceModule (modName, output, processHook);
+        traceModule (modName, processHook);
       });
     }
     // Ignore references to already loaded modules.
     if (!loaded[module.name]) {
       info ('Including module <cyan>%</cyan>.', moduleName);
       loaded[module.name] = true;
-      processHook (module, output);
+      processHook (module);
     }
-  }
-
-  /**
-   * Writes or appends content to a file.
-   * @param {string} path
-   * @param {string} content
-   */
-  function writeFile (path, content)
-  {
-    if (grunt.file.exists (path)) {
-      if (created [path]) {
-        // Append to existing file.
-        var data = grunt.file.read (path);
-        grunt.file.write (path, data + '\n' + content);
-      }
-      else {
-        // Re-create file.
-        grunt.file.delete (path);
-        grunt.file.write (path, content);
-      }
-    }
-    // Create file.
-    else grunt.file.write (path, content);
-    created [path] = true;
-  }
-
-  //------------------------------------------------------------------------------
-  // EXPORT REQUIRED RESOURCES
-  //------------------------------------------------------------------------------
-
-  function exportRequiredResources (mainName)
-  {
-    var scripts = [];
-
-    // Export paths of application-required scripts.
-
-    if (standaloneScripts.length)
-      util.arrayAppend (scripts, standaloneScripts.map (function (e)
-      {
-        return e.path;
-      }));
-    loaded = []; // Reset tracer.
-    traceModule (mainName, null, function (module)
-    {
-      util.arrayAppend (scripts, module.filePaths);
-    });
-    grunt.config (options.scriptsConfigProperty, scripts);
-  }
-
-  //------------------------------------------------------------------------------
-  // DEBUG BUILD
-  //------------------------------------------------------------------------------
-
-  /**
-   * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
-   * source scripts in the correct order. This is used on debug builds.
-   * @param {string} mainName Main module name.
-   * @param {string} targetScript Path to the output script.
-   */
-  function buildDebugPackage (mainName, targetScript)
-  {
-    var output = ['document.write (\''];
-
-    // Output the standalone scripts (if any).
-    if (standaloneScripts.length)
-      output.push (standaloneScripts.map (function (e)
-      {
-        return sprintf ('<script src=\"%\"></script>', e.path);
-      }).join ('\\\n'));
-
-    // Output the modules (if any).
-    traceModule (mainName, output, includeModuleInDebugBuild);
-    output.push ('\');');
-    writeFile (targetScript, output.join ('\\\n'));
-  }
-
-  /**
-   * Outputs code for the specified module on a debug build.
-   * @param {ModuleDef} module
-   * @param {Array.<string>} output
-   */
-  function includeModuleInDebugBuild (module, output)
-  {
-
-    var rep = options.rebaseDebugUrls;
-    module.filePaths.forEach (function (path)
-    {
-      if (rep)
-        for (var i = 0, m = rep.length; i < m; ++i)
-          path = path.replace (rep[i].match, rep[i].replaceWith);
-      output.push (sprintf ('<script src=\"%\"></script>', path));
-    });
-  }
-
-  //------------------------------------------------------------------------------
-  // RELEASE BUILD
-  //------------------------------------------------------------------------------
-
-  /**
-   * Saves all script files required by the specified module into a single output file, in the correct
-   * loading order. This is used on release builds.
-   * @param {string} mainName Main module name.
-   * @param {string} targetScript Path to the output script.
-   */
-  function buildReleasePackage (mainName, targetScript)
-  {
-    var output = [];
-
-    // Output the standalone scripts (if any).
-    if (standaloneScripts.length)
-      output.push (standaloneScripts.map (function (e) {return e.content;}).join ('\n'));
-
-    // Output the modules (if any).
-    traceModule (mainName, output, includeModuleInReleaseBuild);
-    writeFile (targetScript, output.join ('\n'));
-  }
-
-  /**
-   * Outputs the specified module on a release build.
-   * @param {ModuleDef} module
-   * @param {Array.<string>} output
-   */
-  function includeModuleInReleaseBuild (module, output)
-  {
-    // Fist process the head module declaration.
-    var head = optimize (module.head, module.filePaths[0], module);
-
-    // Prevent the creation of an empty (or comments-only) self-invoking function.
-    // In that case, the head content will be output without a wrapping closure.
-    if (!module.bodies.length && sourceExtract.matchWhiteSpaceOrComments (head.data)) {
-      // Output the comments (if any).
-      if (head.data.trim ())
-        output.push (head.data);
-      // Output a module declaration with no definitions.
-      output.push (sprintf ('angular.module (\'%\', %);%', module.name,
-          toList (module.requires), options.moduleFooter)
-      );
-    }
-    // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
-    else {
-      // Begin closure.
-      output.push ('(function (' + options.moduleVar + ') {\n');
-      // Insert module declaration.
-      output.push (conditionalIndent (head));
-      // Insert additional module definitions.
-      for (var i = 0, m = module.bodies.length; i < m; ++i) {
-        var body = optimize (module.bodies[i], module.filePaths[i + 1], module);
-        output.push (conditionalIndent (body));
-      }
-      // End closure.
-      output.push (sprintf ('\n}) (angular.module (\'%\', %));%', module.name,
-        toList (module.requires), options.moduleFooter));
-    }
-  }
-
-  /**
-   * Calls sourceTrans.optimize() and handles the result.
-   *
-   * @param {string} source
-   * @param {string} path For error messages.
-   * @param {ModuleDef} module
-   * @returns {OperationResult} The transformed source code.
-   * @throws Error Sanity check.
-   */
-  function optimize (source, path, module)
-  {
-    var result = sourceTrans.optimize (source, module.name, options.moduleVar);
-    var stat = sourceTrans.TRANS_STAT;
-    switch (result.status) {
-
-      case stat.OK:
-
-        //----------------------------------------------------------
-        // Module already enclosed in a closure with no arguments.
-        //----------------------------------------------------------
-        return /** @type {OperationResult} */ {
-          status: STAT.INDENTED,
-          data:   sourceTrans.renameModuleRefExps (module, options.indent + result.data, options.moduleVar)
-        };
-
-
-      case stat.NO_CLOSURE_FOUND:
-
-        //----------------------------------------------------------
-        // Unwrapped source code.
-        // It must be validated to make sure it's safe.
-        //----------------------------------------------------------
-        verboseOut.write ('Validating ' + path.cyan + '...');
-        var valid = sourceTrans.validateUnwrappedCode (source);
-        if (valid)
-        // The code passed validation.
-          verboseOut.ok ();
-        else {
-          verboseOut.writeln ('FAILED'.yellow);
-          warnAboutGlobalCode (valid, path);
-          // If --force, continue.
-        }
-        // Either the code is valid or --force was used, so process it.
-        return /** @type {OperationResult} */ {
-          status: STAT.OK,
-          data:   sourceTrans.renameModuleRefExps (module, source, options.moduleVar)
-        };
-
-
-      case stat.RENAME_REQUIRED:
-
-        //----------------------------------------------------------
-        // Module already enclosed in a closure, with its reference
-        // passed in as the function's argument.
-        //----------------------------------------------------------
-        /** @type {ModuleClosureInfo} */
-        var modInfo = result.data;
-        if (!options.renameModuleRefs) {
-          warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config setting ' +
-              '<cyan>moduleVar=\'%\'</cyan>.%%%',
-            modInfo.moduleVar, options.moduleVar, NL, reportErrorLocation (path),
-            getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
-          );
-          // If --force, continue.
-        }
-        return /** @type {OperationResult} */ {
-          status: STAT.OK,
-          data:   sourceTrans.renameModuleVariableRefs (modInfo.closureBody, modInfo.moduleVar, options.moduleVar)
-        };
-
-
-      case stat.INVALID_DECLARATION:
-
-        warn ('Wrong module declaration: <cyan>%</cyan>', result.data);
-        // If --force, continue.
-        break;
-
-
-      default:
-        throw new Error ('Optimize failed. It returned ' + JSON.stringify (result));
-    }
-    // Optimization failed. Return the unaltered source code.
-    return /** @type {OperationResult} */ {status: STAT.OK, data: source};
-  }
-
-  /**
-   * Returns the given text indented unless it was already indented.
-   * @param {OperationResult} result
-   * @return {string}
-   */
-  function conditionalIndent (result)
-  {
-    return result.status === STAT.INDENTED ? result.data : indent (result.data, 1, options.indent);
-  }
-
-  /**
-   * Isses a warning about problematic code found on the global scope.
-   * @param {Object} sandbox
-   * @param {string} path
-   */
-  function warnAboutGlobalCode (sandbox, path)
-  {
-    var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
-        reportErrorLocation (path) +
-        getExplanation (
-            'This kind of code will behave differently between release and debug builds.' + NL +
-            'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
-            'directly to the window object.'
-        )
-    );
-    if (verbose) {
-      var found = false;
-      getProperties (sandbox).forEach (function (e)
-      {
-        if (!found) {
-          found = true;
-          msg += '  Detected globals:'.yellow + NL;
-        }
-        msg += (typeof e[1] === 'function' ? '    function '.blue : '    var      '.blue) + e[0].cyan + NL;
-      });
-    }
-    warn (msg + '>>'.yellow);
   }
 
 };
