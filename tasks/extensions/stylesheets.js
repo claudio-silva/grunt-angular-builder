@@ -1,28 +1,31 @@
 'use strict';
 
-module.exports = TemplatesAddOn;
+var MATCH_DIRECTIVE = /\/\/#\s*stylesheet\s*\((.*?)\)/g;
+
+module.exports = StylesheetsExtension;
 
 var util = require ('../lib/gruntUtil');
 
 /**
- * Exports the paths of all templates required by the application,
+ * Exports the paths of all stylesheets required by the application,
  * in the order defined by the modules' dependency graph.
  * @constructor
- * @implements {AddOnInterface}
+ * @implements {ExtensionInterface}
  * @param grunt The Grunt API.
  * @param {TASK_OPTIONS} options Task configuration options.
  * @param {boolean} debugBuild Debug mode flag.
  */
-function TemplatesAddOn (grunt, options, debugBuild)
+function StylesheetsExtension (grunt, options, debugBuild)
 {
   /* jshint unused: vars */
 
   /**
    * @inheritDoc
    */
-  this.trace = function (module)
+  this.trace = function (/*ModuleDef*/ module)
   {
-    // Do nothing.
+    process (module.head);
+    module.bodies.forEach (process);
   };
 
   /**
@@ -35,4 +38,18 @@ function TemplatesAddOn (grunt, options, debugBuild)
   this.build = function (targetScript, tracedPaths, standaloneScripts)
   {
   };
+
+  function process (/*string*/ sourceCode)
+  {
+    var match;
+    while ((match = MATCH_DIRECTIVE.exec (sourceCode))) {
+      var src = match[1].split (',').map (function (s)
+      {
+        return s.match (/(["'])(.*?)\1/)[2];
+      });
+
+      console.log (src);
+      console.log ('');
+    }
+  }
 }

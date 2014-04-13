@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = ReleaseBuildAddOn;
+module.exports = ReleaseBuildExtension;
 
 var util = require ('../lib/gruntUtil')
   , sourceTrans = require ('../lib/sourceTrans')
@@ -27,12 +27,12 @@ var STAT = {
  * Saves all script files required by the specified module into a single output file, in the correct
  * loading order. This is used on release builds.
  * @constructor
- * @implements {AddOnInterface}
+ * @implements {ExtensionInterface}
  * @param grunt The Grunt API.
  * @param {TASK_OPTIONS} options Task configuration options.
  * @param {boolean} debugBuild Debug mode flag.
  */
-function ReleaseBuildAddOn (grunt, options, debugBuild)
+function ReleaseBuildExtension (grunt, options, debugBuild)
 {
   /**
    * <code>true</code> if the task is running in verbose mode.

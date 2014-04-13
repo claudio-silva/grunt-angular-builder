@@ -71,7 +71,7 @@ module.exports = function (grunt)
   /**
    * @type {Class[]}
    */
-  var addOnsClasses = [];
+  var extensionsClasses = [];
 
   util.init (grunt);
 
@@ -106,17 +106,17 @@ module.exports = function (grunt)
     var debugBuild = grunt.option ('build') === 'debug' ||
       (this.flags.debug === undefined ? options.debug : this.flags.debug);
 
-    // Load add-ons.
+    // Load extensions.
 
-    options.bundledAddOns.forEach (function (name)
+    options.bundledExtensions.forEach (function (name)
     {
-      addOnsClasses.push (require (name));
+      extensionsClasses.push (require (name));
     });
 
-    if (options.addOns)
-      options.addOns.forEach (function (name)
+    if (options.extensions)
+      options.extensions.forEach (function (name)
       {
-        addOnsClasses.push (require (name));
+        extensionsClasses.push (require (name));
       });
 
     //-------------------------
@@ -148,15 +148,15 @@ module.exports = function (grunt)
       //------------------
 
       /**
-       * The list of loaded add-ons.
-       * @type {AddOnInterface[]}
+       * The list of loaded extensions.
+       * @type {ExtensionInterface[]}
        */
-      var addOns = [];
+      var extensions = [];
 
-      addOnsClasses.forEach (function (AddOnClass)
+      extensionsClasses.forEach (function (ExtensionClass)
       {
         //noinspection JSValidateTypes
-        addOns.push (new AddOnClass (grunt, options, debugBuild));
+        extensions.push (new ExtensionClass (grunt, options, debugBuild));
       });
 
       //------------------
@@ -173,15 +173,15 @@ module.exports = function (grunt)
       traceModule (options.main, function (/*ModuleDef*/module)
       {
         arrayAppend (tracedPaths, module.filePaths);
-        addOns.forEach (function (/*AddOnInterface*/ addOn)
+        extensions.forEach (function (/*ExtensionInterface*/ extension)
         {
-          addOn.trace (module);
+          extension.trace (module);
         });
       });
 
-      addOns.forEach (function (/*AddOnInterface*/ addOn)
+      extensions.forEach (function (/*ExtensionInterface*/ extension)
       {
-        addOn.build (fileGroup.dest, tracedPaths, standaloneScripts);
+        extension.build (fileGroup.dest, tracedPaths, standaloneScripts);
       });
 
     }.bind (this));

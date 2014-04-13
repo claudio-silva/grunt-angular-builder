@@ -1,18 +1,18 @@
 'use strict';
 
-module.exports = AssetsAddOn;
+module.exports = AssetsExtension;
 
 var util = require ('../lib/gruntUtil');
 
 /**
  * Exports the assets required by the application's modules.
  * @constructor
- * @implements {AddOnInterface}
+ * @implements {ExtensionInterface}
  * @param grunt The Grunt API.
  * @param {TASK_OPTIONS} options Task configuration options.
  * @param {boolean} debugBuild Debug mode flag.
  */
-function AssetsAddOn (grunt, options, debugBuild)
+function AssetsExtension (grunt, options, debugBuild)
 {
   /* jshint unused: vars */
 

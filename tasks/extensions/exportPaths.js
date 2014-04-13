@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = ExportPathsAddOn;
+module.exports = ExportPathsExtension;
 
 var util = require ('../lib/gruntUtil')
   , arrayAppend = util.arrayAppend;
@@ -9,12 +9,12 @@ var util = require ('../lib/gruntUtil')
  * Exports the paths of all script files that are required by the application,
  * in the order defined by the modules' dependency graph.
  * @constructor
- * @implements {AddOnInterface}
+ * @implements {ExtensionInterface}
  * @param grunt The Grunt API.
  * @param {TASK_OPTIONS} options Task configuration options.
  * @param {boolean} debugBuild Debug mode flag.
  */
-function ExportPathsAddOn (grunt, options, debugBuild)
+function ExportPathsExtension (grunt, options, debugBuild)
 {
   /* jshint unused: vars */
 

@@ -159,27 +159,27 @@ var TASK_OPTIONS = {
   scriptsConfigProperty:     'requiredScripts',
 
   /**
-   * Defines the list of add-ons bundled with angular-builder.
+   * Defines the list of extensions bundled with angular-builder.
    * This is a list of add-on module names to be loaded.
    * This is reserved for internal use, but could be overridden if you wish to completely replace the
    * built-in behavior.
    * @type {string[]}
    * @const
    */
-  bundledAddOns: [
-    './add-ons/exportPaths', // Always run this one first.
-    './add-ons/debugBuild',
-    './add-ons/releaseBuild',
-    './add-ons/stylesheets',
-    './add-ons/templates',
-    './add-ons/assets'
+  bundledExtensions: [
+    './extensions/exportPaths', // Always run this one first.
+    './extensions/debugBuild',
+    './extensions/releaseBuild',
+    './extensions/stylesheets',
+    './extensions/templates',
+    './extensions/assets'
   ],
   /**
    * A list of external add-on module names to be loaded.
-   * Use this to load 3rd party add-ons.
+   * Use this to load 3rd party extensions.
    * @type {string[]|null}
    */
-  addOns:        null
+  extensions:        null
 };
 
 /**
@@ -236,10 +236,10 @@ var TASK_OPTIONS = {
  * @param {TASK_OPTIONS} options Task configuration options.
  * @param {boolean} debugBuild Debug mode flag.
  */
-function AddOnInterface (grunt, options, debugBuild)
+function ExtensionInterface (grunt, options, debugBuild)
 {}
 
-AddOnInterface.prototype = {
+ExtensionInterface.prototype = {
   /**
    * Scans a module for relevant information.
    * Invoked once for each required module in the application, in the order defined by
@@ -265,7 +265,7 @@ AddOnInterface.prototype = {
 //------------------------------------------------------------------------------
 
 module.exports = {
-  ModuleDef:      ModuleDef,
-  AddOnInterface: AddOnInterface,
-  TASK_OPTIONS:   TASK_OPTIONS
+  ModuleDef:          ModuleDef,
+  ExtensionInterface: ExtensionInterface,
+  TASK_OPTIONS:       TASK_OPTIONS
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = DebugBuildAddOn;
+module.exports = DebugBuildExtension;
 
 var util = require ('../lib/gruntUtil');
 
@@ -8,12 +8,12 @@ var util = require ('../lib/gruntUtil');
  * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
  * source scripts in the correct order. This is used on debug builds.
  * @constructor
- * @implements {AddOnInterface}
+ * @implements {ExtensionInterface}
  * @param grunt The Grunt API.
  * @param {TASK_OPTIONS} options Task configuration options.
  * @param {boolean} debugBuild Debug mode flag.
  */
-function DebugBuildAddOn (grunt, options, debugBuild)
+function DebugBuildExtension (grunt, options, debugBuild)
 {
   /** @type {string[]} */
   var traceOutput = [];
