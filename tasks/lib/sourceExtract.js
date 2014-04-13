@@ -6,7 +6,7 @@
  */
 'use strict';
 
-var util = require ('./util');
+var util = require ('./gruntUtil');
 
 var tokenize = util.tokenize
   , sprintf = util.sprintf;

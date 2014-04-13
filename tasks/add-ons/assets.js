@@ -2,8 +2,7 @@
 
 module.exports = AssetsAddOn;
 
-var util = require ('../lib/util')
-, gruntUtil = require ('../lib/gruntUtil');
+var util = require ('../lib/gruntUtil');
 
 /**
  * Exports the assets required by the application's modules.

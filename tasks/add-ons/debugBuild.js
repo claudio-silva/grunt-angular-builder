@@ -2,8 +2,7 @@
 
 module.exports = DebugBuildAddOn;
 
-var util = require ('../lib/util')
-  , gruntUtil = require ('../lib/gruntUtil');
+var util = require ('../lib/gruntUtil');
 
 /**
  * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
@@ -61,6 +60,6 @@ function DebugBuildAddOn (grunt, options, debugBuild)
     util.arrayAppend (output, traceOutput);
 
     output.push ('\');');
-    gruntUtil.writeFile (targetScript, output.join ('\\\n'));
+    util.writeFile (targetScript, output.join ('\\\n'));
   };
 }

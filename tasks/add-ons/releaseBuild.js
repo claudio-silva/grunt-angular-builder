@@ -2,19 +2,16 @@
 
 module.exports = ReleaseBuildAddOn;
 
-var util = require ('../lib/util')
+var util = require ('../lib/gruntUtil')
   , sourceTrans = require ('../lib/sourceTrans')
-  , sourceExtract = require ('../lib/sourceExtract')
-  , gruntUtil = require ('../lib/gruntUtil');
+  , sourceExtract = require ('../lib/sourceExtract');
 
-var getProperties = util.getProperties
-  , toList = util.toList
-  , indent = util.indent
+var indent = util.indent
   , sprintf = util.sprintf
   , csprintf = util.csprintf
-  , warn = gruntUtil.warn
-  , getExplanation = gruntUtil.getExplanation
-  , reportErrorLocation = gruntUtil.reportErrorLocation
+  , warn = util.warn
+  , getExplanation = util.getExplanation
+  , reportErrorLocation = util.reportErrorLocation
   , NL = util.NL;
 
 /**
@@ -68,7 +65,7 @@ function ReleaseBuildAddOn (grunt, options, debugBuild)
         module.push (head.data);
       // Output a module declaration with no definitions.
       traceOutput.push (sprintf ('angular.module (\'%\', %);%', module.name,
-          toList (module.requires), options.moduleFooter)
+          util.toQuotedList (module.requires), options.moduleFooter)
       );
     }
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
@@ -84,7 +81,7 @@ function ReleaseBuildAddOn (grunt, options, debugBuild)
       }
       // End closure.
       traceOutput.push (sprintf ('\n}) (angular.module (\'%\', %));%', module.name,
-        toList (module.requires), options.moduleFooter));
+        util.toQuotedList (module.requires), options.moduleFooter));
     }
   };
 
@@ -109,7 +106,7 @@ function ReleaseBuildAddOn (grunt, options, debugBuild)
     // Output the modules (if any).
     util.arrayAppend (output, traceOutput);
 
-    gruntUtil.writeFile (targetScript, output.join (NL));
+    util.writeFile (targetScript, output.join (NL));
   };
 
   //------------------------------------------------------------------------------
@@ -228,13 +225,13 @@ function ReleaseBuildAddOn (grunt, options, debugBuild)
     );
     if (verbose) {
       var found = false;
-      getProperties (sandbox).forEach (function (e)
+      util.forEachProperty (sandbox, function (k, v)
       {
         if (!found) {
           found = true;
           msg += '  Detected globals:'.yellow + NL;
         }
-        msg += (typeof e[1] === 'function' ? '    function '.blue : '    var      '.blue) + e[0].cyan + NL;
+        msg += (typeof v === 'function' ? '    function '.blue : '    var      '.blue) + k.cyan + NL;
       });
     }
     warn (msg + '>>'.yellow);

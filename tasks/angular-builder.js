@@ -13,18 +13,17 @@ var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.
 /**
  * Utility functions.
  */
-var util = require ('./lib/util')
+var util = require ('./lib/gruntUtil')
   , nodeUtil = require ('util')
   , types = require ('./lib/types')
-  , sourceExtract = require ('./lib/sourceExtract')
-  , gruntUtil = require ('./lib/gruntUtil');
+  , sourceExtract = require ('./lib/sourceExtract');
 
 var ModuleDef = types.ModuleDef
-  , fatal = gruntUtil.fatal
-  , warn = gruntUtil.warn
-  , info = gruntUtil.info
-  , reportErrorLocation = gruntUtil.reportErrorLocation
-  , writeln = gruntUtil.writeln
+  , fatal = util.fatal
+  , warn = util.warn
+  , info = util.info
+  , reportErrorLocation = util.reportErrorLocation
+  , writeln = util.writeln
   , arrayAppend = util.arrayAppend
   , NL = util.NL;
 
@@ -74,7 +73,7 @@ module.exports = function (grunt)
    */
   var addOnsClasses = [];
 
-  gruntUtil.init (grunt);
+  util.init (grunt);
 
 //------------------------------------------------------------------------------
 // GRUNT TASK
@@ -141,7 +140,7 @@ module.exports = function (grunt)
         fatal ('No target script is defined.');
 
       // Process the source files.
-      var src = gruntUtil.sortFilesBeforeSubfolders (fileGroup.src);
+      var src = util.sortFilesBeforeSubfolders (fileGroup.src);
       src.forEach (loadScript.bind (null, fileGroup.forceInclude));
 
       //------------------

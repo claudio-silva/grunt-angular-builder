@@ -8,7 +8,7 @@
 
 var sandboxRun = require ('./sandboxRun')
   , sourceExtract = require ('./sourceExtract')
-  , util = require ('./util');
+  , util = require ('./gruntUtil');
 
 var sprintf = util.sprintf;
 

@@ -4,8 +4,7 @@ var MATCH_DIRECTIVE = /\/\/#\s*stylesheet\s*\((.*?)\)/g;
 
 module.exports = StylesheetsAddOn;
 
-var util = require ('../lib/util')
-  , gruntUtil = require ('../lib/gruntUtil');
+var util = require ('../lib/gruntUtil');
 
 /**
  * Exports the paths of all stylesheets required by the application,

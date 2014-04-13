@@ -2,8 +2,7 @@
 
 module.exports = TemplatesAddOn;
 
-var util = require ('../lib/util')
-, gruntUtil = require ('../lib/gruntUtil');
+var util = require ('../lib/gruntUtil');
 
 /**
  * Exports the paths of all templates required by the application,

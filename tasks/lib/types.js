@@ -8,7 +8,7 @@
 
 /* jshint unused: vars */
 
-var NL = require ('./util').NL;
+var NL = require ('./gruntUtil').NL;
 
 /**
  * A module definition record.

@@ -2,7 +2,7 @@
 
 module.exports = ExportPathsAddOn;
 
-var util = require ('../lib/util')
+var util = require ('../lib/gruntUtil')
   , arrayAppend = util.arrayAppend;
 
 /**
