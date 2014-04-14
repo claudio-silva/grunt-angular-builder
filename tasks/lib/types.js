@@ -2,6 +2,7 @@
  * @license
  * Custom types for use on the Grunt plugin.
  * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
  * Licensed under the MIT license.
  */
 'use strict';
@@ -251,13 +252,11 @@ ExtensionInterface.prototype = {
    * Builds the compilation output.
    * Invoked once.
    * @param {string} targetScript Path to the output script.
-   * @param {string[]} tracedPaths Paths of all the required files (excluding standalone scripts),
-   * in the correct loading order.
    * @param {Array.<{path: string, content: string}>} standaloneScripts
    * A list of scripts that have no module definitions but that are forced to still being included in the build.
    * Each item contains the filename and the file content.
    */
-  build: function (targetScript, tracedPaths, standaloneScripts) {}
+  build: function (targetScript, standaloneScripts) {}
 };
 
 //------------------------------------------------------------------------------

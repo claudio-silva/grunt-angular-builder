@@ -2,6 +2,7 @@
  * @license
  * A set of utility functions for use with Grunt.
  * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
  * Licensed under the MIT license.
  */
 'use strict';
@@ -29,86 +30,6 @@ var grunt;
  * @type {boolean}
  */
 var verbose;
-
-//------------------------------------------------------------------------------
-// PRIVATE
-//------------------------------------------------------------------------------
-
-/**
- * Colorized sprintf.
- * Formats a string with color and injects values into placeholders.
- * Placeholders are represented by the symbol %.
- * To colorize, use markup with the syntax: <code>&lt;color_name>text&lt;/color_name></code>
- * Warning: do not nest color tags!
- * @param {string} baseColor The base color for the string. Segments with other colors will resume the base color where
- * they end.
- * @param {string} str The string to be formatted.
- * @param {...string|...number} args Values for each placeholder in <code>str</code>.
- * @returns {string}
- */
-function csprintf (baseColor, str, args)
-{
-  /*jshint unused:false */
-  str = exports.sprintf.apply (null, [].slice.call (arguments, 1));
-  str = str.replace (/<(\w+)>([\s\S]*?)<\/\1>/g, function (m, m1, m2)
-  {
-    if (m1 === 'bold' || m1 === 'underline')
-      m2 = m2[baseColor];
-    return '±' + m2[m1] + '§';
-  });
-  str = str.replace (/^([\s\S]*?)±|§([\s\S]*?)±|§([\s\S]*?)$/g, function (m, m1, m2, m3)
-  {
-    var s = m1 || (m2 || '') || (m3 || '');
-    return s ? s[baseColor] : s;
-  });
-  return str[baseColor];
-}
-
-/**
- * @private
- * Similar to <code>csprintf</code> but supports an <code>args</code> argument that should receive a function's
- * <code>arguments</code> array-like object.
- *
- * @param {string} baseColor Color name.
- * @param {Object} args Should be a function's <code>arguments</code> array-like object.
- * @returns {string}
- */
-function icsprintf (baseColor, args)
-{
-  return exports.csprintf.apply (null, [baseColor].concat ([].slice.call (args)));
-}
-
-/**
- * Generates a tree of folder names and file names from a (possibliy) unsorted linear list of file paths.
- * @param {string[]} filePaths
- * @returns {{files: string[], subfolders: {}}}
- */
-function createFileTree (filePaths)
-{
-  var path = require ('path')
-    , root = {
-      files:      [],
-      subfolders: {}
-    };
-
-  filePaths.forEach (function (filename)
-  {
-    var dir = path.dirname (filename)
-      , folderPtr = root;
-    if (dir)
-      dir.split (path.sep).forEach (function (segment)
-      {
-        if (!folderPtr.subfolders[segment])
-          folderPtr.subfolders[segment] = {
-            files:      [],
-            subfolders: {}
-          };
-        folderPtr = folderPtr.subfolders[segment];
-      });
-    folderPtr.files.push (filename);
-  });
-  return root;
-}
 
 //------------------------------------------------------------------------------
 // PUBLIC
@@ -372,3 +293,83 @@ exports.arrayAppend = function (target, src)
 {
   return Array.prototype.push.apply (target, src);
 };
+
+//------------------------------------------------------------------------------
+// PRIVATE
+//------------------------------------------------------------------------------
+
+/**
+ * Colorized sprintf.
+ * Formats a string with color and injects values into placeholders.
+ * Placeholders are represented by the symbol %.
+ * To colorize, use markup with the syntax: <code>&lt;color_name>text&lt;/color_name></code>
+ * Warning: do not nest color tags!
+ * @param {string} baseColor The base color for the string. Segments with other colors will resume the base color where
+ * they end.
+ * @param {string} str The string to be formatted.
+ * @param {...string|...number} args Values for each placeholder in <code>str</code>.
+ * @returns {string}
+ */
+function csprintf (baseColor, str, args)
+{
+  /*jshint unused:false */
+  str = exports.sprintf.apply (null, [].slice.call (arguments, 1));
+  str = str.replace (/<(\w+)>([\s\S]*?)<\/\1>/g, function (m, m1, m2)
+  {
+    if (m1 === 'bold' || m1 === 'underline')
+      m2 = m2[baseColor];
+    return '±' + m2[m1] + '§';
+  });
+  str = str.replace (/^([\s\S]*?)±|§([\s\S]*?)±|§([\s\S]*?)$/g, function (m, m1, m2, m3)
+  {
+    var s = m1 || (m2 || '') || (m3 || '');
+    return s ? s[baseColor] : s;
+  });
+  return str[baseColor];
+}
+
+/**
+ * @private
+ * Similar to <code>csprintf</code> but supports an <code>args</code> argument that should receive a function's
+ * <code>arguments</code> array-like object.
+ *
+ * @param {string} baseColor Color name.
+ * @param {Object} args Should be a function's <code>arguments</code> array-like object.
+ * @returns {string}
+ */
+function icsprintf (baseColor, args)
+{
+  return exports.csprintf.apply (null, [baseColor].concat ([].slice.call (args)));
+}
+
+/**
+ * Generates a tree of folder names and file names from a (possibliy) unsorted linear list of file paths.
+ * @param {string[]} filePaths
+ * @returns {{files: string[], subfolders: {}}}
+ */
+function createFileTree (filePaths)
+{
+  var path = require ('path')
+    , root = {
+      files:      [],
+      subfolders: {}
+    };
+
+  filePaths.forEach (function (filename)
+  {
+    var dir = path.dirname (filename)
+      , folderPtr = root;
+    if (dir)
+      dir.split (path.sep).forEach (function (segment)
+      {
+        if (!folderPtr.subfolders[segment])
+          folderPtr.subfolders[segment] = {
+            files:      [],
+            subfolders: {}
+          };
+        folderPtr = folderPtr.subfolders[segment];
+      });
+    folderPtr.files.push (filename);
+  });
+  return root;
+}

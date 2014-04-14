@@ -1,7 +1,8 @@
 /**
  * @license
  * AngularJS Build Tool Grunt plugin.
- * Copyright 2013 Cláudio Manuel Brás da Silva
+ * Copyright 2013 Cláudio Manuel Brás da Silva.
+ * http://github.com/claudio-silva
  * Licensed under the MIT license.
  */
 'use strict';
@@ -16,16 +17,13 @@ var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.
 var util = require ('./lib/gruntUtil')
   , nodeUtil = require ('util')
   , types = require ('./lib/types')
-  , sourceExtract = require ('./lib/sourceExtract');
+  , analyser = require ('./lib/angularAnalyser');
 
 var ModuleDef = types.ModuleDef
   , fatal = util.fatal
-  , warn = util.warn
   , info = util.info
-  , reportErrorLocation = util.reportErrorLocation
   , writeln = util.writeln
-  , arrayAppend = util.arrayAppend
-  , NL = util.NL;
+  , arrayAppend = util.arrayAppend;
 
 /**
  * Exports a function that will be called by Grunt to register tasks for this plugin.
@@ -53,7 +51,7 @@ module.exports = function (grunt)
    */
   var created;
   /**
-   * A list of scripts that have no module definitions but that are forced to still being included in the build.
+   * A list of scripts that have no module definitions but still are forced to being included in the build.
    * Each item contains the filename and the file content.
    * @type {Array.<{path: string, content: string}>}
    */
@@ -125,39 +123,27 @@ module.exports = function (grunt)
 
     this.files.forEach (function (/** FILE_GROUP_OPTIONS */ fileGroup)
     {
-      // Reset source code analysis information for each file group, i.e. each group is an independent build.
-
-      //------------------
-      // LOAD SOURCE CODE
-      //------------------
-
-      loaded = {}; // Reset tracer.
-      standaloneScripts = []; // Reset scripts.
-      // Clone the external modules and use it as a starting point.
-      modules = nodeUtil._extend ({}, externals);
-
-      if (!fileGroup.dest)
-        fatal ('No target script is defined.');
-
-      // Process the source files.
-      var src = util.sortFilesBeforeSubfolders (fileGroup.src);
-      src.forEach (loadScript.bind (null, fileGroup.forceInclude));
-
-      //------------------
-      // LOAD ADD-ONS
-      //------------------
+      // Note: source code analysis information for each file group is reset for each file group,
+      // i.e. each group is an independent build.
 
       /**
        * The list of loaded extensions.
        * @type {ExtensionInterface[]}
        */
-      var extensions = [];
+      var extensions = loadExtensions (debugBuild);
 
-      extensionsClasses.forEach (function (ExtensionClass)
-      {
-        //noinspection JSValidateTypes
-        extensions.push (new ExtensionClass (grunt, options, debugBuild));
-      });
+      //------------------
+      // LOAD SOURCE CODE
+      //------------------
+
+      // Clone the external modules and use it as a starting point.
+      modules = nodeUtil._extend ({}, externals);
+      standaloneScripts = []; // Reset scripts.
+
+      if (!fileGroup.dest)
+        fatal ('No target script is defined.');
+
+      analyser.run (grunt, fileGroup, modules, standaloneScripts);
 
       //------------------
       // BUILD
@@ -165,136 +151,42 @@ module.exports = function (grunt)
 
       writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
 
-      /** @type {string[]} */
-      var tracedPaths = [];
+      // Trace the dependency graph and invoke each extension over each module.
 
-      // Trace the dependency graph and invoke each add-on.
-
+      loaded = {}; // Reset tracer.
       traceModule (options.main, function (/*ModuleDef*/module)
       {
-        arrayAppend (tracedPaths, module.filePaths);
         extensions.forEach (function (/*ExtensionInterface*/ extension)
         {
           extension.trace (module);
         });
       });
 
+      // Run all extensions over the analysed source code.
+
       extensions.forEach (function (/*ExtensionInterface*/ extension)
       {
-        extension.build (fileGroup.dest, tracedPaths, standaloneScripts);
+        extension.build (fileGroup.dest, standaloneScripts);
       });
 
     }.bind (this));
   });
 
   /**
-   * Registers the configured external modules so that they can be ignored during the build output generation.
-   * @returns {Object.<string, ModuleDef>}
+   * Loads all extensions.
+   * @param {boolean} debugBuild Is this a debug build?
+   * @returns {ExtensionInterface[]}
    */
-  function setupExternalModules ()
+  function loadExtensions (debugBuild)
   {
-    /** @type {Object.<string, ModuleDef>} */
-    var modules = {};
-    ((typeof options.externalModules === 'string' ? [options.externalModules] : options.externalModules) || []).
-      forEach (function (moduleName)
+    var extensions = [];
+    extensionsClasses.forEach (function (ExtensionClass)
     {
-      /** @type {ModuleDef} */
-      var module = modules[moduleName] = new ModuleDef ();
-      module.name = moduleName;
-      module.external = true;
+      //noinspection JSValidateTypes
+      extensions.push (new ExtensionClass (grunt, options, debugBuild));
     });
-    return modules;
+    return extensions;
   }
-
-  //------------------------------------------------------------------------------
-  // SCAN SOURCES
-  //------------------------------------------------------------------------------
-
-  /**
-   * Loads the specified script file and scans it for module definitions.
-   * @param {string|Array.<string>|null} forceInclude
-   * @param {string} path
-   */
-  function loadScript (forceInclude, path)
-  {
-    if (!grunt.file.exists (path)) {
-      warn ('Source file "' + path + '" not found.');
-      return;
-    }
-    // Read the script and scan it for a module declaration.
-    var script = grunt.file.read (path);
-    var moduleHeader = sourceExtract.extractModuleHeader (script);
-    // Ignore irrelevant files.
-    if (!moduleHeader) {
-      if (!forceInclude || !grunt.file.isMatch ({matchBase: true}, forceInclude, path)) {
-        info ('Ignored file: %', path.cyan);
-        return;
-      }
-      standaloneScripts.push ({
-        path:    path,
-        content: script
-      });
-    }
-    else setupModuleInfo (moduleHeader, script, path);
-  }
-
-  /**
-   * Store information about the specified module retrieved from the given source code on the specified file.
-   * @param {ModuleHeaderInfo} moduleHeader
-   * @param {string} fileContent
-   * @param {string} filePath
-   */
-  function setupModuleInfo (moduleHeader, fileContent, filePath)
-  {
-    var STAT = sourceExtract.EXTRACT_STAT;
-    switch (moduleHeader.status) {
-
-      case STAT.OK:
-
-        // Get information about the specified module.
-        var module = modules[moduleHeader.name];
-        // If this is the first time a specific module is mentioned, create the respective information record.
-        if (!module)
-          module = modules[moduleHeader.name] = new ModuleDef ();
-        // Skip the file if it defines an external module.
-        else if (module.external)
-          return;
-        // Reject additional attempts to redeclare a module (only appending is allowed).
-        else if (module.head && !moduleHeader.append)
-          fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
-        // Fill out the module definition record.
-        module.name = moduleHeader.name;
-        // The file is appending definitions to a module declared elsewhere.
-        if (moduleHeader.append) {
-          module.bodies.push (fileContent);
-          // Append the file path to the bottom of the paths list.
-          module.filePaths.push (filePath);
-        }
-        // Otherwise, the file contains a module declaration.
-        else {
-          if (module.head)
-            fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
-          module.head = fileContent;
-          // Add the file path to the top of the paths list.
-          module.filePaths.unshift (filePath);
-          module.requires = moduleHeader.requires;
-        }
-        break;
-
-      case STAT.MULTIPLE_MODULES:
-
-        fatal ('Definitions for multiple modules were found on the same file.' + NL + reportErrorLocation (filePath));
-        break;
-
-      case STAT.MULTIPLE_DECLS:
-
-        fatal ('More than one module declaration was found on the same file.' + NL + reportErrorLocation (filePath));
-    }
-  }
-
-  //------------------------------------------------------------------------------
-  // BUILD (COMMON)
-  //------------------------------------------------------------------------------
 
   /**
    * Traces a dependency graph for the specified module and calls the given callback
@@ -323,6 +215,25 @@ module.exports = function (grunt)
       loaded[module.name] = true;
       processHook (module);
     }
+  }
+
+  /**
+   * Registers the configured external modules so that they can be ignored during the build output generation.
+   * @returns {Object.<string, ModuleDef>}
+   */
+  function setupExternalModules ()
+  {
+    /** @type {Object.<string, ModuleDef>} */
+    var modules = {};
+    ((typeof options.externalModules === 'string' ? [options.externalModules] : options.externalModules) || []).
+      forEach (function (moduleName)
+    {
+      /** @type {ModuleDef} */
+      var module = modules[moduleName] = new ModuleDef ();
+      module.name = moduleName;
+      module.external = true;
+    });
+    return modules;
   }
 
 };

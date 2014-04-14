@@ -31,11 +31,9 @@ function StylesheetsExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {string[]} tracedPaths Paths of all the required files (excluding standalone scripts),
-   * in the correct loading order.
    * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, tracedPaths, standaloneScripts)
+  this.build = function (targetScript, standaloneScripts)
   {
   };
 
