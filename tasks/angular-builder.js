@@ -22,8 +22,7 @@ var util = require ('./lib/gruntUtil')
 var ModuleDef = types.ModuleDef
   , fatal = util.fatal
   , info = util.info
-  , writeln = util.writeln
-  , arrayAppend = util.arrayAppend;
+  , writeln = util.writeln;
 
 /**
  * Exports a function that will be called by Grunt to register tasks for this plugin.

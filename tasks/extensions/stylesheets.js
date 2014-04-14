@@ -1,10 +1,8 @@
 'use strict';
 
-var MATCH_DIRECTIVE = /\/\/#\s*stylesheet\s*\((.*?)\)/g;
+var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
 
 module.exports = StylesheetsExtension;
-
-var util = require ('../lib/gruntUtil');
 
 /**
  * Exports the paths of all stylesheets required by the application,
@@ -19,13 +17,24 @@ function StylesheetsExtension (grunt, options, debugBuild)
 {
   /* jshint unused: vars */
 
+  var path = require ('path');
+
+  /**
+   * Paths of the required stylesheets.
+   * @type {string[]}
+   */
+  var paths = [];
+
   /**
    * @inheritDoc
    */
   this.trace = function (/*ModuleDef*/ module)
   {
-    process (module.head);
-    module.bodies.forEach (process);
+    scan (module.head, module.filePaths[0]);
+    module.bodies.forEach (function (path, i)
+    {
+      scan (path, module.filePaths[i + 1]);
+    });
   };
 
   /**
@@ -35,19 +44,26 @@ function StylesheetsExtension (grunt, options, debugBuild)
    */
   this.build = function (targetScript, standaloneScripts)
   {
+    // Export file paths.
+    grunt.config (options.stylesheetsConfigProperty, paths);
   };
 
-  function process (/*string*/ sourceCode)
+  /**
+   * Extracts file paths frp, embedded comment references to stylesheets and appends them to `paths`.
+   * @param {string} sourceCode
+   * @param {string} filePath
+   */
+  function scan (sourceCode, filePath)
   {
+    /* jshint -W083 */
     var match;
     while ((match = MATCH_DIRECTIVE.exec (sourceCode))) {
-      var src = match[1].split (',').map (function (s)
+      match[1].split (',').forEach (function (s)
       {
-        return s.match (/(["'])(.*?)\1/)[2];
+        var url = s.match (/(["'])(.*?)\1/)[2];
+        paths.push (path.normalize (path.dirname (filePath) + '/' + url));
       });
-
-      console.log (src);
-      console.log ('');
     }
   }
+
 }
