@@ -54,9 +54,9 @@ This Grunt plugin:
    | Status     | Feature
 ---|:-----------|:-----------
  1 | Done       | Javascript release and debug builder.
- 2 | To do      | Integration with CSS building tasks.
- 3 | To do      | Integration with HTML templates building tasks.
- 4 | To do      | Assets builder.
+ 2 | Done       | Integration with CSS building tasks.
+ 3 | Done       | Integration with HTML templates building tasks.
+ 4 | Done       | Assets builder.
 
 # Documentation
 
@@ -193,6 +193,10 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.4.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.3.1) / 2014-04-20
+
+- Angular Builder is now feature-complete.
+  
 [v0.3.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.3.0) / 2014-03-29
 
 - Added support for multiple patterns on rebaseDebugUrls. Breaks compatibility with previous version.
