@@ -101,14 +101,14 @@ var TASK_OPTIONS = {
    * Set to `true` to enable the assets builder.
    * @type {boolean}
    */
-  buildAssets: false,
+  buildAssets:               false,
   /**
    * Directory path that will be used as the reference point from where relative asset urls are calculated.
-   * This determines where assets exported to.
+   * This determines where assets are exported to.
    * If you specify a relative path, it is resolved from the current filegroup's destination folder.
    * @type {string}
    */
-  assetsTargetDir: '',
+  assetsTargetDir:           '',
   /**
    * Code packaging method.
    *
@@ -170,29 +170,28 @@ var TASK_OPTIONS = {
    * @type {string}
    */
   scriptsConfigProperty:     'requiredScripts',
-
+  /**
+   * A list of external extension modules names to be loaded.
+   * Use this to load 3rd party extensions.
+   * @type {string[]|null}
+   */
+  extensions:                null,
   /**
    * Defines the list of extensions bundled with angular-builder.
-   * This is a list of add-on module names to be loaded.
+   * This is a list of extension modules names to be loaded.
    * This is reserved for internal use, but could be overridden if you wish to completely replace the
    * built-in behavior.
    * @type {string[]}
    * @const
    */
-  bundledExtensions: [
+  bundledExtensions:         [
     './extensions/exportPaths', // Always run this one first.
     './extensions/debugBuild',
     './extensions/releaseBuild',
     './extensions/stylesheets',
     './extensions/templates',
     './extensions/assets'
-  ],
-  /**
-   * A list of external add-on module names to be loaded.
-   * Use this to load 3rd party extensions.
-   * @type {string[]|null}
-   */
-  extensions:        null
+  ]
 };
 
 /**
