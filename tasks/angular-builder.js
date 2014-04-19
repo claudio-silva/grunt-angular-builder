@@ -68,7 +68,7 @@ module.exports = function (grunt)
   /**
    * @type {Class[]}
    */
-  var extensionsClasses = [];
+  var extensionsClasses;
 
   util.init (grunt);
 
@@ -103,18 +103,7 @@ module.exports = function (grunt)
     var debugBuild = grunt.option ('build') === 'debug' ||
       (this.flags.debug === undefined ? options.debug : this.flags.debug);
 
-    // Load extensions.
-
-    options.bundledExtensions.forEach (function (name)
-    {
-      extensionsClasses.push (require (name));
-    });
-
-    if (options.extensions)
-      options.extensions.forEach (function (name)
-      {
-        extensionsClasses.push (require (name));
-      });
+    loadExtensions ();
 
     //-------------------------
     // Process each file group
@@ -127,9 +116,10 @@ module.exports = function (grunt)
 
       /**
        * The list of loaded extensions.
+       * These will be reset for each file group.
        * @type {ExtensionInterface[]}
        */
-      var extensions = loadExtensions (debugBuild);
+      var extensions = instantiateExtensions (debugBuild);
 
       //------------------
       // LOAD SOURCE CODE
@@ -173,10 +163,29 @@ module.exports = function (grunt)
 
   /**
    * Loads all extensions.
+   */
+  function loadExtensions ()
+  {
+    extensionsClasses = [];
+
+    options.bundledExtensions.forEach (function (name)
+    {
+      extensionsClasses.push (require (name));
+    });
+
+    if (options.extensions)
+      options.extensions.forEach (function (name)
+      {
+        extensionsClasses.push (require (name));
+      });
+  }
+
+  /**
+   * Creates a new instance of each loaded extension.
    * @param {boolean} debugBuild Is this a debug build?
    * @returns {ExtensionInterface[]}
    */
-  function loadExtensions (debugBuild)
+  function instantiateExtensions (debugBuild)
   {
     var extensions = [];
     extensionsClasses.forEach (function (ExtensionClass)

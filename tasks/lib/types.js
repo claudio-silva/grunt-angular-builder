@@ -87,7 +87,7 @@ var TASK_OPTIONS = {
    */
   renameModuleRefs:          false,
   /**
-   * When `false`, required assets are copied to the assets target folder.
+   * When `false`, required assets are copied to the assets target directory.
    *
    * When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk
    * space.
@@ -97,6 +97,18 @@ var TASK_OPTIONS = {
    * @type {boolean}
    */
   symlinkAssets:             true,
+  /**
+   * Set to `true` to enable the assets builder.
+   * @type {boolean}
+   */
+  buildAssets: false,
+  /**
+   * Directory path that will be used as the reference point from where relative asset urls are calculated.
+   * This determines where assets exported to.
+   * If you specify a relative path, it is resolved from the current filegroup's destination folder.
+   * @type {string}
+   */
+  assetsTargetDir: '',
   /**
    * Code packaging method.
    *

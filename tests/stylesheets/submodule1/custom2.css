@@ -3,6 +3,8 @@
 }
 
 .icon2 {
+  /* Duplicate asset */
+  background: url(assets/module1/test_32x32.png) no-repeat left center;
   width: 16px;
   height: 16px;
 }

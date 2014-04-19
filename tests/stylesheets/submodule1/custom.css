@@ -3,7 +3,7 @@
 }
 
 .icon {
-  background: url('assets/module1/test_32x32.png') no-repeat left center;
+  background: url ( assets/module1/test_32x32.png ) no-repeat left center;
   width: 32px;
   height: 32px;
 }

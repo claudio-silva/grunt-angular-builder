@@ -3,5 +3,5 @@ h2 {
 }
 
 button2 i {
-  background: url('assets/module2/check_alt_32x32.png') no-repeat left center;
+  background: url("../submodule2/assets/module2/check_alt_32x32.png") no-repeat left center;
 }
