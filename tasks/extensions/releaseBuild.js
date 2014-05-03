@@ -62,7 +62,7 @@ function ReleaseBuildExtension (grunt, options, debugBuild)
     if (!module.bodies.length && sourceExtract.matchWhiteSpaceOrComments (head.data)) {
       // Output the comments (if any).
       if (head.data.trim ())
-        module.push (head.data);
+        traceOutput.push (head.data);
       // Output a module declaration with no definitions.
       traceOutput.push (sprintf ('angular.module (\'%\', %);%', module.name,
           util.toQuotedList (module.requires), options.moduleFooter)
