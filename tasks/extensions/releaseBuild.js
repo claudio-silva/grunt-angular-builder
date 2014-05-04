@@ -55,6 +55,8 @@ function ReleaseBuildExtension (grunt, options, debugBuild)
     if (debugBuild) return;
 
     // Fist process the head module declaration.
+    if (!module.head)
+      return util.warn('Module <cyan>%</cyan> has no declaration.', module.name);
     var head = optimize (module.head, module.filePaths[0], module);
 
     // Prevent the creation of an empty (or comments-only) self-invoking function.
