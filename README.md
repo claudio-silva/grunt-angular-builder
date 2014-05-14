@@ -64,7 +64,7 @@ It is being used in production on real projects right now.**
  4 | Done       | Assets builder.
  5 | Done       | Source paths export for extended integration with other Grunt tasks.
  6 | Done       | Plugin-based architecture.
- 7 | To do      | Finish the documentation.
+ 7 | To do      | More documentation and more examples.
 
 # Documentation
 
@@ -201,6 +201,10 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.4.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.1) / 2014-05-04
+
+- Bug fixes.
+  
 [v0.4.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.0) / 2014-04-20
 
 - Angular Builder is now feature-complete.
