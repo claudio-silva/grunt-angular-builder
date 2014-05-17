@@ -64,11 +64,56 @@ It is being used in production on real projects right now.**
  4 | Done       | Assets builder.
  5 | Done       | Source paths export for extended integration with other Grunt tasks.
  6 | Done       | Plugin-based architecture.
- 7 | To do      | More documentation and more examples.
+ 7 | To do      | Improve compatibility with 3rd-party libraries.
+ 8 | To do      | More documentation and more examples.
 
 # Documentation
 
 Extended documentation is available on the [Wiki](https://github.com/claudio-silva/grunt-angular-builder/wiki).
+
+## Foreword
+
+We have been successfully building our applications with Angular Builder. It definitely works and it works quite well.
+
+But **we use the builder mainly for building the application's code (and our own libraries)**.  
+For 3rd part libraries, we usually concatenate the minified builds of those libraries and load them as a single file.
+
+#### FAQ
+
+**Q.** Doesn't that defeat the purpose of this project?
+
+**A.** Not really! **It's your own application code and your own libraries that benefit the most from the build process.**  
+The main advantage lies in the way the building process allows you to structure and simplify your code.  
+Give it a try, I believe you'll like it!
+
+**Q.** Can I build 3rd-party libraries in my project?
+
+**A.** Yes, some. If they are structured in such a way as to be builder-compatible, you will be able to import only some parts of those libraries, discard dead code and simplify your build process.
+
+#### Why this limitation?
+
+Yes, it would be great if Angular Builder could build any 3rd-party library. But some libraries are not "build friendly". It would be a major challenge to support all the myriad ways code can be structured by other people.
+
+On the Wiki you'll find a page about writing "Build-enabled code".
+As long as you follow those rules, your application or library will build just fine.
+
+Nevertheless, **it is possible** to build, at least, **some** of the most common Angular libraries out there, including the standard Angular.js libraries bundled with the framework itself.
+
+Currently, the following libraries are tested and they work:
+
+- ngAnimate
+- ngCookies
+- ngResource
+- ngRoute
+- ngSanitize
+
+`ngTouch` and `ngLocale` (the locale specific files, ex. `angular-locale_en-iso`) still fail to build. I'm working on a fix.
+
+`angular-mocks` is not compatible, as it defines many modules in a single file.
+
+#### In sum
+
+Even with some limitations, Angular Builder has been very useful to us (at our company). We hope that it may be useful to you too.
 
 ## Getting Started
 
@@ -201,6 +246,11 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.4.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.2) / 2014-05-17
+
+- Improved compatibility with 3rd-party libraries.
+- Bug fixes.
+  
 [v0.4.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.1) / 2014-05-04
 
 - Bug fixes.
