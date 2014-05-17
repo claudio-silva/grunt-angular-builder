@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta charset="UTF-8">
+    <title>Angular Builder Test</title>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <style>
+      body {
+        padding-top: 50px
+      }
+    </style>
+    <script>
+      var ok = true;
+      window.onerror = function ()
+      {
+        ok = false;
+        $ ('#err').show ();
+      };
+    </script>
+  </head>
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Angular Builder</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <br>
+      <h2>3rd party library integration demo</h2>
+      <br>
+      <div id="success" style="display:none" class="alert alert-success">The test was successful.</div>
+      <div id="err" style="display:none" class="alert alert-danger">See your browser's console for error messages.</div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+      if (ok)
+        $ ('#success').show ();
+    </script>
+  </body>
+</html>

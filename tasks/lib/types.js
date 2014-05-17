@@ -126,14 +126,14 @@ var TASK_OPTIONS = {
   /**
    * A list of module names to ignore when building.
    * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that
-   * are loaded independently).
+   * are loaded independently) or to framework built-in modules (ex. 'ng').
    *
    * If a module reference (for module access or for declaring a dependency) is found in the source code, which targets
    * a module that is not declared anywhere in the build's source files, the build operation aborts when that module
    * name is not present on this list.
    * @type {string|string[]}
    */
-  externalModules:           null,
+  externalModules:           'ng',
   /**
    * Indentation white space for one level.
    * You may, for instance, configure it for tabs or additional spaces.

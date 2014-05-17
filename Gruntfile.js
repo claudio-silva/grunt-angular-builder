@@ -80,6 +80,14 @@ module.exports = function (grunt)
         },
         src:     'tests/stylesheets/**/*.js',
         dest:    'dist/main.js'
+      },
+      'test-3rd-party':   {
+        options:      {
+          main: 'App'
+        },
+        src:          'tests/3rd-party/**/*.js',
+        dest:         'dist/main.js',
+        forceInclude: 'tests/3rd-party/angular-loader.js'
       }
     },
 
@@ -91,6 +99,10 @@ module.exports = function (grunt)
       'test-assets':      {
         src:  '<%= requiredStylesheets %>',
         dest: 'dist/styles/styles.css'
+      },
+      '3rd-party':      {
+        src:  'tests/3rd-party/index.html',
+        dest: 'dist/index.html'
       }
     }
 
@@ -124,5 +136,6 @@ module.exports = function (grunt)
   grunt.registerTask ('test-js-comments', ['clean', 'angular-builder:test-js-comments']);
   grunt.registerTask ('test-stylesheets', ['clean', 'angular-builder:test-stylesheets', 'concat:test-stylesheets']);
   grunt.registerTask ('test-assets', ['clean', 'angular-builder:test-assets', 'concat:test-assets']);
+  grunt.registerTask ('test-3rd-party', ['clean', 'angular-builder:test-3rd-party', 'concat:3rd-party']);
 
 };

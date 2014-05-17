@@ -69,6 +69,7 @@ exports.optimize = function (source, moduleName, moduleVar)
    * @type {string}
    */
   var clean = sourceExtract.trimComments (source);
+
   // Extract the function's body and some additional information about the module and how it's being declared.
   var modInfo = sourceExtract.getModuleClosureInfo (clean);
 

@@ -86,6 +86,12 @@ var EXTRACT_STAT = {
 //------------------------------------------------------------------------------
 
 /**
+ * Matches a comment block preceding a module definition.
+ * This allows excluding module definitions thar lie inside comment blocks.
+ * @type {string}
+ */
+var MATCH_LEADING_COMMENT = '(/`*(?:(?!/`*)[`s`S])*?)?';
+/**
  * Regular expression string that matches an angular module declaration in one of these formats:
  * angular.module('name',[dependencies]) or
  * angular.module('name')
@@ -96,22 +102,23 @@ var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? 
  * Regular expression string that matches javascript block/line comments.
  * @type {string}
  */
-var MATCH_COMMENTS_EXP = '/`*[`s`S]*?`*/|//.*';
+var MATCH_COMMENTS_EXP = '(`/`*[`s`S]*?`*`/|`/`/.*)';
 /**
  * Matches source code consisting only of white space and javascript comments.
  * @type {RegExp}
  */
-var MATCH_NO_SCRIPT = new RegExp (tokenize (sprintf ('^ ((%) )*$', MATCH_COMMENTS_EXP)));
+var MATCH_NO_SCRIPT = new RegExp (tokenize (sprintf ('^ (% )*$', MATCH_COMMENTS_EXP)));
 /**
  * Matches white space and javascript comments at the beginning of a file.
  * @type {RegExp}
  */
-var TRIM_COMMENTS_TOP = new RegExp (tokenize (sprintf ('^ ((%) )*', MATCH_COMMENTS_EXP)));
+var TRIM_COMMENTS_TOP = new RegExp (tokenize (sprintf ('^ (% )*', MATCH_COMMENTS_EXP)));
 /**
  * Matches white space and javascript comments at the end of a file.
  * @type {RegExp}
  */
-var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (sprintf (' ((%) )*$', MATCH_COMMENTS_EXP)));
+//Note: max.limit of 3 prevents infinite matching and thread lockup.
+var TRIM_COMMENTS_BOTTOM = new RegExp (tokenize (sprintf (' (% ){0,3}$', MATCH_COMMENTS_EXP)));
 /**
  * Matches a self-invoking anonymous function that wraps all the remaining source code.
  * It assumes white space and comments have been already removed from both ends of the script.
@@ -152,19 +159,27 @@ exports.EXTRACT_STAT = EXTRACT_STAT;
  */
 exports.extractModuleHeader = function (source)
 {
-  var R = new RegExp (tokenize (MODULE_DECL_EXP), 'ig');
+  var LEADING_COMMENT = 1
+    , MODULE_NAME = 2
+    , MODULE_DEPS = 3;
+  var R = new RegExp (tokenize (MATCH_LEADING_COMMENT + MODULE_DECL_EXP), 'ig');
   var all = [], m;
+
+  // Collect all matches but exclude declarations inside comment blocks.
   while ((m = R.exec (source)) !== null)
-    all.push (m);
+    if (!m[LEADING_COMMENT] || m[LEADING_COMMENT].match (/\*\//))
+      all.push (m);
+  //all.forEach (function (e) {console.log ('------\n', e[1], '------\n')});
+
   // Ignore the file if it has no angular module definition.
   if (!all.length)
     return null;
-  var moduleName = all[0][1]
+  var moduleName = all[0][MODULE_NAME]
     , headerIndex = false;
   for (var i = 0, x = all.length; i < x; ++i) {
-    if (all[i][1] !== moduleName)
+    if (all[i][MODULE_NAME] !== moduleName)
       return {status: EXTRACT_STAT.MULTIPLE_MODULES};
-    if (all[i][2] !== undefined) {
+    if (all[i][MODULE_DEPS] !== undefined) {
       if (headerIndex === false)
         headerIndex = i;
       else return {status: EXTRACT_STAT.MULTIPLE_DECLS};
@@ -175,8 +190,8 @@ exports.extractModuleHeader = function (source)
     status:   EXTRACT_STAT.OK,
     name:     moduleName,
     append:   headerIndex === false,
-    requires: m[2] &&
-        JSON.parse (m[2].replace (/\/\*[\s\S]*\*\/|\/\/.*$/gm, '').replace (/'/g, '"')) || []
+    requires: m[MODULE_DEPS] &&
+                JSON.parse (m[MODULE_DEPS].replace (/\/\*[\s\S]*\*\/|\/\/.*$/gm, '').replace (/'/g, '"')) || []
   };
 };
 
