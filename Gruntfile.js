@@ -127,7 +127,8 @@ module.exports = function (grunt)
     //'test-js-fail',
     'test-js-comments',
     'test-stylesheets',
-    'test-assets'
+    'test-assets',
+    'test-3rd-party'
   ]);
 
   grunt.registerTask ('test-js-app', ['clean', 'angular-builder:test-js-app']);

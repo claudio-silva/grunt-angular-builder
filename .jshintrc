@@ -22,7 +22,7 @@
   "maxparams":     5,         // set the max number of formal parameters allowed per function
   "maxdepth":      5,         // limit how any block nesting levels there can be
   "maxstatements": 25,        // max number of statements allowed per function
-  "maxcomplexity": 10,        // control cyclomatic complexity throughout your code
+  "maxcomplexity": 11,        // control cyclomatic complexity throughout your code
   "maxlen":        120,       // max.length of a line
 
   // Suppress
