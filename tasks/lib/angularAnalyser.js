@@ -103,16 +103,17 @@ function setupModuleInfo (modules, moduleHeader, fileContent, filePath)
         module.filePaths.unshift (filePath);
         module.requires = moduleHeader.requires;
       }
+      module.configFn = moduleHeader.configFn;
       break;
 
     case STAT.MULTIPLE_MODULES:
 
-      fatal ('Definitions for multiple modules were found on the same file.' + NL + reportErrorLocation (filePath));
+      warn ('Definitions for multiple modules were found on the same file.' + NL + reportErrorLocation (filePath));
       break;
 
     case STAT.MULTIPLE_DECLS:
 
-      fatal ('More than one module declaration was found on the same file.' + NL + reportErrorLocation (filePath));
+      warn ('More than one module declaration was found on the same file.' + NL + reportErrorLocation (filePath));
   }
 }
 

@@ -69,6 +69,10 @@ var tokenize = util.tokenize
  * @type {boolean}
  * If <code>false</code> this module reference is declaring the module and its dependencies.
  * If <code>true</code> this module reference is appending definitions to a module declared elsewhere.
+ *//**
+ * @name ModuleHeaderInfo#configFn
+ * @type {string|undefined}
+ * Third parameter of a module declaration, if present.
  */
 
 /**
@@ -97,14 +101,14 @@ var MATCH_LEADING_COMMENT = '(/`*(?:(?!/`*)[`s`S])*?)?';
  * angular.module('name')
  * @type {string}
  */
-var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? `)';
+var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? (,[`s`S]+)?`)';
 /**
  * Regular expression string that matches the start of a declaration for a specific module.
  * <MOD> is replaced by the module name being extracted before the RegExp is compiled.
  * This also captures whether there is a variable assignment preceding the module declaration.
  * @type {string}
  */
-var MODULE_EXTR_EXP = '(= )?angular `. module `( ["\']<MOD>["\'] (?:, `[[`s`S]*?`])? `)( ; )?';
+var MODULE_EXTR_EXP = '(= )?angular `. module `( ["\']<MOD>["\'] (?:, `[[`s`S]*?`])? (,[`s`S]+)?`)( ; )?';
 /**
  * Regular expression string that matches javascript block/line comments.
  * @type {string}
@@ -115,6 +119,11 @@ var MATCH_COMMENTS_EXP = '(`/`*[`s`S]*?`*`/|`/`/.*)';
  * @type {RegExp}
  */
 var MATCH_NO_SCRIPT = new RegExp (tokenize (sprintf ('^ (% )*$', MATCH_COMMENTS_EXP)));
+/**
+ * Matches /* block and // line comments.
+ * @type {RegExp}
+ */
+var MATCH_COMMENT_BLOCKS = /\/\*[\s\S]*\*\/|\/\/.*$/gm;
 /**
  * Matches white space and javascript comments at the beginning of a file.
  * @type {RegExp}
@@ -168,7 +177,8 @@ exports.extractModuleHeader = function (source)
 {
   var LEADING_COMMENT = 1
     , MODULE_NAME = 2
-    , MODULE_DEPS = 3;
+    , MODULE_DEPS = 3
+    , CONFIG_FN = 4;
   var R = new RegExp (tokenize (MATCH_LEADING_COMMENT + MODULE_DECL_EXP), 'ig');
   var all = [], m;
 
@@ -176,7 +186,6 @@ exports.extractModuleHeader = function (source)
   while ((m = R.exec (source)) !== null)
     if (!m[LEADING_COMMENT] || m[LEADING_COMMENT].match (/\*\//))
       all.push (m);
-  //all.forEach (function (e) {console.log ('------\n', e[1], '------\n')});
 
   // Ignore the file if it has no angular module definition.
   if (!all.length)
@@ -198,7 +207,8 @@ exports.extractModuleHeader = function (source)
     name:     moduleName,
     append:   headerIndex === false,
     requires: m[MODULE_DEPS] &&
-                JSON.parse (m[MODULE_DEPS].replace (/\/\*[\s\S]*\*\/|\/\/.*$/gm, '').replace (/'/g, '"')) || []
+                JSON.parse (m[MODULE_DEPS].replace (MATCH_COMMENT_BLOCKS, '').replace (/'/g, '"')) || [],
+    configFn: m[CONFIG_FN]
   };
 };
 

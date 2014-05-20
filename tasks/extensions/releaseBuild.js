@@ -82,8 +82,8 @@ function ReleaseBuildExtension (grunt, options, debugBuild)
         traceOutput.push (conditionalIndent (body));
       }
       // End closure.
-      traceOutput.push (sprintf ('\n}) (angular.module (\'%\', %));%', module.name,
-        util.toQuotedList (module.requires), options.moduleFooter));
+      traceOutput.push (sprintf ('\n}) (angular.module (\'%\', %%));%', module.name,
+        util.toQuotedList (module.requires), module.configFn || '', options.moduleFooter));
     }
   };
 

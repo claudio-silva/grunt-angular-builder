@@ -4,8 +4,8 @@ angular.module ('App', [
   'ngResource',
   'ngRoute',
   'ngSanitize',
-  'ngTouch'//,
-  //'ngLocale'
+  'ngTouch',
+  'ngLocale'
 ]);
 
 // Signal success to the tester web page.

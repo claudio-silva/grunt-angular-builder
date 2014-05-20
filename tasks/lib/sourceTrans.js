@@ -130,7 +130,7 @@ exports.renameModuleRefExps = function (module, source, moduleVar)
   /** Matches the start of a declaration for the current module.*/
   var declPattern = sourceExtract.moduleExtractionPattern (module.name);
 
-  return source.replace (declPattern, function (decl, assign, semicolon)
+  return source.replace (declPattern, function (decl, assign, configFn, semicolon)
   {
     return (assign || '') + (semicolon && !assign ? '' : moduleVar + (semicolon || ''));
   });

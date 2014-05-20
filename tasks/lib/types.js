@@ -56,7 +56,12 @@ ModuleDef.prototype = {
    * When true, the module is not included in the build but it's possibly referenced in the source code.
    * @type {boolean}
    */
-  external:  false
+  external:  false,
+  /**
+  * @type {string|undefined}
+  * Third parameter of a module declaration, if present.
+  */
+  configFn: undefined
 };
 
 /**

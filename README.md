@@ -75,7 +75,7 @@ You can also examine the tests that are provided on the `/tests` folder and the 
 
 ### A warning about building third-party libraries
 
-You should have in mind that Some third-party libraries are not "build friendly". It would be a major challenge for Angular Builder to support all the myriad ways code can be structured by other people.
+You should have in mind that some third-party libraries are not "build friendly". It would be a major challenge for Angular Builder to support all the myriad ways code can be structured by other people.
 
 On the Wiki you'll find a page about writing "Build-enabled code".
 As long as you follow those rules, your application or library will build just fine.
@@ -90,16 +90,17 @@ Libraries that were written without Angular Builder could not make use of all th
 
 So, for third-party libraries, if they are structured in a way that is **not** builder-compatible, I recommend that you concatenate and/or minify the pre-built files that came bundled with those libraries and load them independently.
 
-But if they are compatible, it may be useful to include them in the angular-build. That way, you will be able to include only some parts of those libraries, discard dead code, auto-find which modules are actually used on your project and simplify the build process.
+But if they are compatible, it may be useful to include them in the angular-build; that way, you will be able to include only some parts of those libraries, discard dead code, auto-find which modules are actually used on your project and simplify the build process.
 
-**The bottom line is:** you don't have to include each and every third-party library in your angular-build process. Do it if you need it, if the code is compatible and if it makes sense. Otherwise, keep the building-thing to your own code and libraries. The rest, just load it separately.
+**The bottom line is:** you don't have to include each and every third-party library in your angular-build process. Do it if you need it, if the libraries are compatible and if it makes sense. Otherwise, keep the building-thing to your own code and libraries. The rest, just load it separately.
 
 Having said this, rest assured that **it is possible** to build some of the most common Angular libraries out there.
 
-
 #### Compatibility with the standard Angular.js libraries
 
-An automated test is provided for building the standard Angular.js libraries bundled with the framework itself. Currently, the libraries below are tested and they build successfully:
+An automated test is provided for building the standard Angular.js libraries that are optional parts of the framework.
+
+The libraries below were tested and they build successfully:
 
 - ngAnimate
 - ngCookies
@@ -107,8 +108,7 @@ An automated test is provided for building the standard Angular.js libraries bun
 - ngRoute
 - ngSanitize
 - ngTouch
-
-`ngLocale` (the locale specific files, ex. `angular-locale_en-iso`) still fail to build. I'm working on a fix.
+- ngLocale (the locale specific files, ex. `angular-locale_en-iso`)
 
 `angular-mocks` is not compatible, but you shouldn't include it in a production/debug build, anyway.
 
@@ -243,6 +243,12 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.4.3](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.3) / 2014-05-20
+
+- Improved compatibility with 3rd-party libraries.
+    - The standard Angular.js libraries can now be included in builds successfully.
+    - Module references assignements and inline module configuration functions are supported now.
+  
 [v0.4.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.2) / 2014-05-17
 
 - Improved compatibility with 3rd-party libraries.
