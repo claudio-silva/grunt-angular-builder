@@ -89,7 +89,7 @@ exports.optimize = function (source, moduleName, moduleVar)
     // Let the caller decide what to do.
       return /** @type {OperationResult} */ {
         status: TRANS_STAT.RENAME_REQUIRED,
-        data: modInfo
+        data:   modInfo
       };
     return /** @type {OperationResult} */ {status: TRANS_STAT.OK, data: source};
   }
@@ -130,9 +130,9 @@ exports.renameModuleRefExps = function (module, source, moduleVar)
   /** Matches the start of a declaration for the current module.*/
   var declPattern = sourceExtract.moduleExtractionPattern (module.name);
 
-  return source.replace (declPattern, function (m)
+  return source.replace (declPattern, function (decl, assign, semicolon)
   {
-    return m.substr (-1) === ')' ? moduleVar : '';
+    return (assign || '') + (semicolon && !assign ? '' : moduleVar + (semicolon || ''));
   });
 };
 

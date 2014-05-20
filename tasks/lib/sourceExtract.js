@@ -99,6 +99,13 @@ var MATCH_LEADING_COMMENT = '(/`*(?:(?!/`*)[`s`S])*?)?';
  */
 var MODULE_DECL_EXP = 'angular `. module `( ["\'](.*?)["\'] (?:, (`[[^`]]*`]))? `)';
 /**
+ * Regular expression string that matches the start of a declaration for a specific module.
+ * <MOD> is replaced by the module name being extracted before the RegExp is compiled.
+ * This also captures whether there is a variable assignment preceding the module declaration.
+ * @type {string}
+ */
+var MODULE_EXTR_EXP = '(= )?angular `. module `( ["\']<MOD>["\'] (?:, `[[`s`S]*?`])? `)( ; )?';
+/**
  * Regular expression string that matches javascript block/line comments.
  * @type {string}
  */
@@ -202,10 +209,7 @@ exports.extractModuleHeader = function (source)
  */
 exports.moduleExtractionPattern = function (moduleName)
 {
-  return new RegExp (
-    tokenize ('angular `. module `( ["\']' + moduleName + '["\'] (?:, `[[`s`S]*?`])? `)(?: ; )?'),
-    'ig'
-  );
+  return new RegExp (tokenize (MODULE_EXTR_EXP.replace ('<MOD>', moduleName), 'ig'));
 };
 
 /**

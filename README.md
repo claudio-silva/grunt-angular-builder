@@ -56,64 +56,61 @@ This Grunt plugin:
 **The project is almost feature-complete.  
 It is being used in production on real projects right now.**
 
-   | Status     | Feature
----|:-----------|:-----------
- 1 | Done       | Javascript release and debug builder.
- 2 | Done       | Integration with CSS building tasks.
- 3 | Done       | Integration with HTML templates building tasks.
- 4 | Done       | Assets builder.
- 5 | Done       | Source paths export for extended integration with other Grunt tasks.
- 6 | Done       | Plugin-based architecture.
- 7 | To do      | Improve compatibility with 3rd-party libraries.
- 8 | To do      | More documentation and more examples.
+   | Status      | Feature
+---|:------------|:-----------
+ 1 | Done        | Javascript release and debug builder.
+ 2 | Done        | Integration with CSS building tasks.
+ 3 | Done        | Integration with HTML templates building tasks.
+ 4 | Done        | Assets builder.
+ 5 | Done        | Source paths export for extended integration with other Grunt tasks.
+ 6 | Done        | Plugin-based architecture.
+ 7 | In progress | Improve compatibility with 3rd-party libraries.
+ 8 | To do       | Even more documentation and more examples.
 
 # Documentation
 
 Extended documentation is available on the [Wiki](https://github.com/claudio-silva/grunt-angular-builder/wiki).
 
-## Foreword
+You can also examine the tests that are provided on the `/tests` folder and the test configurations that are defined on `/Gruntfile.js`. They are very simple working examples that you can build immediately.
 
-We have been successfully building our applications with Angular Builder. It definitely works and it works quite well.
+### A warning about building third-party libraries
 
-But **we use the builder mainly for building the application's code (and our own libraries)**.  
-For 3rd part libraries, we usually concatenate the minified builds of those libraries and load them as a single file.
-
-#### FAQ
-
-**Q.** Doesn't that defeat the purpose of this project?
-
-**A.** Not really! **It's your own application code and your own libraries that benefit the most from the build process.**  
-The main advantage lies in the way the building process allows you to structure and simplify your code.  
-Give it a try, I believe you'll like it!
-
-**Q.** Can I build 3rd-party libraries in my project?
-
-**A.** Yes, some. If they are structured in such a way as to be builder-compatible, you will be able to import only some parts of those libraries, discard dead code and simplify your build process.
-
-#### Why this limitation?
-
-Yes, it would be great if Angular Builder could build any 3rd-party library. But some libraries are not "build friendly". It would be a major challenge to support all the myriad ways code can be structured by other people.
+You should have in mind that Some third-party libraries are not "build friendly". It would be a major challenge for Angular Builder to support all the myriad ways code can be structured by other people.
 
 On the Wiki you'll find a page about writing "Build-enabled code".
 As long as you follow those rules, your application or library will build just fine.
 
-Nevertheless, **it is possible** to build, at least, **some** of the most common Angular libraries out there, including the standard Angular.js libraries bundled with the framework itself.
+We have been successfully building our applications with Angular Builder. It definitely works and it works quite well.
 
-Currently, the following libraries are tested and they work:
+But, mainly, we use the builder for building our own applications' code (and our own libraries).
+
+Do note that **it's your own application code and your own libraries that benefit the most from the build process.** The main advantage lies in the way the building process allows you to structure and simplify your code.
+ 
+Libraries that were written without Angular Builder could not make use of all the advantages it provides. So, as they are already built by some other means, you may as well just include them as they are.
+
+So, for third-party libraries, if they are structured in a way that is **not** builder-compatible, I recommend that you concatenate and/or minify the pre-built files that came bundled with those libraries and load them independently.
+
+But if they are compatible, it may be useful to include them in the angular-build. That way, you will be able to include only some parts of those libraries, discard dead code, auto-find which modules are actually used on your project and simplify the build process.
+
+**The bottom line is:** you don't have to include each and every third-party library in your angular-build process. Do it if you need it, if the code is compatible and if it makes sense. Otherwise, keep the building-thing to your own code and libraries. The rest, just load it separately.
+
+Having said this, rest assured that **it is possible** to build some of the most common Angular libraries out there.
+
+
+#### Compatibility with the standard Angular.js libraries
+
+An automated test is provided for building the standard Angular.js libraries bundled with the framework itself. Currently, the libraries below are tested and they build successfully:
 
 - ngAnimate
 - ngCookies
 - ngResource
 - ngRoute
 - ngSanitize
+- ngTouch
 
-`ngTouch` and `ngLocale` (the locale specific files, ex. `angular-locale_en-iso`) still fail to build. I'm working on a fix.
+`ngLocale` (the locale specific files, ex. `angular-locale_en-iso`) still fail to build. I'm working on a fix.
 
-`angular-mocks` is not compatible, as it defines many modules in a single file.
-
-#### In sum
-
-Even with some limitations, Angular Builder has been very useful to us (at our company). We hope that it may be useful to you too.
+`angular-mocks` is not compatible, but you shouldn't include it in a production/debug build, anyway.
 
 ## Getting Started
 
@@ -217,7 +214,7 @@ If you wish to minify/optimize your build files, you can add the respective task
 
 If you wish to compile files from other languages to javascript (coffeescript, typescript, etc), they must be compiled prior to the build step, so you should add those tasks to the `release` task list __before__ the `angular-builder` task.
 
-Build-directives embedded in your source javascript files can direct the Builder to generate lists of stylesheets and templates that are **actually** required by your modules, in the correct loading order. These file path arrays can then be used by other Grunt tasks to build the required files.  
+_Build-directives_ embedded in your source javascript files can direct the builder to generate lists of stylesheets and templates that are **actually** required by your modules, in the correct loading order. These file path arrays can then be used by other Grunt tasks to build the required files.  
 Read the Wiki for more information.
 
 ### Advanced Use
@@ -236,7 +233,7 @@ In lieu of a formal style-guide, take care to maintain the existing coding style
 
 A linter is already present on the project, so just type `grunt` to run it.
 
-If it's appropriate, create some test cases on the `/test` folder and include them as individual tasks on the project's  Gruntfile.
+If it's appropriate, create some test cases on the `/tests` folder and include them as individual tasks on the project's  Gruntfile.
 
 Always start developing by creating a topic branch on your forked repository from the latest tagged stable version on the `master` branch.
 

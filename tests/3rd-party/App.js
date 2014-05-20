@@ -3,9 +3,10 @@ angular.module ('App', [
   'ngCookies',
   'ngResource',
   'ngRoute',
-  'ngSanitize'//,
-  //'ngTouch'//,
+  'ngSanitize',
+  'ngTouch'//,
   //'ngLocale'
 ]);
 
-
+// Signal success to the tester web page.
+window.success = true;

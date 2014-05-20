@@ -11,14 +11,6 @@
         padding-top: 50px
       }
     </style>
-    <script>
-      var ok = true;
-      window.onerror = function ()
-      {
-        ok = false;
-        $ ('#err').show ();
-      };
-    </script>
   </head>
   <body>
 
@@ -34,14 +26,15 @@
       <br>
       <h2>3rd party library integration demo</h2>
       <br>
-      <div id="success" style="display:none" class="alert alert-success">The test was successful.</div>
+      <div id="ok" style="display:none" class="alert alert-success">The test was successful.</div>
       <div id="err" style="display:none" class="alert alert-danger">See your browser's console for error messages.</div>
     </div>
 
     <script src="main.js"></script>
     <script>
-      if (ok)
-        $ ('#success').show ();
+      if (window.hasOwnProperty('success'))
+        $ ('#ok').show ();
+      else $ ('#err').show ();
     </script>
   </body>
 </html>
