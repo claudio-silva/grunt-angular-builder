@@ -49,7 +49,7 @@ function TemplatesExtension (grunt, options, debugBuild)
   };
 
   /**
-   * Extracts file paths frp, embedded comment references to stylesheets and appends them to `paths`.
+   * Extracts file paths from embedded comment references to templates and appends them to `paths`.
    * @param {string} sourceCode
    * @param {string} filePath
    */

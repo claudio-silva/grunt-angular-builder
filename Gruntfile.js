@@ -88,6 +88,14 @@ module.exports = function (grunt)
         src:          'tests/3rd-party/**/*.js',
         dest:         'dist/main.js',
         forceInclude: 'tests/3rd-party/angular-loader.js'
+      },
+      'test-include-non-angular':   {
+        options:      {
+          main: 'App'
+        },
+        src:          'tests/include-non-angular/**/*.js',
+        dest:         'dist/main.js',
+        forceInclude: 'tests/include-non-angular/other/other.js'
       }
     },
 
@@ -128,7 +136,8 @@ module.exports = function (grunt)
     'test-js-comments',
     'test-stylesheets',
     'test-assets',
-    'test-3rd-party'
+    'test-3rd-party',
+    'test-include-non-angular'
   ]);
 
   grunt.registerTask ('test-js-app', ['clean', 'angular-builder:test-js-app']);
@@ -138,5 +147,6 @@ module.exports = function (grunt)
   grunt.registerTask ('test-stylesheets', ['clean', 'angular-builder:test-stylesheets', 'concat:test-stylesheets']);
   grunt.registerTask ('test-assets', ['clean', 'angular-builder:test-assets', 'concat:test-assets']);
   grunt.registerTask ('test-3rd-party', ['clean', 'angular-builder:test-3rd-party', 'concat:3rd-party']);
+  grunt.registerTask ('test-include-non-angular',['clean', 'angular-builder:test-include-non-angular']);
 
 };

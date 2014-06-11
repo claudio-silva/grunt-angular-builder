@@ -286,8 +286,8 @@ exports.strRepeat = function (str, num)
 /**
  * Appends the second array into the first one, in-place.
  * @param {Array} target
- * @param {Array} src
- * @returns {Number}
+ * @param {Array?} src If null, not specified or an empty array, target will not be modified.
+ * @returns {Number} The cardinality of target after the operation.
  */
 exports.arrayAppend = function (target, src)
 {

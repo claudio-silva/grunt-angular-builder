@@ -96,17 +96,7 @@ function ReleaseBuildExtension (grunt, options, debugBuild)
   {
     if (debugBuild) return;
 
-    /** @type {string[]} */
-    var output = [];
-
-    // Output the standalone scripts (if any).
-    if (standaloneScripts.length)
-      output.push (standaloneScripts.map (function (e) {return e.content;}).join (NL));
-
-    // Output the modules (if any).
-    util.arrayAppend (output, traceOutput);
-
-    util.writeFile (targetScript, output.join (NL));
+    util.writeFile (targetScript, traceOutput.join (NL));
   };
 
   //------------------------------------------------------------------------------

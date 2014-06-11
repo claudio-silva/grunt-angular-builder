@@ -17,7 +17,8 @@ var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.
 var util = require ('./lib/gruntUtil')
   , nodeUtil = require ('util')
   , types = require ('./lib/types')
-  , analyser = require ('./lib/angularAnalyser');
+  , analyser = require ('./lib/angularAnalyser')
+  , shared = require ('./lib/sharedData');
 
 var ModuleDef = types.ModuleDef
   , fatal = util.fatal
@@ -113,6 +114,8 @@ module.exports = function (grunt)
     {
       // Note: source code analysis information for each file group is reset for each file group,
       // i.e. each group is an independent build.
+
+      shared.reset ();
 
       /**
        * The list of loaded extensions.

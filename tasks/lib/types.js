@@ -142,7 +142,7 @@ var TASK_OPTIONS = {
   /**
    * A list of framework built-in modules (ex. 'ng') that will always be appended to the `externalModules` list when
    * running tasks, so that references to them are ignored by the builder.
-   * This should usually not be set by the user.
+   * This is reserved for internal use, but could be overridden if you wish to completely replace the built-in behavior.
    * @type {string[]}
    */
   builtinModules:            ['ng'],
@@ -178,10 +178,18 @@ var TASK_OPTIONS = {
   templatesConfigProperty:   'requiredTemplates',
   /**
    * The name of the Gruntfile config property to where the list of required script paths will be exported.
-   * These scripts are all those that are actually required by your project, including forced includes.
+   * These scripts are all those that are actually required by your project, including forced includes and
+   * files included via build-directives.
    * @type {string}
    */
   scriptsConfigProperty:     'requiredScripts',
+  /**
+   * A list of file paths to prepend to the build output.
+   * This forces the inclusion of specific script files, independently of any source file scanning performed
+   * by Grunt.
+   * @type {string[]}
+   */
+  require: [],
   /**
    * A list of external extension modules names to be loaded.
    * Use this to load 3rd party extensions.
@@ -198,6 +206,8 @@ var TASK_OPTIONS = {
    */
   bundledExtensions:         [
     './extensions/exportPaths', // Always run this one first.
+    './extensions/scripts',     // This one must precede debugBuild and releaseBuild.
+    './extensions/NonModuleScriptsBuild',
     './extensions/debugBuild',
     './extensions/releaseBuild',
     './extensions/stylesheets',

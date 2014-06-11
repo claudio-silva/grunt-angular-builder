@@ -2,7 +2,8 @@
 
 module.exports = DebugBuildExtension;
 
-var util = require ('../lib/gruntUtil');
+var util = require ('../lib/gruntUtil')
+  , shared = require ('../lib/sharedData');
 
 /**
  * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
@@ -47,12 +48,8 @@ function DebugBuildExtension (grunt, options, debugBuild)
     /** @type {string[]} */
     var output = ['document.write (\''];
 
-    // Output the standalone scripts (if any).
-    if (standaloneScripts.length)
-      output.push (standaloneScripts.map (function (e)
-      {
-        return util.sprintf ('<script src=\"%\"></script>', e.path);
-      }).join ('\\\n'));
+    // Output standalone scripts (if any).
+    output.push (shared.data.prependOutput);
 
     // Output the modules (if any).
     util.arrayAppend (output, traceOutput);
