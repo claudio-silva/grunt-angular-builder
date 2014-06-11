@@ -234,12 +234,15 @@ module.exports = function (grunt)
     /** @type {Object.<string, ModuleDef>} */
     var modules = {};
     ((typeof options.externalModules === 'string' ? [options.externalModules] : options.externalModules) || []).
+      concat (options.builtinModules).
       forEach (function (moduleName)
     {
-      /** @type {ModuleDef} */
-      var module = modules[moduleName] = new ModuleDef ();
-      module.name = moduleName;
-      module.external = true;
+      if (!modules[moduleName]) { // Ignore redundant names.
+        /** @type {ModuleDef} */
+        var module = modules[moduleName] = new ModuleDef ();
+        module.name = moduleName;
+        module.external = true;
+      }
     });
     return modules;
   }

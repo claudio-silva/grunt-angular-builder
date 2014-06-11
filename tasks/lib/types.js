@@ -58,10 +58,10 @@ ModuleDef.prototype = {
    */
   external:  false,
   /**
-  * @type {string|undefined}
-  * Third parameter of a module declaration, if present.
-  */
-  configFn: undefined
+   * @type {string|undefined}
+   * Third parameter of a module declaration, if present.
+   */
+  configFn:  undefined
 };
 
 /**
@@ -131,14 +131,21 @@ var TASK_OPTIONS = {
   /**
    * A list of module names to ignore when building.
    * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that
-   * are loaded independently) or to framework built-in modules (ex. 'ng').
+   * are loaded independently).
    *
    * If a module reference (for module access or for declaring a dependency) is found in the source code, which targets
    * a module that is not declared anywhere in the build's source files, the build operation aborts when that module
    * name is not present on this list.
    * @type {string|string[]}
    */
-  externalModules:           'ng',
+  externalModules:           '',
+  /**
+   * A list of framework built-in modules (ex. 'ng') that will always be appended to the `externalModules` list when
+   * running tasks, so that references to them are ignored by the builder.
+   * This should usually not be set by the user.
+   * @type {string[]}
+   */
+  builtinModules:            ['ng'],
   /**
    * Indentation white space for one level.
    * You may, for instance, configure it for tabs or additional spaces.
