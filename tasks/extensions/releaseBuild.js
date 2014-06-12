@@ -94,6 +94,8 @@ function ReleaseBuildExtension (grunt, options, debugBuild)
    */
   this.build = function (targetScript, standaloneScripts)
   {
+    /* jshint unused: vars */
+
     if (debugBuild) return;
 
     util.writeFile (targetScript, traceOutput.join (NL));

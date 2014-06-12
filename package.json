@@ -1,7 +1,7 @@
 {
   "name": "grunt-angular-builder",
   "description": "A project builder for AngularJS applications.",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "homepage": "https://github.com/claudio-silva/grunt-angular-builder",
   "author": {
     "name": "Cláudio Silva",

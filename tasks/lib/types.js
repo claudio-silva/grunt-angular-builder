@@ -201,13 +201,15 @@ var TASK_OPTIONS = {
    * This is a list of extension modules names to be loaded.
    * This is reserved for internal use, but could be overridden if you wish to completely replace the
    * built-in behavior.
+   * WARNING: the order of the extensions listed here is important! If you change it, the build process
+   * my fail!
    * @type {string[]}
    * @const
    */
   bundledExtensions:         [
-    './extensions/exportPaths', // Always run this one first.
-    './extensions/scripts',     // This one must precede debugBuild and releaseBuild.
-    './extensions/NonModuleScriptsBuild',
+    './extensions/exportPaths',
+    './extensions/scripts',
+    './extensions/NonAngularScripts',
     './extensions/debugBuild',
     './extensions/releaseBuild',
     './extensions/stylesheets',

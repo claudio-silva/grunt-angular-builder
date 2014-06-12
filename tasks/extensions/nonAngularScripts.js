@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = NonModuleScriptsBuildExtension;
+module.exports = NonAngularScriptsExtension;
 
 var util = require ('../lib/gruntUtil')
   , shared = require ('../lib/sharedData');
@@ -21,13 +21,14 @@ var NL = util.NL;
  * @param {TASK_OPTIONS} options Task configuration options.
  * @param {boolean} debugBuild Debug mode flag.
  */
-function NonModuleScriptsBuildExtension (grunt, options, debugBuild)
+function NonAngularScriptsExtension (grunt, options, debugBuild)
 {
   /**
    * @inheritDoc
    */
   this.trace = function (module)
   {
+    /* jshint unused: vars */
     // Do nothing
   };
 
@@ -51,6 +52,7 @@ function NonModuleScriptsBuildExtension (grunt, options, debugBuild)
         var output = standaloneScripts.map (function (e) { return e.content; }).join (NL);
 
         util.writeFile (targetScript, output);
+        //Note: the ensuing release/debug build step will append to the file created here.
       }
     }
   };

@@ -43,6 +43,8 @@ function DebugBuildExtension (grunt, options, debugBuild)
    */
   this.build = function (targetScript, standaloneScripts)
   {
+    /* jshint unused: vars */
+
     if (!debugBuild) return;
 
     /** @type {string[]} */
