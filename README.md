@@ -279,6 +279,7 @@ __Important:__ all contributions that are accepted will be made available under 
 - Support for non-angular-module scripts inclusion and dependency resolution. New `#require` directive.
 - Some refactoring and new internal extensions.
 - Bug fixes.
+- Improved docs.
 
 [v0.4.3](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.3) / 2014-05-20
 
