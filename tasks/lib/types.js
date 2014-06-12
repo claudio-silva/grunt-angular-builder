@@ -209,7 +209,7 @@ var TASK_OPTIONS = {
   bundledExtensions:         [
     './extensions/exportPaths',
     './extensions/scripts',
-    './extensions/NonAngularScripts',
+    './extensions/nonAngularScripts',
     './extensions/debugBuild',
     './extensions/releaseBuild',
     './extensions/stylesheets',
