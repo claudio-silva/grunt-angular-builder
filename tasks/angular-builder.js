@@ -153,15 +153,18 @@ module.exports = function (grunt)
           extension.trace (module);
         });
       });
-      options.includeModules && options.includeModules.forEach(function(module){
-        traceModule (module, function (/*ModuleDef*/module)
-        {
-          extensions.forEach (function (/*ExtensionInterface*/ extension)
+      if(options.includeModules){
+        'string' === typeof options.includeModules && (options.includeModules = [options.includeModules]);
+        options.includeModules.forEach(function(module){
+          traceModule (module, function (/*ModuleDef*/module)
           {
-            extension.trace (module);
+            extensions.forEach (function (/*ExtensionInterface*/ extension)
+            {
+              extension.trace (module);
+            });
           });
         });
-      });
+      }
       // Run all extensions over the analysed source code.
 
       extensions.forEach (function (/*ExtensionInterface*/ extension)
