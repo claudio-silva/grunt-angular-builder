@@ -146,8 +146,14 @@ module.exports = function (grunt)
       // Trace the dependency graph and invoke each extension over each module.
 
       loaded = {}; // Reset tracer.
-      'string' === typeof options.main && (options.main = [options.main]); 
-      options.main.forEach(function(module){
+      traceModule (options.main, function (/*ModuleDef*/module)
+      {
+        extensions.forEach (function (/*ExtensionInterface*/ extension)
+        {
+          extension.trace (module);
+        });
+      });
+      options.includeModules && options.includeModules.forEach(function(module){
         traceModule (module, function (/*ModuleDef*/module)
         {
           extensions.forEach (function (/*ExtensionInterface*/ extension)
@@ -156,7 +162,6 @@ module.exports = function (grunt)
           });
         });
       });
-
       // Run all extensions over the analysed source code.
 
       extensions.forEach (function (/*ExtensionInterface*/ extension)
