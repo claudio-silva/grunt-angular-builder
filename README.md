@@ -274,6 +274,10 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.4.5](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.5) / 2014-06-12
+
+- Hotfix release.
+
 [v0.4.4](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.4) / 2014-06-12
 
 - Support for non-angular-module scripts inclusion and dependency resolution. New `#require` directive.
