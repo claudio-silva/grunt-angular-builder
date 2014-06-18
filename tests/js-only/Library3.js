@@ -1,10 +1,14 @@
 angular.module ('Library3', [
 
-    /**
-     * Multi-line comment
-     */
+  /**
+   * Multi-line comment
+   */
     'Submodule1',
 
     // Single-line comment
-    'Submodule2'
-]);
+
+    'Submodule2', // Trailing comma.
+
+    /* And another comment */
+  ]
+);

@@ -1,1 +1,1 @@
-angular.module ('Library2', ['Submodule3', 'Submodule4']);
+angular.module ('Library2', ['Submodule3', 'Submodule4',]); // Test trailing comma.

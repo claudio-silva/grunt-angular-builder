@@ -48,6 +48,8 @@ module.exports = function (grunt)
         dest:    'dist/library1.js'
       },
       'test-js-fail':     {
+      /** Warning: The module variable reference declare doesn't match the preset name
+          on the config setting moduleVar='module'. File: tests/js-only/extra/Submodule4.js */
         options: {
           main: 'Library2'
         },
