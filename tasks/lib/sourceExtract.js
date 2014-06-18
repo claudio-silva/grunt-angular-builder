@@ -120,10 +120,10 @@ var MATCH_COMMENTS_EXP = '(`/`*[`s`S]*?`*`/|`/`/.*)';
  */
 var MATCH_NO_SCRIPT = new RegExp (tokenize (sprintf ('^ (% )*$', MATCH_COMMENTS_EXP)));
 /**
- * Matches /* block and // line comments.
+ * Matches /* block and // line comments and any trailing commas to ensure JSON.parse() success.
  * @type {RegExp}
  */
-var MATCH_COMMENT_BLOCKS = /\/\*[\s\S]*\*\/|\/\/.*$/gm;
+var MATCH_COMMENT_BLOCKS_LAST_COMMA = /\/\*[\s\S]*\*\/|\/\/.*$|,(?=[^,]$)/gm;
 /**
  * Matches white space and javascript comments at the beginning of a file.
  * @type {RegExp}
@@ -207,7 +207,7 @@ exports.extractModuleHeader = function (source)
     name:     moduleName,
     append:   headerIndex === false,
     requires: m[MODULE_DEPS] &&
-                JSON.parse (m[MODULE_DEPS].replace (MATCH_COMMENT_BLOCKS, '').replace (/'/g, '"')) || [],
+                JSON.parse (m[MODULE_DEPS].replace (MATCH_COMMENT_BLOCKS_LAST_COMMA, '').replace (/'/g, '"')) || [],
     configFn: m[CONFIG_FN]
   };
 };
