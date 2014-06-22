@@ -86,8 +86,8 @@ var TASK_OPTIONS = {
    * <code>config.moduleVar</code>.
    *
    * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on
-   * <code>config.moduleVar</code>,
-   * a warning will be issued and the task may stop, unless the `--force` option is specified.
+   * <code>config.moduleVar</code>, a warning will be issued and the task may stop, unless the `--force` option is
+   * specified.
    * @type {boolean}
    */
   renameModuleRefs:          false,
@@ -147,6 +147,36 @@ var TASK_OPTIONS = {
    */
   builtinModules:            ['ng'],
   /**
+   * A list of modules to be excluded from the build.
+   *
+   * Unlike <code>externalModules</code>, which excludes each module and all of its dependencies, this option only
+   * excludes the specified module from the output, not its dependencies.
+   * One typical use for this is to exclude the main module from one or more build tasks.
+   * @type {string[]}
+   */
+  excludeModules:            [],
+  /**
+   * A list of modules to be included in the build.
+   * This allows a task to synthesize the main module's dependencies.
+   * This is useful for building large applications that can have multiple alternative builds determined by the
+   * user's profile or other criteria.
+   *
+   * This list will be set as the main module's list of required modules.
+   * If it's empty, this funcitonality will be disabled and the build will be performed as usual.
+   * If it's not empty, a synthetic main module definition will be generated for both the release and the debug
+   * builds. You  must <b>not</b> declare the main module in your application or, if you do, you must exclude
+   * the file that declares it from the task's source files set.
+   * The reason for this is that the generated main module declaration would collide with the one on the source code.
+   * You may still declare services, directives, etc. for the main module, using the <code>angular.module('name')</code>
+   * syntax. You must not call the <code>module</code> method with more than one argument.
+   *
+   * Note that, to be included in the output, the modules on this list must have their source files located somewhere
+   * on the task's source paths.
+   *
+   * @type {string[]}
+   */
+  mainRequires:              [],
+  /**
    * Indentation white space for one level.
    * You may, for instance, configure it for tabs or additional spaces.
    * @type {string}
@@ -189,7 +219,7 @@ var TASK_OPTIONS = {
    * by Grunt.
    * @type {string[]}
    */
-  require: [],
+  require:                   [],
   /**
    * A list of external extension modules names to be loaded.
    * Use this to load 3rd party extensions.
