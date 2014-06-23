@@ -22,7 +22,7 @@ function DebugBuildExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    */
-  this.trace = function (module)
+  this.trace = function (/*ModuleDef*/ module)
   {
     if (!debugBuild) return;
 

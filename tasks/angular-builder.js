@@ -130,7 +130,8 @@ module.exports = function (grunt)
 
       // Clone the external modules and use it as a starting point.
       modules = nodeUtil._extend ({}, externals);
-      standaloneScripts = []; // Reset scripts.
+      // Reset the scripts list to a clone of the `require` option or to an empty list.
+      standaloneScripts = (options.require || []).slice ();
 
       if (!fileGroup.dest)
         fatal ('No target script is defined.');
@@ -220,8 +221,8 @@ module.exports = function (grunt)
         traceModule (modName, processHook);
       });
     }
-    // Ignore references to already loaded modules.
-    if (!loaded[module.name]) {
+    // Ignore references to already loaded modules or to explicitly excluded modules.
+    if (!loaded[module.name] && !~options.excludeModules.indexOf (module.name)) {
       info ('Including module <cyan>%</cyan>.', moduleName);
       loaded[module.name] = true;
       processHook (module);

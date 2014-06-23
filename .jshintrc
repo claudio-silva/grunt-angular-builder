@@ -1,6 +1,6 @@
 {
   // Enforce
-  "bitwise":       true,      // prohibits the use of bitwise operators
+  "bitwise":       false,     // prohibits the use of bitwise operators
   "camelcase":     true,      // force all variable names to use either camelCase style or UPPER_CASE with underscores
   "curly":         false,     // always put curly braces around blocks in loops and conditionals
   "eqeqeq":        true,      // prohibits the use of == and != in favor of === and !==

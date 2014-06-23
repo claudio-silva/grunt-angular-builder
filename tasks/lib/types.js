@@ -177,6 +177,13 @@ var TASK_OPTIONS = {
    */
   mainRequires:              [],
   /**
+   * A list of file paths to prepend to the build output.
+   * This forces the inclusion of specific script files, independently of any source file scanning performed
+   * by Grunt.
+   * @type {string[]}
+   */
+  require:                   [],
+  /**
    * Indentation white space for one level.
    * You may, for instance, configure it for tabs or additional spaces.
    * @type {string}
@@ -213,13 +220,6 @@ var TASK_OPTIONS = {
    * @type {string}
    */
   scriptsConfigProperty:     'requiredScripts',
-  /**
-   * A list of file paths to prepend to the build output.
-   * This forces the inclusion of specific script files, independently of any source file scanning performed
-   * by Grunt.
-   * @type {string[]}
-   */
-  require:                   [],
   /**
    * A list of external extension modules names to be loaded.
    * Use this to load 3rd party extensions.
@@ -310,6 +310,8 @@ ExtensionInterface.prototype = {
    * Scans a module for relevant information.
    * Invoked once for each required module in the application, in the order defined by
    * the dependency graph.
+   *
+   * Note: external and excluded modules are never traced; dependencies of excluded modules may be traced.
    * @param {ModuleDef} module Gives you access to the module's metadata and its source code.
    */
   trace: function (module) {},
