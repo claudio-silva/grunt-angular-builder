@@ -11,11 +11,9 @@ module.exports = ScriptsExtension;
  * in the order defined by the modules' dependency graph.
  * @constructor
  * @implements {ExtensionInterface}
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function ScriptsExtension (grunt, options, debugBuild)
+function ScriptsExtension (context)
 {
   /* jshint unused: vars */
 
@@ -57,9 +55,8 @@ function ScriptsExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, standaloneScripts)
+  this.build = function (targetScript)
   {
     var scripts = paths.map (function (path, i)
     {
@@ -68,9 +65,11 @@ function ScriptsExtension (grunt, options, debugBuild)
         content: sources[i]
       };
     });
-    util.arrayAppend (standaloneScripts, scripts);
-    if (standaloneScripts.length) {
-      var list = standaloneScripts.map (function (e, i) { return '  ' + (i + 1) + '. ' + e.path; }).join (util.NL);
+    util.arrayAppend (context.standaloneScripts, scripts);
+    if (context.standaloneScripts.length) {
+      var list = context.standaloneScripts.map (
+        function (e, i) { return '  ' + (i + 1) + '. ' + e.path; }
+      ).join (util.NL);
       util.info ("Required non-angular scripts:%<cyan>%</cyan>", util.NL, list);
     }
   };
@@ -98,7 +97,7 @@ function ScriptsExtension (grunt, options, debugBuild)
           // Check if this script was not already referenced.
           if (!references[requiredPath]) {
             references[requiredPath] = true;
-            var source = grunt.file.read (requiredPath);
+            var source = context.grunt.file.read (requiredPath);
             // First, see if the required script has its own 'requires'.
             // If so, they must be required *before* the current script.
             scan (source, requiredPath);

@@ -9,7 +9,8 @@
 
 /* jshint unused: vars */
 
-var NL = require ('./gruntUtil').NL;
+var NL = require ('./gruntUtil').NL
+  , nodeUtil = require ('util');
 
 /**
  * A module definition record.
@@ -154,7 +155,7 @@ var TASK_OPTIONS = {
    * One typical use for this is to exclude the main module from one or more build tasks.
    * @type {string[]}
    */
-  excludeModules:            [],
+  excludedModules:           [],
   /**
    * A list of modules to be included in the build.
    * This allows a task to synthesize the main module's dependencies.
@@ -162,7 +163,7 @@ var TASK_OPTIONS = {
    * user's profile or other criteria.
    *
    * This list will be set as the main module's list of required modules.
-   * If it's empty, this funcitonality will be disabled and the build will be performed as usual.
+   * If it's empty, this functionality will be disabled and the build will be performed as usual.
    * If it's not empty, a synthetic main module definition will be generated for both the release and the debug
    * builds. You  must <b>not</b> declare the main module in your application or, if you do, you must exclude
    * the file that declares it from the task's source files set.
@@ -175,7 +176,7 @@ var TASK_OPTIONS = {
    *
    * @type {string[]}
    */
-  mainRequires:              [],
+  mainModuleDependencies:    [],
   /**
    * A list of file paths to prepend to the build output.
    * This forces the inclusion of specific script files, independently of any source file scanning performed
@@ -232,11 +233,12 @@ var TASK_OPTIONS = {
    * This is reserved for internal use, but could be overridden if you wish to completely replace the
    * built-in behavior.
    * WARNING: the order of the extensions listed here is important! If you change it, the build process
-   * my fail!
+   * may fail!
    * @type {string[]}
    * @const
    */
   bundledExtensions:         [
+    './extensions/analyze',
     './extensions/exportPaths',
     './extensions/scripts',
     './extensions/nonAngularScripts',
@@ -298,11 +300,9 @@ var TASK_OPTIONS = {
  * API for an Angular Builder plugin.
  * Note: implementing classes must have a compatible constructor.
  * @interface
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function ExtensionInterface (grunt, options, debugBuild)
+function ExtensionInterface (context)
 {}
 
 ExtensionInterface.prototype = {
@@ -319,11 +319,100 @@ ExtensionInterface.prototype = {
    * Builds the compilation output.
    * Invoked once.
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
-   * A list of scripts that have no module definitions but that are forced to still being included in the build.
-   * Each item contains the filename and the file content.
    */
-  build: function (targetScript, standaloneScripts) {}
+  build: function (targetScript) {}
+};
+
+/**
+ * The execution context for the build pipeline.
+ * Contains information shared between the main app and the extensions.
+ * @constructor
+ * @param grunt The Grunt API.
+ * @param task The currently executing Grunt task.
+ */
+function Context (grunt, task)
+{
+  this.grunt = grunt;
+  this.options = task.options (TASK_OPTIONS);
+  this.debugBuild = grunt.option ('build') === 'debug' ||
+    (task.flags.debug === undefined ? this.options.debug : task.flags.debug);
+  // Clone the external modules and use it as a starting point.
+  this.modules = nodeUtil._extend ({}, this._setupExternalModules ());
+  // Reset tracer.
+  this.loaded = {};
+  // Reset the scripts list to a clone of the `require` option or to an empty list.
+  this.standaloneScripts = (this.options.require || []).slice ();
+  this.shared = {};
+}
+
+Context.prototype = {
+  /**
+   * The Grunt API.
+   */
+  grunt:                 null,
+  /**
+   * Task-specific options set on the Gruntfile.
+   * @type {TASK_OPTIONS}
+   */
+  options:               null,
+  /**
+   * Is this a debug build?
+   * Note: the debug build mode can be set via three different settings.
+   * @type {boolean}
+   */
+  debugBuild:            false,
+  /**
+   * A map of module names to module definition records.
+   * @type {Object.<string, ModuleDef>}
+   */
+  modules:               null,
+  /**
+   * A map of module names to boolean values that registers which modules were already
+   * emmited to/ referenced on the output.
+   * @type {Object.<string,boolean>}
+   */
+  loaded:                null,
+  /**
+   * A list of scripts that have no module definitions but still are forced to being included in the build.
+   * Each item contains the filename and the file content.
+   * @type {Array.<{path: string, content: string}>}
+   */
+  standaloneScripts:     null,
+  /**
+   * Source code to be prepended to the build output file.
+   * @type {string}
+   */
+  prependOutput:         '',
+  /**
+   * Custom data shared between extensions.
+   */
+  shared:                null,
+  /**
+   * Registers the configured external modules so that they can be ignored during the build output generation.
+   * @returns {Object.<string, ModuleDef>}
+   * @private
+   */
+  _setupExternalModules: function ()
+  {
+    /** @type {Object.<string, ModuleDef>} */
+    var modules = {};
+    ((typeof this.options.externalModules === 'string' ?
+      [this.options.externalModules] : this.options.externalModules
+      ) || []).
+      concat (this.options.builtinModules).
+      forEach (function (moduleName)
+    {
+      // Ignore redundant names.
+      if (!modules[moduleName]) {
+        /** @type {ModuleDef} */
+        var module = modules[moduleName] = new ModuleDef ();
+        module.name = moduleName;
+        module.external = true;
+      }
+    });
+    return modules;
+  }
+
 };
 
 //------------------------------------------------------------------------------
@@ -333,5 +422,6 @@ ExtensionInterface.prototype = {
 module.exports = {
   ModuleDef:          ModuleDef,
   ExtensionInterface: ExtensionInterface,
+  Context:            Context,
   TASK_OPTIONS:       TASK_OPTIONS
 };

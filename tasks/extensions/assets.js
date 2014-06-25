@@ -12,13 +12,13 @@ var util = require ('../lib/gruntUtil')
  * Exports the assets required by the application's modules.
  * @constructor
  * @implements {ExtensionInterface}
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function AssetsExtension (grunt, options, debugBuild)
+function AssetsExtension (context)
 {
   /* jshint unused: vars */
+
+  var grunt = context.grunt;
 
   /**
    * Records which files have been already exported.
@@ -39,12 +39,11 @@ function AssetsExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, standaloneScripts)
+  this.build = function (targetScript)
   {
-    if (!options.buildAssets) return;
-    var stylehseets = grunt.config (options.stylesheetsConfigProperty); // Import file paths.
+    if (!context.options.buildAssets) return;
+    var stylehseets = grunt.config (context.options.stylesheetsConfigProperty); // Import file paths.
     if (!stylehseets) return; // No stylesheet sources are configured.
     var targetPath = path.dirname (targetScript);
     stylehseets.forEach (function (filePath)
@@ -69,7 +68,7 @@ function AssetsExtension (grunt, options, debugBuild)
       var url = match[2];
       if (!url.match (/^http/i) && url[0] !== '/') { // Skip absolute URLs
         var absSrcPath = path.resolve (basePath, url)
-          , absDestPath = path.resolve (targetPath, options.assetsTargetDir, url)
+          , absDestPath = path.resolve (targetPath, context.options.assetsTargetDir, url)
           , relDestPath = path.relative (targetPath, absDestPath);
         if (relDestPath[0] === '.')
           return util.warn ('Relative asset url falls outside the build folder: <cyan>%</cyan>%', url, util.NL);
@@ -78,7 +77,7 @@ function AssetsExtension (grunt, options, debugBuild)
         else exportedAssets[absDestPath] = true;
         var absTargetFolder = path.dirname (absDestPath);
         grunt.file.mkdir (absTargetFolder);
-        if (options.symlinkAssets)
+        if (context.options.symlinkAssets)
           fs.symlinkSync (absSrcPath, absDestPath);
         else grunt.file.copy (absSrcPath, absDestPath);
       }

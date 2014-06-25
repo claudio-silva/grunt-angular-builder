@@ -15,12 +15,10 @@ var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.
  * Utility functions.
  */
 var util = require ('./lib/gruntUtil')
-  , nodeUtil = require ('util')
   , types = require ('./lib/types')
-  , analyser = require ('./lib/angularAnalyser')
-  , shared = require ('./lib/sharedData');
+  , analyser = require ('./lib/angularAnalyser');
 
-var ModuleDef = types.ModuleDef
+var Context = types.Context
   , fatal = util.fatal
   , info = util.info
   , writeln = util.writeln;
@@ -32,40 +30,10 @@ var ModuleDef = types.ModuleDef
 module.exports = function (grunt)
 {
   /**
-   * A map of module names to module definition records.
-   * @type {Object.<string,ModuleDef>}
-   */
-  var modules;
-  /**
-   * A map of module names to boolean values that registers which modules were already
-   * emmited to/ referenced on the output.
-   * @type {Object.<string,boolean>}
-   */
-  var loaded;
-  /**
-   * A map of file names to boolean values that registers which files were already created on the output.
-   * When attempting to save a file, if another one with the same name already exists at the target location,
-   * the builder will erase the existing file before writing to it if the file is not registered here, otherwise
-   * it will append to it.
-   * @type {Object.<string,boolean>}
-   */
-  var created;
-  /**
-   * A list of scripts that have no module definitions but still are forced to being included in the build.
-   * Each item contains the filename and the file content.
-   * @type {Array.<{path: string, content: string}>}
-   */
-  var standaloneScripts;
-  /**
    * Task-specific options set on the Gruntfile.
    * @type {TASK_OPTIONS}
    */
   var options;
-  /**
-   * <code>true</code> if the task is running in verbose mode.
-   * @type {boolean}
-   */
-  var verbose;
   /**
    * @type {Class[]}
    */
@@ -92,18 +60,6 @@ module.exports = function (grunt)
     if (!this.files.length)
       fatal ('No source files were defined.');
 
-    verbose = grunt.option ('verbose');
-    created = {};
-
-    var externals = setupExternalModules ();
-    /**
-     * Is this a debug build?
-     * Note: the debug build mode can be set via three different settings.
-     * @type {boolean}
-     */
-    var debugBuild = grunt.option ('build') === 'debug' ||
-      (this.flags.debug === undefined ? options.debug : this.flags.debug);
-
     loadExtensions ();
 
     //-------------------------
@@ -115,39 +71,33 @@ module.exports = function (grunt)
       // Note: source code analysis information for each file group is reset for each file group,
       // i.e. each group is an independent build.
 
-      shared.reset ();
+      var context = new Context(grunt, this);
 
       /**
        * The list of loaded extensions.
        * These will be reset for each file group.
        * @type {ExtensionInterface[]}
        */
-      var extensions = instantiateExtensions (debugBuild);
+      var extensions = instantiateExtensions (context);
 
       //------------------
       // LOAD SOURCE CODE
       //------------------
 
-      // Clone the external modules and use it as a starting point.
-      modules = nodeUtil._extend ({}, externals);
-      // Reset the scripts list to a clone of the `require` option or to an empty list.
-      standaloneScripts = (options.require || []).slice ();
-
       if (!fileGroup.dest)
         fatal ('No target script is defined.');
 
-      analyser.run (grunt, fileGroup, modules, standaloneScripts);
+      analyser.run (grunt, fileGroup, context.modules, context.standaloneScripts);
 
       //------------------
       // BUILD
       //------------------
 
-      writeln ('Generating the <cyan>%</cyan> build...', debugBuild ? 'debug' : 'release');
+      writeln ('Generating the <cyan>%</cyan> build...', context.debugBuild ? 'debug' : 'release');
 
       // Trace the dependency graph and invoke each extension over each module.
 
-      loaded = {}; // Reset tracer.
-      traceModule (options.main, function (/*ModuleDef*/module)
+      traceModule (options.main, context, function (/*ModuleDef*/module)
       {
         extensions.forEach (function (/*ExtensionInterface*/ extension)
         {
@@ -159,7 +109,7 @@ module.exports = function (grunt)
 
       extensions.forEach (function (/*ExtensionInterface*/ extension)
       {
-        extension.build (fileGroup.dest, standaloneScripts);
+        extension.build (fileGroup.dest, context.standaloneScripts);
       });
 
     }.bind (this));
@@ -186,16 +136,16 @@ module.exports = function (grunt)
 
   /**
    * Creates a new instance of each loaded extension.
-   * @param {boolean} debugBuild Is this a debug build?
+   * @param {Context} context The build execution context.
    * @returns {ExtensionInterface[]}
    */
-  function instantiateExtensions (debugBuild)
+  function instantiateExtensions (context)
   {
     var extensions = [];
     extensionsClasses.forEach (function (ExtensionClass)
     {
       //noinspection JSValidateTypes
-      extensions.push (new ExtensionClass (grunt, options, debugBuild));
+      extensions.push (new ExtensionClass (context));
     });
     return extensions;
   }
@@ -204,11 +154,12 @@ module.exports = function (grunt)
    * Traces a dependency graph for the specified module and calls the given callback
    * to process each required module in the correct loading order.
    * @param {string} moduleName
+   * @param {Context} context The execution context for the build pipeline.
    * @param {function(ModuleDef)} processHook
    */
-  function traceModule (moduleName, processHook)
+  function traceModule (moduleName, context, processHook)
   {
-    var module = modules[moduleName];
+    var module = context.modules[moduleName];
     if (!module)
       fatal ('Module <cyan>%</cyan> was not found.', moduleName);
     // Ignore the module if it's external.
@@ -218,37 +169,15 @@ module.exports = function (grunt)
     if (module.requires) {
       module.requires.forEach (function (modName)
       {
-        traceModule (modName, processHook);
+        traceModule (modName, context, processHook);
       });
     }
     // Ignore references to already loaded modules or to explicitly excluded modules.
-    if (!loaded[module.name] && !~options.excludeModules.indexOf (module.name)) {
+    if (!context.loaded[module.name] && !~options.excludedModules.indexOf (module.name)) {
       info ('Including module <cyan>%</cyan>.', moduleName);
-      loaded[module.name] = true;
+      context.loaded[module.name] = true;
       processHook (module);
     }
-  }
-
-  /**
-   * Registers the configured external modules so that they can be ignored during the build output generation.
-   * @returns {Object.<string, ModuleDef>}
-   */
-  function setupExternalModules ()
-  {
-    /** @type {Object.<string, ModuleDef>} */
-    var modules = {};
-    ((typeof options.externalModules === 'string' ? [options.externalModules] : options.externalModules) || []).
-      concat (options.builtinModules).
-      forEach (function (moduleName)
-    {
-      if (!modules[moduleName]) { // Ignore redundant names.
-        /** @type {ModuleDef} */
-        var module = modules[moduleName] = new ModuleDef ();
-        module.name = moduleName;
-        module.external = true;
-      }
-    });
-    return modules;
   }
 
 };

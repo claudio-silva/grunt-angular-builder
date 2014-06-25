@@ -3,8 +3,7 @@
 module.exports = NonAngularScriptsExtension;
 
 var util = require ('../lib/gruntUtil')
-  , shared = require ('../lib/sharedData');
-var NL = util.NL;
+  , NL = util.NL;
 
 /**
  * Builds non-angular-module scripts.
@@ -17,11 +16,9 @@ var NL = util.NL;
  *
  * @constructor
  * @implements {ExtensionInterface}
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function NonAngularScriptsExtension (grunt, options, debugBuild)
+function NonAngularScriptsExtension (context)
 {
   /**
    * @inheritDoc
@@ -35,21 +32,20 @@ function NonAngularScriptsExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, standaloneScripts)
+  this.build = function (targetScript)
   {
     // Output the standalone scripts (if any).
-    if (standaloneScripts.length) {
-      if (debugBuild) {
-        shared.data.prependOutput += (standaloneScripts.map (function (e)
+    if (context.standaloneScripts.length) {
+      if (context.debugBuild) {
+        context.prependOutput += (context.standaloneScripts.map (function (e)
         {
           return util.sprintf ('<script src=\"%\"></script>', e.path);
         }).join ('\\\n'));
       }
       else {
         /** @type {string[]} */
-        var output = standaloneScripts.map (function (e) { return e.content; }).join (NL);
+        var output = context.standaloneScripts.map (function (e) { return e.content; }).join (NL);
 
         util.writeFile (targetScript, output);
         //Note: the ensuing release/debug build step will append to the file created here.

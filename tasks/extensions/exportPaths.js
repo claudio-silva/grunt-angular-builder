@@ -10,11 +10,9 @@ var util = require ('../lib/gruntUtil')
  * in the order defined by the modules' dependency graph.
  * @constructor
  * @implements {ExtensionInterface}
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function ExportPathsExtension (grunt, options, debugBuild)
+function ExportPathsExtension (context)
 {
   /* jshint unused: vars */
 
@@ -35,16 +33,15 @@ function ExportPathsExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, standaloneScripts)
+  this.build = function (targetScript)
   {
     var scripts = [];
 
     // Include paths of forced-include scripts.
 
-    if (standaloneScripts.length)
-      arrayAppend (scripts, standaloneScripts.map (function (e)
+    if (context.standaloneScripts.length)
+      arrayAppend (scripts, context.standaloneScripts.map (function (e)
       {
         return e.path;
       }));
@@ -55,6 +52,6 @@ function ExportPathsExtension (grunt, options, debugBuild)
 
     // Export.
 
-    grunt.config (options.scriptsConfigProperty, scripts);
+    context.grunt.config (context.options.scriptsConfigProperty, scripts);
   };
 }

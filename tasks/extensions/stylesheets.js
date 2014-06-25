@@ -9,11 +9,9 @@ module.exports = StylesheetsExtension;
  * in the order defined by the modules' dependency graph.
  * @constructor
  * @implements {ExtensionInterface}
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function StylesheetsExtension (grunt, options, debugBuild)
+function StylesheetsExtension (context)
 {
   /* jshint unused: vars */
 
@@ -40,12 +38,11 @@ function StylesheetsExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, standaloneScripts)
+  this.build = function (targetScript)
   {
     // Export file paths.
-    grunt.config (options.stylesheetsConfigProperty, paths);
+    context.grunt.config (context.options.stylesheetsConfigProperty, paths);
   };
 
   /**

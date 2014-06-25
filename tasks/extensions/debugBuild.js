@@ -2,19 +2,16 @@
 
 module.exports = DebugBuildExtension;
 
-var util = require ('../lib/gruntUtil')
-  , shared = require ('../lib/sharedData');
+var util = require ('../lib/gruntUtil');
 
 /**
  * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
  * source scripts in the correct order. This is used on debug builds.
  * @constructor
  * @implements {ExtensionInterface}
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function DebugBuildExtension (grunt, options, debugBuild)
+function DebugBuildExtension (context)
 {
   /** @type {string[]} */
   var traceOutput = [];
@@ -24,9 +21,9 @@ function DebugBuildExtension (grunt, options, debugBuild)
    */
   this.trace = function (/*ModuleDef*/ module)
   {
-    if (!debugBuild) return;
+    if (!context.debugBuild) return;
 
-    var rep = options.rebaseDebugUrls;
+    var rep = context.options.rebaseDebugUrls;
     module.filePaths.forEach (function (path)
     {
       if (rep)
@@ -39,19 +36,18 @@ function DebugBuildExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, standaloneScripts)
+  this.build = function (targetScript)
   {
     /* jshint unused: vars */
 
-    if (!debugBuild) return;
+    if (!context.debugBuild) return;
 
     /** @type {string[]} */
     var output = ['document.write (\''];
 
     // Output standalone scripts (if any).
-    output.push (shared.data.prependOutput);
+    output.push (context.prependOutput);
 
     // Output the modules (if any).
     util.arrayAppend (output, traceOutput);

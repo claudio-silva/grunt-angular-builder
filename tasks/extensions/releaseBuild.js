@@ -28,22 +28,21 @@ var STAT = {
  * loading order. This is used on release builds.
  * @constructor
  * @implements {ExtensionInterface}
- * @param grunt The Grunt API.
- * @param {TASK_OPTIONS} options Task configuration options.
- * @param {boolean} debugBuild Debug mode flag.
+ * @param {Context} context The execution context for the build pipeline.
  */
-function ReleaseBuildExtension (grunt, options, debugBuild)
+function ReleaseBuildExtension (context)
 {
+  var options = context.options;
   /**
    * <code>true</code> if the task is running in verbose mode.
    * @type {boolean}
    */
-  var verbose = grunt.option ('verbose');
+  var verbose = context.grunt.option ('verbose');
   /**
    * Grunt's verbose output API.
    * @type {Object}
    */
-  var verboseOut = grunt.log.verbose;
+  var verboseOut = context.grunt.log.verbose;
   /** @type {string[]} */
   var traceOutput = [];
 
@@ -52,7 +51,7 @@ function ReleaseBuildExtension (grunt, options, debugBuild)
    */
   this.trace = function (/*ModuleDef*/ module)
   {
-    if (debugBuild) return;
+    if (context.debugBuild) return;
 
     // Fist process the head module declaration.
     if (!module.head)
@@ -90,13 +89,12 @@ function ReleaseBuildExtension (grunt, options, debugBuild)
   /**
    * @inheritDoc
    * @param {string} targetScript Path to the output script.
-   * @param {Array.<{path: string, content: string}>} standaloneScripts
    */
-  this.build = function (targetScript, standaloneScripts)
+  this.build = function (targetScript)
   {
     /* jshint unused: vars */
 
-    if (debugBuild) return;
+    if (context.debugBuild) return;
 
     util.writeFile (targetScript, traceOutput.join (NL));
   };
