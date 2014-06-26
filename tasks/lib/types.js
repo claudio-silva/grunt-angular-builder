@@ -256,54 +256,53 @@ var TASK_OPTIONS = {
 };
 
 /**
- * @name FILE_GROUP_OPTIONS
- * Extended options for Grunt file groups.
- *//**
- * @name FILE_GROUP_OPTIONS#forceInclude
- * @type {string|string[]|null}
- * A list of filenames or glob patterns that specify which javascript files should always be included in the build,
- * even if they have no module declarations.
- *
- * <b>Warning:</b> the files must also be matched by <code>src</code> to be included.
- *
- * <b>Note:</b> patterns without slashes will match against the basename of the path even if it contains slashes,
- * eg. pattern <code>*.js</code> will match filepath <code>path/to/file.js</code>.
- *
- * Usually, when a script file is found in the set of source files which doesn't contain a module declaration,
- * that file is ignored.
- * But, if the file name and path matches a file name or glob pattern specified here, it will still be included.
- *
- * Non-module files are output in the same order they were read, and <b>before</b> any module.
- *
- * <b>Tip:</b> You can append the current step's result script to another one that resulted from a previous build
- * step.
- * If you specify a target or file group exclusively for standalone script files and append the result to other built
- * files, you will have more control on the order of the assembled files.
- *//**
- * @name FILE_GROUP_OPTIONS#src
- * @type {string[]|null}
- *//**
- * @name FILE_GROUP_OPTIONS#dest
- * @type {string|null}
+ * A Grunt files array with extended options.
+ * @interface
  */
+function GruntFilesArrayExt ()
+{}
 
-/**
- * A function result composite value that includes a status value and optional data.
- * @name OperationResult
- *//**
- * Result status code. 0 = OK, other values depend on the context this is being used on.
- * @name OperationResult#status
- * @type {number}
- */
-/**
- * Optional output data from the function that returned this record.
- * @name OperationResult#data
- * @type {*}
- */
+GruntFilesArrayExt.prototype = {
+  /**
+   * @type {string[]|null}
+   */
+  src:          null,
+  /**
+   * @type {string|null}
+   */
+  dest:         null,
+  /**
+   * A list of filenames or glob patterns that specify which javascript files should always be included in the build,
+   * even if they have no module declarations.
+   *
+   * <b>Warning:</b> the files must also be matched by <code>src</code> to be included.
+   *
+   * <b>Note:</b> patterns without slashes will match against the basename of the path even if it contains slashes,
+   * eg. pattern <code>*.js</code> will match filepath <code>path/to/file.js</code>.
+   *
+   * Usually, when a script file is found in the set of source files which doesn't contain a module declaration,
+   * that file is ignored.
+   * But, if the file name and path matches a file name or glob pattern specified here, it will still be included.
+   *
+   * Non-module files are output in the same order they were read, and <b>before</b> any module.
+   *
+   * <b>Tip:</b> You can append the current step's result script to another one that resulted from a previous build
+   * step.
+   * If you specify a target or file group exclusively for standalone script files and append the result to other built
+   * files, you will have more control on the order of the assembled files.
+   *
+   *  @type {string|string[]|null}
+   */
+  forceInclude: null
+
+};
 
 /**
  * API for an Angular Builder middleware plugin.
+ * Defines handlers for the three stages of the build process: analyze --> trace --> build.
+ *
  * Note: implementing classes must have a compatible constructor.
+ *
  * @interface
  * @param {Context} context The execution context for the build pipeline.
  */
@@ -312,20 +311,29 @@ function MiddlewareInterface (context)
 
 MiddlewareInterface.prototype = {
   /**
-   * Scans a module for relevant information.
+   * Load and analyze the specified source files.
+   * Invoked once.
+   *
+   * @param {GruntFilesArrayExt} filesArray The set of source code files to be processed.
+   */
+  analyze: function (filesArray) {},
+  /**
+   * Scan a module for relevant information.
    * Invoked once for each required module in the application, in the order defined by the dependency graph.
-   * Each module, in turn, is passed trough all the middleware pipeline.
+   * Each module, in turn, is passed trough all the middleware in pipeline.
    *
    * Note: external and excluded modules are never traced; dependencies of excluded modules may be traced.
+   *
    * @param {ModuleDef} module Gives you access to the module's metadata and its source code.
    */
-  trace: function (module) {},
+  trace:   function (module) {},
   /**
-   * Builds the compilation output.
+   * Build the compilation output.
    * Invoked once.
+   *
    * @param {string} targetScript Path to the output script.
    */
-  build: function (targetScript) {}
+  build:   function (targetScript) {}
 };
 
 /**
@@ -419,6 +427,20 @@ Context.prototype = {
   }
 
 };
+
+/**
+ * A function result composite value that includes a status value and optional data.
+ * @name OperationResult
+ *//**
+ * Result status code. 0 = OK, other values depend on the context this is being used on.
+ * @name OperationResult#status
+ * @type {number}
+ */
+/**
+ * Optional output data from the function that returned this record.
+ * @name OperationResult#data
+ * @type {*}
+ */
 
 //------------------------------------------------------------------------------
 // EXPORT

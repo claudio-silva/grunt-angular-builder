@@ -13,8 +13,6 @@ module.exports = StylesheetsMiddleware;
  */
 function StylesheetsMiddleware (context)
 {
-  /* jshint unused: vars */
-
   var path = require ('path');
 
   /**
@@ -22,6 +20,15 @@ function StylesheetsMiddleware (context)
    * @type {string[]}
    */
   var paths = [];
+
+  /**
+   * @inheritDoc
+   */
+  this.analyze = function (filesArray)
+  {
+    /* jshint unused: vars */
+    // Do nothing
+  };
 
   /**
    * @inheritDoc
@@ -41,6 +48,8 @@ function StylesheetsMiddleware (context)
    */
   this.build = function (targetScript)
   {
+    /* jshint unused: vars */
+
     // Export file paths.
     context.grunt.config (context.options.stylesheetsConfigProperty, paths);
   };

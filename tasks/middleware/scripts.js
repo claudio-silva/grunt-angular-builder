@@ -15,8 +15,6 @@ module.exports = ScriptsMiddleware;
  */
 function ScriptsMiddleware (context)
 {
-  /* jshint unused: vars */
-
   var path = require ('path');
 
   /**
@@ -42,6 +40,15 @@ function ScriptsMiddleware (context)
   /**
    * @inheritDoc
    */
+  this.analyze = function (filesArray)
+  {
+    /* jshint unused: vars */
+    // Do nothing
+  };
+
+  /**
+   * @inheritDoc
+   */
   this.trace = function (module)
   {
     util.info ("Scanning <cyan>%</cyan> for non-angular script dependencies...", module.name);
@@ -58,6 +65,8 @@ function ScriptsMiddleware (context)
    */
   this.build = function (targetScript)
   {
+    /* jshint unused: vars */
+
     var scripts = paths.map (function (path, i)
     {
       return {

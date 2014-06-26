@@ -19,6 +19,15 @@ function DebugBuildMiddleware (context)
   /**
    * @inheritDoc
    */
+  this.analyze = function (filesArray)
+  {
+    /* jshint unused: vars */
+    // Do nothing
+  };
+
+  /**
+   * @inheritDoc
+   */
   this.trace = function (/*ModuleDef*/ module)
   {
     if (!context.debugBuild) return;

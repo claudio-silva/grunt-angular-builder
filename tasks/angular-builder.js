@@ -66,7 +66,7 @@ module.exports = function (grunt)
     // Process each file group
     //-------------------------
 
-    this.files.forEach (function (/** FILE_GROUP_OPTIONS */ fileGroup)
+    this.files.forEach (function (/** GruntFilesArrayExt */ fileGroup)
     {
       // Note: source code analysis information for each file group is reset for each file group,
       // i.e. each group is an independent build.

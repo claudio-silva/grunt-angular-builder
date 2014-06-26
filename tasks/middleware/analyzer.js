@@ -2,9 +2,6 @@
 
 module.exports = AnalyzerMiddleware;
 
-var util = require ('../lib/gruntUtil')
-  , NL = util.NL;
-
 /**
  * An AngularJS module source code loader and analyser.
  *
@@ -14,8 +11,21 @@ var util = require ('../lib/gruntUtil')
  */
 function AnalyzerMiddleware (context)
 {
+  context = context; //disable warning
+
   /**
    * @inheritDoc
+   * @param {GruntFilesArrayExt} filesArray The set of source code files to be processed.
+   */
+  this.analyze = function (filesArray)
+  {
+    /* jshint unused: vars */
+    // Do nothing
+  };
+
+  /**
+   * @inheritDoc
+   * @param {ModuleDef} module Gives you access to the module's metadata and its source code.
    */
   this.trace = function (module)
   {
@@ -29,7 +39,8 @@ function AnalyzerMiddleware (context)
    */
   this.build = function (targetScript)
   {
-
+    /* jshint unused: vars */
+    // Do nothing
   };
 
 }

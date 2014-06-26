@@ -49,6 +49,15 @@ function ReleaseBuildMiddleware (context)
   /**
    * @inheritDoc
    */
+  this.analyze = function (filesArray)
+  {
+    /* jshint unused: vars */
+    // Do nothing
+  };
+
+  /**
+   * @inheritDoc
+   */
   this.trace = function (/*ModuleDef*/ module)
   {
     if (context.debugBuild) return;
@@ -92,8 +101,6 @@ function ReleaseBuildMiddleware (context)
    */
   this.build = function (targetScript)
   {
-    /* jshint unused: vars */
-
     if (context.debugBuild) return;
 
     util.writeFile (targetScript, traceOutput.join (NL));

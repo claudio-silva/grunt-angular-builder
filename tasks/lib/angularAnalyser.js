@@ -22,7 +22,7 @@ var ModuleDef = types.ModuleDef
 /**
  * Loads and analyses the specified source files.
  * @param grunt The Grunt API instance.
- * @param {FILE_GROUP_OPTIONS} fileGroup Source file paths.
+ * @param {GruntFilesArrayExt} fileGroup Source file paths.
  * @param {Object.<string,ModuleDef>} modules A map of module names to module definition records.
  * This is an INPUT/OUTPUT argument.
  * @param  {Array.<{path: string, content: string}>} standaloneScripts

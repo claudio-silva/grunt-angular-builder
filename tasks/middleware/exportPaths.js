@@ -14,13 +14,20 @@ var util = require ('../lib/gruntUtil')
  */
 function ExportPathsMiddleware (context)
 {
-  /* jshint unused: vars */
-
   /**
    * Paths of all the required files (excluding standalone scripts) in the correct loading order.
    * @type {string[]}
    */
   var tracedPaths = [];
+
+  /**
+   * @inheritDoc
+   */
+  this.analyze = function (filesArray)
+  {
+    /* jshint unused: vars */
+    // Do nothing
+  };
 
   /**
    * @inheritDoc
@@ -36,6 +43,8 @@ function ExportPathsMiddleware (context)
    */
   this.build = function (targetScript)
   {
+    /* jshint unused: vars */
+
     var scripts = [];
 
     // Include paths of forced-include scripts.

@@ -16,8 +16,6 @@ var util = require ('../lib/gruntUtil')
  */
 function AssetsMiddleware (context)
 {
-  /* jshint unused: vars */
-
   var grunt = context.grunt;
 
   /**
@@ -31,8 +29,18 @@ function AssetsMiddleware (context)
   /**
    * @inheritDoc
    */
+  this.analyze = function (filesArray)
+  {
+    /* jshint unused: vars */
+    // Do nothing
+  };
+
+  /**
+   * @inheritDoc
+   */
   this.trace = function (module)
   {
+    /* jshint unused: vars */
     // Do nothing.
   };
 
