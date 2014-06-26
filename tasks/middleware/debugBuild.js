@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = DebugBuildExtension;
+module.exports = DebugBuildMiddleware;
 
 var util = require ('../lib/gruntUtil');
 
@@ -8,10 +8,10 @@ var util = require ('../lib/gruntUtil');
  * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
  * source scripts in the correct order. This is used on debug builds.
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function DebugBuildExtension (context)
+function DebugBuildMiddleware (context)
 {
   /** @type {string[]} */
   var traceOutput = [];

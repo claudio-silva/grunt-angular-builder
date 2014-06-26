@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = ReleaseBuildExtension;
+module.exports = ReleaseBuildMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , sourceTrans = require ('../lib/sourceTrans')
@@ -27,10 +27,10 @@ var STAT = {
  * Saves all script files required by the specified module into a single output file, in the correct
  * loading order. This is used on release builds.
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function ReleaseBuildExtension (context)
+function ReleaseBuildMiddleware (context)
 {
   var options = context.options;
   /**

@@ -4,16 +4,16 @@ var util = require ('../lib/gruntUtil');
 
 var MATCH_DIRECTIVE = /\/\/#\s*require\s*\((.*?)\)/g;
 
-module.exports = ScriptsExtension;
+module.exports = ScriptsMiddleware;
 
 /**
  * Exports the paths of all extra scripts required explicitly by build-directives,
  * in the order defined by the modules' dependency graph.
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function ScriptsExtension (context)
+function ScriptsMiddleware (context)
 {
   /* jshint unused: vars */
 

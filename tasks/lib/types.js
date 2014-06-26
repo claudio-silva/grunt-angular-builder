@@ -222,31 +222,36 @@ var TASK_OPTIONS = {
    */
   scriptsConfigProperty:     'requiredScripts',
   /**
-   * A list of external extension modules names to be loaded.
-   * Use this to load 3rd party extensions.
-   * @type {string[]|null}
+   * Allows loading 3rd party middleware into the build pipeline.
+   *
+   * This option may define a list of external middleware modules to load and for each one, specify where
+   * to place it in the pipeline.
+   * Each element in the list defines a module name (with the `load` property) and either the `before` or
+   * `after` property with the name of a target module in the pipeline from where to insert the loaded one
+   * before or after it.
+   * Note: internal middleware are loaded into the pipeline before the external middleware.
+   * @type {Array.<{load: string, before?: string, after?: string}>|null}
    */
-  extensions:                null,
+  externalMiddleware:        null,
   /**
-   * Defines the list of extensions bundled with angular-builder.
-   * This is a list of extension modules names to be loaded.
-   * This is reserved for internal use, but could be overridden if you wish to completely replace the
+   * Defines the list of middleware bundled with angular-builder.
+   * This is a list of modules names to load and assemble into a pipeline in the specified order.
+   * This is reserved for internal use, but could be overridden if you wish to replace some or all of the
    * built-in behavior.
-   * WARNING: the order of the extensions listed here is important! If you change it, the build process
-   * may fail!
+   * WARNING: the order of middleware listed here is important! If you change it, the build process may fail!
    * @type {string[]}
    * @const
    */
-  bundledExtensions:         [
-    './extensions/analyze',
-    './extensions/exportPaths',
-    './extensions/scripts',
-    './extensions/nonAngularScripts',
-    './extensions/debugBuild',
-    './extensions/releaseBuild',
-    './extensions/stylesheets',
-    './extensions/templates',
-    './extensions/assets'
+  internalMiddleware:        [
+    './middleware/analyzer',
+    './middleware/exportPaths',
+    './middleware/scripts',
+    './middleware/nonAngularScripts',
+    './middleware/debugBuild',
+    './middleware/releaseBuild',
+    './middleware/stylesheets',
+    './middleware/templates',
+    './middleware/assets'
   ]
 };
 
@@ -297,19 +302,19 @@ var TASK_OPTIONS = {
  */
 
 /**
- * API for an Angular Builder plugin.
+ * API for an Angular Builder middleware plugin.
  * Note: implementing classes must have a compatible constructor.
  * @interface
  * @param {Context} context The execution context for the build pipeline.
  */
-function ExtensionInterface (context)
+function MiddlewareInterface (context)
 {}
 
-ExtensionInterface.prototype = {
+MiddlewareInterface.prototype = {
   /**
    * Scans a module for relevant information.
-   * Invoked once for each required module in the application, in the order defined by
-   * the dependency graph.
+   * Invoked once for each required module in the application, in the order defined by the dependency graph.
+   * Each module, in turn, is passed trough all the middleware pipeline.
    *
    * Note: external and excluded modules are never traced; dependencies of excluded modules may be traced.
    * @param {ModuleDef} module Gives you access to the module's metadata and its source code.
@@ -325,7 +330,7 @@ ExtensionInterface.prototype = {
 
 /**
  * The execution context for the build pipeline.
- * Contains information shared between the main app and the extensions.
+ * Contains shared information available throughout the middleware pipeline.
  * @constructor
  * @param grunt The Grunt API.
  * @param task The currently executing Grunt task.
@@ -421,7 +426,7 @@ Context.prototype = {
 
 module.exports = {
   ModuleDef:          ModuleDef,
-  ExtensionInterface: ExtensionInterface,
+  ExtensionInterface: MiddlewareInterface,
   Context:            Context,
   TASK_OPTIONS:       TASK_OPTIONS
 };

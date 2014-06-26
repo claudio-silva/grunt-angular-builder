@@ -2,7 +2,7 @@
 
 var MATCH_URLS = /\burl\s*\(\s*('|")?\s*(.*?)\s*\1?\s*\)/gi;
 
-module.exports = AssetsExtension;
+module.exports = AssetsMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , path = require ('path')
@@ -11,10 +11,10 @@ var util = require ('../lib/gruntUtil')
 /**
  * Exports the assets required by the application's modules.
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function AssetsExtension (context)
+function AssetsMiddleware (context)
 {
   /* jshint unused: vars */
 

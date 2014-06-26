@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = AnalyzeExtension;
+module.exports = AnalyzerMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , NL = util.NL;
@@ -9,10 +9,10 @@ var util = require ('../lib/gruntUtil')
  * An AngularJS module source code loader and analyser.
  *
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function AnalyzeExtension (context)
+function AnalyzerMiddleware (context)
 {
   /**
    * @inheritDoc

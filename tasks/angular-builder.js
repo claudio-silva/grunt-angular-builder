@@ -34,10 +34,6 @@ module.exports = function (grunt)
    * @type {TASK_OPTIONS}
    */
   var options;
-  /**
-   * @type {Class[]}
-   */
-  var extensionsClasses;
 
   util.init (grunt);
 
@@ -60,7 +56,11 @@ module.exports = function (grunt)
     if (!this.files.length)
       fatal ('No source files were defined.');
 
-    loadExtensions ();
+    /**
+     * An ordered list of middleware classes that will form the build pipeline.
+     * @type {MiddlewareInterface[]}
+     */
+    var pipelineClasses = loadMiddleware ();
 
     //-------------------------
     // Process each file group
@@ -71,14 +71,14 @@ module.exports = function (grunt)
       // Note: source code analysis information for each file group is reset for each file group,
       // i.e. each group is an independent build.
 
-      var context = new Context(grunt, this);
+      var context = new Context (grunt, this);
 
       /**
-       * The list of loaded extensions.
+       * The sequential list of loaded middleare.
        * These will be reset for each file group.
-       * @type {ExtensionInterface[]}
+       * @type {MiddlewareInterface[]}
        */
-      var extensions = instantiateExtensions (context);
+      var pipeline = createPipeline (pipelineClasses, context);
 
       //------------------
       // LOAD SOURCE CODE
@@ -95,59 +95,66 @@ module.exports = function (grunt)
 
       writeln ('Generating the <cyan>%</cyan> build...', context.debugBuild ? 'debug' : 'release');
 
-      // Trace the dependency graph and invoke each extension over each module.
+      // Trace the dependency graph and pass each module trough the middleware pipeline.
 
       traceModule (options.main, context, function (/*ModuleDef*/module)
       {
-        extensions.forEach (function (/*ExtensionInterface*/ extension)
+        pipeline.forEach (function (/*MiddlewareInterface*/ middleare)
         {
-          extension.trace (module);
+          middleare.trace (module);
         });
       });
 
-      // Run all extensions over the analysed source code.
+      // Pass all the analysed source code trough the middleware pipeline.
 
-      extensions.forEach (function (/*ExtensionInterface*/ extension)
+      pipeline.forEach (function (/*MiddlewareInterface*/ middleware)
       {
-        extension.build (fileGroup.dest, context.standaloneScripts);
+        middleware.build (fileGroup.dest, context.standaloneScripts);
       });
 
     }.bind (this));
   });
 
   /**
-   * Loads all extensions.
+   * Loads all middleware (both internal and external).
    */
-  function loadExtensions ()
+  function loadMiddleware ()
   {
-    extensionsClasses = [];
+    var pipelineClasses = [];
 
-    options.bundledExtensions.forEach (function (name)
+    options.internalMiddleware.forEach (function (moduleName)
     {
-      extensionsClasses.push (require (name));
+      pipelineClasses.push (require (moduleName));
     });
 
-    if (options.extensions)
-      options.extensions.forEach (function (name)
+    if (options.externalMiddleware)
+      options.externalMiddleware.forEach (function (info)
       {
-        extensionsClasses.push (require (name));
+        var module = require (info.load)
+          , target = info.before || info.after
+          , i = pipelineClasses.indexOf (target);
+        if (~i)
+          util.fatal ('The % middleware module was not found.', target);
+        pipelineClasses.splice (i + (info.before ? 0 : 1), 0, module);
       });
+
+    return pipelineClasses;
   }
 
   /**
-   * Creates a new instance of each loaded extension.
+   * Creates a new instance of each loaded middleware and assembles them into a sequential list.
+   * @param {MiddlewareInterface[]} pipelineClasses An ordered list of classes to be instantiated.
    * @param {Context} context The build execution context.
-   * @returns {ExtensionInterface[]}
+   * @returns {MiddlewareInterface[]}
    */
-  function instantiateExtensions (context)
+  function createPipeline (pipelineClasses, context)
   {
-    var extensions = [];
-    extensionsClasses.forEach (function (ExtensionClass)
+    var middleware = [];
+    pipelineClasses.forEach (function (MiddlewareClass)
     {
-      //noinspection JSValidateTypes
-      extensions.push (new ExtensionClass (context));
+      middleware.push (new MiddlewareClass (context));
     });
-    return extensions;
+    return middleware;
   }
 
   /**

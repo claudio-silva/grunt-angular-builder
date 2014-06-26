@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = NonAngularScriptsExtension;
+module.exports = NonAngularScriptsMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , NL = util.NL;
@@ -15,10 +15,10 @@ var util = require ('../lib/gruntUtil')
  * source scripts in the correct order.
  *
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function NonAngularScriptsExtension (context)
+function NonAngularScriptsMiddleware (context)
 {
   /**
    * @inheritDoc

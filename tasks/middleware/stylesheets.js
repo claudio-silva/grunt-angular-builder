@@ -2,16 +2,16 @@
 
 var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
 
-module.exports = StylesheetsExtension;
+module.exports = StylesheetsMiddleware;
 
 /**
  * Exports the paths of all stylesheets required by the application,
  * in the order defined by the modules' dependency graph.
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function StylesheetsExtension (context)
+function StylesheetsMiddleware (context)
 {
   /* jshint unused: vars */
 

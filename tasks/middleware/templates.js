@@ -2,16 +2,16 @@
 
 var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
 
-module.exports = TemplatesExtension;
+module.exports = TemplatesMiddleware;
 
 /**
  * Exports the paths of all templates required by the application,
  * in the order defined by the modules' dependency graph.
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function TemplatesExtension (context)
+function TemplatesMiddleware (context)
 {
   /* jshint unused: vars */
 

@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = ExportPathsExtension;
+module.exports = ExportPathsMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , arrayAppend = util.arrayAppend;
@@ -9,10 +9,10 @@ var util = require ('../lib/gruntUtil')
  * Exports the paths of all script files that are required by the application,
  * in the order defined by the modules' dependency graph.
  * @constructor
- * @implements {ExtensionInterface}
+ * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the build pipeline.
  */
-function ExportPathsExtension (context)
+function ExportPathsMiddleware (context)
 {
   /* jshint unused: vars */
 
