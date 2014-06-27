@@ -21,6 +21,10 @@ function TemplatesMiddleware (context)
    */
   var paths = [];
 
+  //-------------------------------------------------------------------------------------------------------------------
+  // PUBLIC API
+  //-------------------------------------------------------------------------------------------------------------------
+
   /**
    * @inheritDoc
    */
@@ -53,6 +57,10 @@ function TemplatesMiddleware (context)
     // Export file paths.
     context.grunt.config (context.options.templatesConfigProperty, paths);
   };
+
+  //-------------------------------------------------------------------------------------------------------------------
+  // PRIVATE
+  //-------------------------------------------------------------------------------------------------------------------
 
   /**
    * Extracts file paths from embedded comment references to templates and appends them to `paths`.

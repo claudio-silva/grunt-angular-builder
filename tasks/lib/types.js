@@ -222,14 +222,14 @@ var TASK_OPTIONS = {
    */
   scriptsConfigProperty:     'requiredScripts',
   /**
-   * Allows loading 3rd party middleware into the build pipeline.
+   * Allows loading 3rd party middlewares into the build pipeline.
    *
    * This option may define a list of external middleware modules to load and for each one, specify where
    * to place it in the pipeline.
    * Each element in the list defines a module name (with the `load` property) and either the `before` or
    * `after` property with the name of a target module in the pipeline from where to insert the loaded one
    * before or after it.
-   * Note: internal middleware are loaded into the pipeline before the external middleware.
+   * Note: internal middlewares are loaded into the pipeline before the external middlewares.
    * @type {Array.<{load: string, before?: string, after?: string}>|null}
    */
   externalMiddleware:        null,
@@ -320,7 +320,7 @@ MiddlewareInterface.prototype = {
   /**
    * Scan a module for relevant information.
    * Invoked once for each required module in the application, in the order defined by the dependency graph.
-   * Each module, in turn, is passed trough all the middleware in pipeline.
+   * Each module, in turn, is passed trough all the middlewares on the pipeline.
    *
    * Note: external and excluded modules are never traced; dependencies of excluded modules may be traced.
    *

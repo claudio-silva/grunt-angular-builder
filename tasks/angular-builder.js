@@ -15,8 +15,7 @@ var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.
  * Utility functions.
  */
 var util = require ('./lib/gruntUtil')
-  , types = require ('./lib/types')
-  , analyser = require ('./lib/angularAnalyser');
+  , types = require ('./lib/types');
 
 var Context = types.Context
   , fatal = util.fatal
@@ -60,7 +59,7 @@ module.exports = function (grunt)
      * An ordered list of middleware classes that will form the build pipeline.
      * @type {MiddlewareInterface[]}
      */
-    var pipelineClasses = loadMiddleware ();
+    var pipelineClasses = loadMiddlewareModules ();
 
     //-------------------------
     // Process each file group
@@ -87,7 +86,12 @@ module.exports = function (grunt)
       if (!fileGroup.dest)
         fatal ('No target script is defined.');
 
-      analyser.run (grunt, fileGroup, context.modules, context.standaloneScripts);
+      // Pass all the source code trough the 1st stage of the middleware pipeline.
+
+      pipeline.forEach (function (/*MiddlewareInterface*/ middleware)
+      {
+        middleware.analyze (fileGroup);
+      });
 
       //------------------
       // BUILD
@@ -95,7 +99,7 @@ module.exports = function (grunt)
 
       writeln ('Generating the <cyan>%</cyan> build...', context.debugBuild ? 'debug' : 'release');
 
-      // Trace the dependency graph and pass each module trough the middleware pipeline.
+      // Trace the dependency graph and pass each module trough the 2nd stage of the middleware pipeline.
 
       traceModule (options.main, context, function (/*ModuleDef*/module)
       {
@@ -105,7 +109,7 @@ module.exports = function (grunt)
         });
       });
 
-      // Pass all the analysed source code trough the middleware pipeline.
+      // Pass all the analysed source code trough the 3rd stage of the middleware pipeline.
 
       pipeline.forEach (function (/*MiddlewareInterface*/ middleware)
       {
@@ -116,9 +120,9 @@ module.exports = function (grunt)
   });
 
   /**
-   * Loads all middleware (both internal and external).
+   * Loads all middlewares (both internal and external).
    */
-  function loadMiddleware ()
+  function loadMiddlewareModules ()
   {
     var pipelineClasses = [];
 
@@ -149,12 +153,12 @@ module.exports = function (grunt)
    */
   function createPipeline (pipelineClasses, context)
   {
-    var middleware = [];
+    var middlewares = [];
     pipelineClasses.forEach (function (MiddlewareClass)
     {
-      middleware.push (new MiddlewareClass (context));
+      middlewares.push (new MiddlewareClass (context));
     });
-    return middleware;
+    return middlewares;
   }
 
   /**

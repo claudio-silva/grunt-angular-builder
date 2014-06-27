@@ -49,7 +49,7 @@ This Grunt plugin:
 
 11. Integrates easily with other Grunt plugins to expand your build process with minification, optimization, preprocessing and/or compilation steps.
 
-12. It has its own internal plugins (called 'extensions'). All the bundled functionality is provided by **9 internal extensions**. You can also **easily** write your own extensions to augment angular-builder's capabilities (or even replace them).
+12. It has its own internal plugins (called 'middleware'). All the bundled functionality is provided by **9 internal middleware modules**. You can also **easily** write your own extensions to augment angular-builder's capabilities (or even replace them).
 
 ### Roadmap
 

@@ -21,6 +21,10 @@ function StylesheetsMiddleware (context)
    */
   var paths = [];
 
+  //-------------------------------------------------------------------------------------------------------------------
+  // PUBLIC API
+  //-------------------------------------------------------------------------------------------------------------------
+
   /**
    * @inheritDoc
    */
@@ -53,6 +57,10 @@ function StylesheetsMiddleware (context)
     // Export file paths.
     context.grunt.config (context.options.stylesheetsConfigProperty, paths);
   };
+
+  //-------------------------------------------------------------------------------------------------------------------
+  // PRIVATE
+  //-------------------------------------------------------------------------------------------------------------------
 
   /**
    * Extracts file paths from embedded comment references to stylesheets and appends them to `paths`.
