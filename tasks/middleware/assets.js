@@ -12,7 +12,7 @@ var util = require ('../lib/gruntUtil')
  * Exports the assets required by the application's modules.
  * @constructor
  * @implements {MiddlewareInterface}
- * @param {Context} context The execution context for the build pipeline.
+ * @param {Context} context The execution context for the middleware stack.
  */
 function AssetsMiddleware (context)
 {

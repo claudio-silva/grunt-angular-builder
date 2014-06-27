@@ -64,9 +64,13 @@ It is being used in production on real projects right now.**
  4 | Done        | Assets builder.
  5 | Done        | Non-module-based / non-angular-code javascript builder.
  6 | Done        | Source paths export for extended integration with other Grunt tasks.
- 7 | Done        | Plugin-based architecture.
+ 7 | Done        | Middleware-based architecture.
  8 | In progress | Improve compatibility with 3rd-party libraries.
  9 | In progress | Even more documentation and more examples.
+
+### Show your support
+
+If you use Angular-Builder, please [star](https://github.com/claudio-silva/grunt-angular-builder) the project on Github to show your support!
 
 # Documentation
 

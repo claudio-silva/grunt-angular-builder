@@ -56,10 +56,10 @@ module.exports = function (grunt)
       fatal ('No source files were defined.');
 
     /**
-     * An ordered list of middleware classes that will form the build pipeline.
+     * An ordered list of middleware classes that will form the middleware stack.
      * @type {MiddlewareInterface[]}
      */
-    var pipelineClasses = loadMiddlewareModules ();
+    var middlewareStackClasses = loadMiddlewareModules ();
 
     //-------------------------
     // Process each file group
@@ -77,7 +77,7 @@ module.exports = function (grunt)
        * These will be reset for each file group.
        * @type {MiddlewareInterface[]}
        */
-      var pipeline = createPipeline (pipelineClasses, context);
+      var middlewareStack = assembleMiddleware (middlewareStackClasses, context);
 
       //------------------
       // LOAD SOURCE CODE
@@ -86,9 +86,9 @@ module.exports = function (grunt)
       if (!fileGroup.dest)
         fatal ('No target script is defined.');
 
-      // Pass all the source code trough the 1st stage of the middleware pipeline.
+      // Pass all the source code trough the 1st stage of the middleware stack.
 
-      pipeline.forEach (function (/*MiddlewareInterface*/ middleware)
+      middlewareStack.forEach (function (/*MiddlewareInterface*/ middleware)
       {
         middleware.analyze (fileGroup);
       });
@@ -99,19 +99,19 @@ module.exports = function (grunt)
 
       writeln ('Generating the <cyan>%</cyan> build...', context.debugBuild ? 'debug' : 'release');
 
-      // Trace the dependency graph and pass each module trough the 2nd stage of the middleware pipeline.
+      // Trace the dependency graph and pass each module trough the 2nd stage of the middleware stack.
 
       traceModule (options.main, context, function (/*ModuleDef*/module)
       {
-        pipeline.forEach (function (/*MiddlewareInterface*/ middleare)
+        middlewareStack.forEach (function (/*MiddlewareInterface*/ middleare)
         {
           middleare.trace (module);
         });
       });
 
-      // Pass all the analysed source code trough the 3rd stage of the middleware pipeline.
+      // Pass all the analysed source code trough the 3rd stage of the middleware stack.
 
-      pipeline.forEach (function (/*MiddlewareInterface*/ middleware)
+      middlewareStack.forEach (function (/*MiddlewareInterface*/ middleware)
       {
         middleware.build (fileGroup.dest, context.standaloneScripts);
       });
@@ -124,11 +124,11 @@ module.exports = function (grunt)
    */
   function loadMiddlewareModules ()
   {
-    var pipelineClasses = [];
+    var middlewareStackClasses = [];
 
     options.internalMiddleware.forEach (function (moduleName)
     {
-      pipelineClasses.push (require (moduleName));
+      middlewareStackClasses.push (require (moduleName));
     });
 
     if (options.externalMiddleware)
@@ -136,25 +136,25 @@ module.exports = function (grunt)
       {
         var module = require (info.load)
           , target = info.before || info.after
-          , i = pipelineClasses.indexOf (target);
+          , i = middlewareStackClasses.indexOf (target);
         if (~i)
           util.fatal ('The % middleware module was not found.', target);
-        pipelineClasses.splice (i + (info.before ? 0 : 1), 0, module);
+        middlewareStackClasses.splice (i + (info.before ? 0 : 1), 0, module);
       });
 
-    return pipelineClasses;
+    return middlewareStackClasses;
   }
 
   /**
    * Creates a new instance of each loaded middleware and assembles them into a sequential list.
-   * @param {MiddlewareInterface[]} pipelineClasses An ordered list of classes to be instantiated.
+   * @param {MiddlewareInterface[]} middlewareStackClasses An ordered list of classes to be instantiated.
    * @param {Context} context The build execution context.
    * @returns {MiddlewareInterface[]}
    */
-  function createPipeline (pipelineClasses, context)
+  function assembleMiddleware (middlewareStackClasses, context)
   {
     var middlewares = [];
-    pipelineClasses.forEach (function (MiddlewareClass)
+    middlewareStackClasses.forEach (function (MiddlewareClass)
     {
       middlewares.push (new MiddlewareClass (context));
     });
@@ -165,7 +165,7 @@ module.exports = function (grunt)
    * Traces a dependency graph for the specified module and calls the given callback
    * to process each required module in the correct loading order.
    * @param {string} moduleName
-   * @param {Context} context The execution context for the build pipeline.
+   * @param {Context} context The execution context for the middleware stack.
    * @param {function(ModuleDef)} processHook
    */
   function traceModule (moduleName, context, processHook)

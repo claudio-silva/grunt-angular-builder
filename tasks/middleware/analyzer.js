@@ -25,7 +25,7 @@ var ModuleDef = types.ModuleDef
  *
  * @constructor
  * @implements {MiddlewareInterface}
- * @param {Context} context The execution context for the build pipeline.
+ * @param {Context} context The execution context for the middleware stack.
  */
 function AnalyzerMiddleware (context)
 {

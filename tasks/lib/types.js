@@ -222,20 +222,20 @@ var TASK_OPTIONS = {
    */
   scriptsConfigProperty:     'requiredScripts',
   /**
-   * Allows loading 3rd party middlewares into the build pipeline.
+   * Allows loading 3rd party middlewares into the middleware stack.
    *
    * This option may define a list of external middleware modules to load and for each one, specify where
-   * to place it in the pipeline.
+   * to place it on the middleware stack.
    * Each element in the list defines a module name (with the `load` property) and either the `before` or
-   * `after` property with the name of a target module in the pipeline from where to insert the loaded one
+   * `after` property with the name of a target module on the middleware stack from where to insert the loaded one
    * before or after it.
-   * Note: internal middlewares are loaded into the pipeline before the external middlewares.
+   * Note: internal middlewares are loaded into the middleware stack before the external middlewares.
    * @type {Array.<{load: string, before?: string, after?: string}>|null}
    */
   externalMiddleware:        null,
   /**
    * Defines the list of middleware bundled with angular-builder.
-   * This is a list of modules names to load and assemble into a pipeline in the specified order.
+   * This is a list of modules names to load and assemble into a middleware stack in the specified order.
    * This is reserved for internal use, but could be overridden if you wish to replace some or all of the
    * built-in behavior.
    * WARNING: the order of middleware listed here is important! If you change it, the build process may fail!
@@ -304,7 +304,7 @@ GruntFilesArrayExt.prototype = {
  * Note: implementing classes must have a compatible constructor.
  *
  * @interface
- * @param {Context} context The execution context for the build pipeline.
+ * @param {Context} context The execution context for the middleware stack.
  */
 function MiddlewareInterface (context)
 {}
@@ -320,7 +320,7 @@ MiddlewareInterface.prototype = {
   /**
    * Scan a module for relevant information.
    * Invoked once for each required module in the application, in the order defined by the dependency graph.
-   * Each module, in turn, is passed trough all the middlewares on the pipeline.
+   * Each module, in turn, is passed trough all the middlewares on the stack.
    *
    * Note: external and excluded modules are never traced; dependencies of excluded modules may be traced.
    *
@@ -337,8 +337,8 @@ MiddlewareInterface.prototype = {
 };
 
 /**
- * The execution context for the build pipeline.
- * Contains shared information available throughout the middleware pipeline.
+ * The execution context for the middleware stack.
+ * Contains shared information available throughout the middleware stack.
  * @constructor
  * @param grunt The Grunt API.
  * @param task The currently executing Grunt task.

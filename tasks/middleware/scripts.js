@@ -11,7 +11,7 @@ module.exports = ScriptsMiddleware;
  * in the order defined by the modules' dependency graph.
  * @constructor
  * @implements {MiddlewareInterface}
- * @param {Context} context The execution context for the build pipeline.
+ * @param {Context} context The execution context for the middleware stack.
  */
 function ScriptsMiddleware (context)
 {

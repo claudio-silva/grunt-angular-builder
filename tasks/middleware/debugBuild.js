@@ -9,7 +9,7 @@ var util = require ('../lib/gruntUtil');
  * source scripts in the correct order. This is used on debug builds.
  * @constructor
  * @implements {MiddlewareInterface}
- * @param {Context} context The execution context for the build pipeline.
+ * @param {Context} context The execution context for the middleware stack.
  */
 function DebugBuildMiddleware (context)
 {
