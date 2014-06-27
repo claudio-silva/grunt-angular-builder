@@ -20,44 +20,44 @@ exports.detectInvalidSourceCode = function (source)
   var vm = require ('vm')
     , mockupMethod = function () { return angularModuleMockup; }
     , angularModuleMockup = {
-      animation:  mockupMethod,
-      config:     mockupMethod,
-      constant:   mockupMethod,
-      controller: mockupMethod,
-      directive:  mockupMethod,
-      factory:    mockupMethod,
-      filter:     mockupMethod,
-      provider:   mockupMethod,
-      run:        mockupMethod,
-      service:    mockupMethod,
-      value:      mockupMethod
-    }
+        animation:  mockupMethod,
+        config:     mockupMethod,
+        constant:   mockupMethod,
+        controller: mockupMethod,
+        directive:  mockupMethod,
+        factory:    mockupMethod,
+        filter:     mockupMethod,
+        provider:   mockupMethod,
+        run:        mockupMethod,
+        service:    mockupMethod,
+        value:      mockupMethod
+      }
     , noop = function () {}
     , consoleMockup = {
-      assert:         noop,
-      debug:          noop,
-      count:          noop,
-      error:          noop,
-      group:          noop,
-      groupCollapsed: noop,
-      groupEnd:       noop,
-      info:           noop,
-      log:            noop,
-      profile:        noop,
-      profileEnd:     noop,
-      time:           noop,
-      timeEnd:        noop,
-      timeStamp:      noop,
-      trace:          noop,
-      warn:           noop
-    }
+        assert:         noop,
+        debug:          noop,
+        count:          noop,
+        error:          noop,
+        group:          noop,
+        groupCollapsed: noop,
+        groupEnd:       noop,
+        info:           noop,
+        log:            noop,
+        profile:        noop,
+        profileEnd:     noop,
+        time:           noop,
+        timeEnd:        noop,
+        timeStamp:      noop,
+        trace:          noop,
+        warn:           noop
+      }
     , sandbox = {
-      angular: {
-        module: function () { return angularModuleMockup; }
-      },
-      console: consoleMockup,
-      window:  {}
-    };
+        angular: {
+          module: function () { return angularModuleMockup; }
+        },
+        console: consoleMockup,
+        window:  {}
+      };
   try {
     vm.runInNewContext (source, sandbox);
     delete sandbox.angular;

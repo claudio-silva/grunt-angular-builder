@@ -31,41 +31,43 @@ module.exports = function (grunt)
     },
 
     'angular-builder': {
-      'test-js-app':      {
+      'test-js-app':              {
         options: {
-          main:            'App',
+          mainModule:      'App',
           externalModules: 'Library1'
         },
         src:     'tests/js-only/**/*.js',
         dest:    'dist/main.js'
       },
-      'test-js-lib':      {
+      'test-js-lib':              {
         options: {
-          main:             'Library1',
-          renameModuleRefs: true
+          mainModule:     'Library1',
+          releaseBuilder: {
+            renameModuleRefs: true
+          }
         },
         src:     'tests/js-only/**/*.js',
         dest:    'dist/library1.js'
       },
-      'test-js-fail':     {
-      /** Warning: The module variable reference declare doesn't match the preset name
-          on the config setting moduleVar='module'. File: tests/js-only/extra/Submodule4.js */
+      'test-js-fail':             {
+        /** Warning: The module variable reference declare doesn't match the preset name
+         on the config setting moduleVar='module'. File: tests/js-only/extra/Submodule4.js */
         options: {
-          main: 'Library2'
+          mainModule: 'Library2'
         },
         src:     'tests/js-only/**/*.js',
         dest:    'dist/library2.js'
       },
-      'test-js-comments': {
+      'test-js-comments':         {
         options: {
-          main: 'Library3'
+          mainModule: 'Library3'
         },
         src:     'tests/js-only/**/*.js',
         dest:    'dist/library3.js'
       },
-      'test-stylesheets': {
+      'test-stylesheets':         {
         options: {
-          main: 'Submodule1'
+          mainModule: 'Submodule1'
         },
         src:     [
           'tests/stylesheets/submodule1/**/*.js',
@@ -73,27 +75,29 @@ module.exports = function (grunt)
         ],
         dest:    'dist/main.js'
       },
-      'test-assets':      {
+      'test-assets':              {
         options: {
-          main:            'App',
-          buildAssets:     true,
-          assetsTargetDir: 'styles',
-          symlinkAssets:   true
+          mainModule:    'App',
+          assetsBuilder: {
+            enabled:   true,
+            targetDir: 'styles',
+            symlink:   true
+          }
         },
         src:     'tests/stylesheets/**/*.js',
         dest:    'dist/main.js'
       },
-      'test-3rd-party':   {
+      'test-3rd-party':           {
         options:      {
-          main: 'App'
+          mainModule: 'App'
         },
         src:          'tests/3rd-party/**/*.js',
         dest:         'dist/main.js',
         forceInclude: 'tests/3rd-party/angular-loader.js'
       },
-      'test-include-non-angular':   {
+      'test-include-non-angular': {
         options:      {
-          main: 'App'
+          mainModule: 'App'
         },
         src:          'tests/include-non-angular/**/*.js',
         dest:         'dist/main.js',
@@ -110,7 +114,7 @@ module.exports = function (grunt)
         src:  '<%= requiredStylesheets %>',
         dest: 'dist/styles/styles.css'
       },
-      '3rd-party':      {
+      '3rd-party':        {
         src:  'tests/3rd-party/index.html',
         dest: 'dist/index.html'
       }
@@ -149,6 +153,6 @@ module.exports = function (grunt)
   grunt.registerTask ('test-stylesheets', ['clean', 'angular-builder:test-stylesheets', 'concat:test-stylesheets']);
   grunt.registerTask ('test-assets', ['clean', 'angular-builder:test-assets', 'concat:test-assets']);
   grunt.registerTask ('test-3rd-party', ['clean', 'angular-builder:test-3rd-party', 'concat:3rd-party']);
-  grunt.registerTask ('test-include-non-angular',['clean', 'angular-builder:test-include-non-angular']);
+  grunt.registerTask ('test-include-non-angular', ['clean', 'angular-builder:test-include-non-angular']);
 
 };

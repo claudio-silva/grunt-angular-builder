@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = DebugBuildMiddleware;
+module.exports = DebugBuilderMiddleware;
 
 var util = require ('../lib/gruntUtil');
 
@@ -11,14 +11,14 @@ var util = require ('../lib/gruntUtil');
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function DebugBuildMiddleware (context)
+function DebugBuilderMiddleware (context)
 {
   /** @type {string[]} */
   var traceOutput = [];
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc
@@ -36,7 +36,7 @@ function DebugBuildMiddleware (context)
   {
     if (!context.debugBuild) return;
 
-    var rep = context.options.rebaseDebugUrls;
+    var rep = context.options.debugBuilder.rebaseDebugUrls;
     module.filePaths.forEach (function (path)
     {
       if (rep)

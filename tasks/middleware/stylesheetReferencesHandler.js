@@ -2,7 +2,7 @@
 
 var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
 
-module.exports = StylesheetsMiddleware;
+module.exports = StylesheetReferencesHandlerMiddleware;
 
 /**
  * Exports the paths of all stylesheets required by the application,
@@ -11,7 +11,7 @@ module.exports = StylesheetsMiddleware;
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function StylesheetsMiddleware (context)
+function StylesheetReferencesHandlerMiddleware (context)
 {
   var path = require ('path');
 
@@ -21,9 +21,9 @@ function StylesheetsMiddleware (context)
    */
   var paths = [];
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc
@@ -55,12 +55,12 @@ function StylesheetsMiddleware (context)
     /* jshint unused: vars */
 
     // Export file paths.
-    context.grunt.config (context.options.stylesheetsConfigProperty, paths);
+    context.grunt.config (context.options.stylesheetReferencesHandler.exportToConfigProperty, paths);
   };
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PRIVATE
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * Extracts file paths from embedded comment references to stylesheets and appends them to `paths`.

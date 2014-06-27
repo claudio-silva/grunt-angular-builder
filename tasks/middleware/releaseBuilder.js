@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = ReleaseBuildMiddleware;
+module.exports = ReleaseBuilderMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , sourceTrans = require ('../lib/sourceTrans')
@@ -30,7 +30,7 @@ var STAT = {
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function ReleaseBuildMiddleware (context)
+function ReleaseBuilderMiddleware (context)
 {
   var options = context.options;
   /**
@@ -46,9 +46,9 @@ function ReleaseBuildMiddleware (context)
   /** @type {string[]} */
   var traceOutput = [];
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc
@@ -68,7 +68,7 @@ function ReleaseBuildMiddleware (context)
 
     // Fist process the head module declaration.
     if (!module.head)
-      return util.warn('Module <cyan>%</cyan> has no declaration.', module.name);
+      return util.warn ('Module <cyan>%</cyan> has no declaration.', module.name);
     var head = optimize (module.head, module.filePaths[0], module);
 
     // Prevent the creation of an empty (or comments-only) self-invoking function.
@@ -79,13 +79,13 @@ function ReleaseBuildMiddleware (context)
         traceOutput.push (head.data);
       // Output a module declaration with no definitions.
       traceOutput.push (sprintf ('angular.module (\'%\', %);%', module.name,
-          util.toQuotedList (module.requires), options.moduleFooter)
+          util.toQuotedList (module.requires), options.releaseBuilder.moduleFooter)
       );
     }
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
     else {
       // Begin closure.
-      traceOutput.push ('(function (' + options.moduleVar + ') {\n');
+      traceOutput.push ('(function (' + options.releaseBuilder.moduleVar + ') {\n');
       // Insert module declaration.
       traceOutput.push (conditionalIndent (head));
       // Insert additional module definitions.
@@ -95,7 +95,7 @@ function ReleaseBuildMiddleware (context)
       }
       // End closure.
       traceOutput.push (sprintf ('\n}) (angular.module (\'%\', %%));%', module.name,
-        util.toQuotedList (module.requires), module.configFn || '', options.moduleFooter));
+        util.toQuotedList (module.requires), module.configFn || '', options.releaseBuilder.moduleFooter));
     }
   };
 
@@ -110,9 +110,9 @@ function ReleaseBuildMiddleware (context)
     util.writeFile (targetScript, traceOutput.join (NL));
   };
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PRIVATE
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * Calls sourceTrans.optimize() and handles the result.
@@ -125,7 +125,7 @@ function ReleaseBuildMiddleware (context)
    */
   function optimize (source, path, module)
   {
-    var result = sourceTrans.optimize (source, module.name, options.moduleVar);
+    var result = sourceTrans.optimize (source, module.name, options.releaseBuilder.moduleVar);
     var stat = sourceTrans.TRANS_STAT;
     switch (result.status) {
 
@@ -136,7 +136,8 @@ function ReleaseBuildMiddleware (context)
         //----------------------------------------------------------
         return /** @type {OperationResult} */ {
           status: STAT.INDENTED,
-          data:   sourceTrans.renameModuleRefExps (module, options.indent + result.data, options.moduleVar)
+          data:   sourceTrans.renameModuleRefExps (module, options.releaseBuilder.indent + result.data,
+            options.releaseBuilder.moduleVar)
         };
 
 
@@ -159,7 +160,7 @@ function ReleaseBuildMiddleware (context)
         // Either the code is valid or --force was used, so process it.
         return /** @type {OperationResult} */ {
           status: STAT.OK,
-          data:   sourceTrans.renameModuleRefExps (module, source, options.moduleVar)
+          data:   sourceTrans.renameModuleRefExps (module, source, options.releaseBuilder.moduleVar)
         };
 
 
@@ -171,17 +172,18 @@ function ReleaseBuildMiddleware (context)
         //----------------------------------------------------------
         /** @type {ModuleClosureInfo} */
         var modInfo = result.data;
-        if (!options.renameModuleRefs) {
+        if (!options.releaseBuilder.renameModuleRefs) {
           warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config setting ' +
               '<cyan>moduleVar=\'%\'</cyan>.%%%',
-            modInfo.moduleVar, options.moduleVar, NL, reportErrorLocation (path),
+            modInfo.moduleVar, options.releaseBuilder.moduleVar, NL, reportErrorLocation (path),
             getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
           );
           // If --force, continue.
         }
         return /** @type {OperationResult} */ {
           status: STAT.OK,
-          data:   sourceTrans.renameModuleVariableRefs (modInfo.closureBody, modInfo.moduleVar, options.moduleVar)
+          data:   sourceTrans.renameModuleVariableRefs (modInfo.closureBody, modInfo.moduleVar,
+            options.releaseBuilder.moduleVar)
         };
 
 
@@ -206,7 +208,7 @@ function ReleaseBuildMiddleware (context)
    */
   function conditionalIndent (result)
   {
-    return result.status === STAT.INDENTED ? result.data : indent (result.data, 1, options.indent);
+    return result.status === STAT.INDENTED ? result.data : indent (result.data, 1, options.releaseBuilder.indent);
   }
 
   /**

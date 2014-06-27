@@ -2,7 +2,7 @@
 
 var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
 
-module.exports = TemplatesMiddleware;
+module.exports = TemplateReferencesHandlerMiddleware;
 
 /**
  * Exports the paths of all templates required by the application,
@@ -11,7 +11,7 @@ module.exports = TemplatesMiddleware;
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function TemplatesMiddleware (context)
+function TemplateReferencesHandlerMiddleware (context)
 {
   var path = require ('path');
 
@@ -21,9 +21,9 @@ function TemplatesMiddleware (context)
    */
   var paths = [];
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc
@@ -55,12 +55,12 @@ function TemplatesMiddleware (context)
     /* jshint unused: vars */
 
     // Export file paths.
-    context.grunt.config (context.options.templatesConfigProperty, paths);
+    context.grunt.config (context.options.templateReferencesHandler.exportToConfigProperty, paths);
   };
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PRIVATE
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * Extracts file paths from embedded comment references to templates and appends them to `paths`.

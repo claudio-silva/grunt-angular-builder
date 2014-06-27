@@ -70,51 +70,14 @@ ModuleDef.prototype = {
  * Defaults for task options.
  */
 var TASK_OPTIONS = {
+  /*==================================================================================================================
+   * Common options
+   *=================================================================================================================*/
   /**
    * Main module name. Only this module and its dependencies will be exported.
    * @type {string}
    */
-  main:                      '',
-  /**
-   * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
-   * functions.
-   * You may select another identifier if the default one causes a conflict with existing code.
-   * @type {string}
-   */
-  moduleVar:                 'module',
-  /**
-   * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be renamed to
-   * <code>config.moduleVar</code>.
-   *
-   * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on
-   * <code>config.moduleVar</code>, a warning will be issued and the task may stop, unless the `--force` option is
-   * specified.
-   * @type {boolean}
-   */
-  renameModuleRefs:          false,
-  /**
-   * When `false`, required assets are copied to the assets target directory.
-   *
-   * When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk
-   * space.
-   *
-   * If your operating system does not support symlinks, or if you want to archive or upload the build output, use
-   * `false`.
-   * @type {boolean}
-   */
-  symlinkAssets:             true,
-  /**
-   * Set to `true` to enable the assets builder.
-   * @type {boolean}
-   */
-  buildAssets:               false,
-  /**
-   * Directory path that will be used as the reference point from where relative asset urls are calculated.
-   * This determines where assets are exported to.
-   * If you specify a relative path, it is resolved from the current filegroup's destination folder.
-   * @type {string}
-   */
-  assetsTargetDir:           '',
+  mainModule:                  '',
   /**
    * Code packaging method.
    *
@@ -128,7 +91,7 @@ var TASK_OPTIONS = {
    * Use the `debug` task argument instead.
    * @type {boolean}
    */
-  debug:                     false,
+  debugBuild:                  false,
   /**
    * A list of module names to ignore when building.
    * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that
@@ -139,14 +102,14 @@ var TASK_OPTIONS = {
    * name is not present on this list.
    * @type {string|string[]}
    */
-  externalModules:           '',
+  externalModules:             '',
   /**
    * A list of framework built-in modules (ex. 'ng') that will always be appended to the `externalModules` list when
    * running tasks, so that references to them are ignored by the builder.
    * This is reserved for internal use, but could be overridden if you wish to completely replace the built-in behavior.
    * @type {string[]}
    */
-  builtinModules:            ['ng'],
+  builtinModules:              ['ng'],
   /**
    * A list of modules to be excluded from the build.
    *
@@ -155,7 +118,7 @@ var TASK_OPTIONS = {
    * One typical use for this is to exclude the main module from one or more build tasks.
    * @type {string[]}
    */
-  excludedModules:           [],
+  excludedModules:             [],
   /**
    * A list of modules to be included in the build.
    * This allows a task to synthesize the main module's dependencies.
@@ -176,51 +139,14 @@ var TASK_OPTIONS = {
    *
    * @type {string[]}
    */
-  mainModuleDependencies:    [],
+  mainModuleDependencies:      [],
   /**
    * A list of file paths to prepend to the build output.
    * This forces the inclusion of specific script files, independently of any source file scanning performed
    * by Grunt.
    * @type {string[]}
    */
-  require:                   [],
-  /**
-   * Indentation white space for one level.
-   * You may, for instance, configure it for tabs or additional spaces.
-   * @type {string}
-   */
-  indent:                    '  ',
-  /**
-   * This string will be appended to each module definition block.
-   * Use this to increase the readability of the generated script by visually separating each module from the previous
-   * one.
-   * @type {string}
-   */
-  moduleFooter:              NL + NL + NL,
-  /**
-   * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
-   * @type {{match:RegExp|string,replaceWith:string}[]|null}
-   */
-  rebaseDebugUrls:           null,
-  /**
-   * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
-   * These stylesheets are those required by javascript files included in the build via build-directives.
-   * @type {string}
-   */
-  stylesheetsConfigProperty: 'requiredStylesheets',
-  /**
-   * The name of the Gruntfile config property to where the list of required template paths will be exported.
-   * These HTML templates are those required by javascript files included in the build via build-directives.
-   * @type {string}
-   */
-  templatesConfigProperty:   'requiredTemplates',
-  /**
-   * The name of the Gruntfile config property to where the list of required script paths will be exported.
-   * These scripts are all those that are actually required by your project, including forced includes and
-   * files included via build-directives.
-   * @type {string}
-   */
-  scriptsConfigProperty:     'requiredScripts',
+  require:                     [],
   /**
    * Allows loading 3rd party middlewares into the middleware stack.
    *
@@ -232,7 +158,7 @@ var TASK_OPTIONS = {
    * Note: internal middlewares are loaded into the middleware stack before the external middlewares.
    * @type {Array.<{load: string, before?: string, after?: string}>|null}
    */
-  externalMiddleware:        null,
+  externalMiddleware:          null,
   /**
    * Defines the list of middleware bundled with angular-builder.
    * This is a list of modules names to load and assemble into a middleware stack in the specified order.
@@ -242,17 +168,137 @@ var TASK_OPTIONS = {
    * @type {string[]}
    * @const
    */
-  internalMiddleware:        [
+  internalMiddleware:          [
     './middleware/analyzer',
-    './middleware/exportPaths',
-    './middleware/scripts',
-    './middleware/nonAngularScripts',
-    './middleware/debugBuild',
-    './middleware/releaseBuild',
-    './middleware/stylesheets',
-    './middleware/templates',
-    './middleware/assets'
-  ]
+    './middleware/sourceCodePathsExporter',
+    './middleware/requiredScriptsHandler',
+    './middleware/nonAngularScriptsBuilder',
+    './middleware/debugBuilder',
+    './middleware/releaseBuilder',
+    './middleware/stylesheetReferencesHandler',
+    './middleware/templateReferencesHandler',
+    './middleware/assetReferencesHandler'
+  ],
+  //==================================================================================================================
+  /** Options specific to the debug builder middleware. */
+  //==================================================================================================================
+  debugBuilder:                {
+    /**
+     * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
+     * @type {{match:RegExp|string,replaceWith:string}[]|null}
+     */
+    rebaseDebugUrls: null
+  },
+  //==================================================================================================================
+  /** Options specific to the release builder middleware. */
+  //==================================================================================================================
+  releaseBuilder:              {
+    /**
+     * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
+     * functions.
+     * You may select another identifier if the default one causes a conflict with existing code.
+     * @type {string}
+     */
+    moduleVar:        'module',
+    /**
+     * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be
+     * renamed to <code>config.moduleVar</code>.
+     *
+     * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on
+     * <code>config.moduleVar</code>, a warning will be issued and the task may stop, unless the `--force` option is
+     * specified.
+     * @type {boolean}
+     */
+    renameModuleRefs: false,
+    /**
+     * Indentation white space for one level.
+     * You may, for instance, configure it for tabs or additional spaces.
+     * @type {string}
+     */
+    indent:           '  ',
+    /**
+     * This string will be appended to each module definition block.
+     * Use this to increase the readability of the generated script by visually separating each module from the previous
+     * one.
+     * @type {string}
+     */
+    moduleFooter:     NL + NL + NL
+  },
+  //==================================================================================================================
+  /** Options specific to the Asset References Handler middleware. */
+  //==================================================================================================================
+  assetReferencesHandler:      {
+    /**
+     * Set to `true` to enable the assets builder.
+     * @type {boolean}
+     */
+    enabled:   false,
+    /**
+     * Directory path that will be used as the reference point from where relative asset urls are calculated.
+     * This determines where assets are exported to.
+     * If you specify a relative path, it is resolved from the current filegroup's destination folder.
+     * @type {string}
+     */
+    targetDir: '',
+    /**
+     * When `false`, required assets are copied to the assets target directory.
+     *
+     * When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk
+     * space.
+     *
+     * If your operating system does not support symlinks, or if you want to archive or upload the build output, use
+     * `false`.
+     * @type {boolean}
+     */
+    symlink:   true
+  },
+  //==================================================================================================================
+  /** Options specific to the Source Code Paths Exporter middleware. */
+  //==================================================================================================================
+  sourceCodePathsExporter:     {
+    /**
+     * The name of the Gruntfile config property to where the list of required script paths will be exported.
+     * These scripts are all those that are actually required by your project, including forced includes and
+     * files included via build-directives.
+     * @type {string}
+     */
+    exportToConfigProperty: 'requiredScripts'
+  },
+  //==================================================================================================================
+  /** Options specific to the Stylesheet References Handler middleware. */
+  //==================================================================================================================
+  stylesheetReferencesHandler: {
+    /**
+     * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
+     * These stylesheets are those required by javascript files included in the build via build-directives.
+     * @type {string}
+     */
+    exportToConfigProperty: 'requiredStylesheets'
+  },
+  //==================================================================================================================
+  /** Options specific to the Template References Handler middleware. */
+  //==================================================================================================================
+  templateReferencesHandler:   {
+    /**
+     * The name of the Gruntfile config property to where the list of required template paths will be exported.
+     * These HTML templates are those required by javascript files included in the build via build-directives.
+     * @type {string}
+     */
+    exportToConfigProperty: 'requiredTemplates'
+  },
+  //==================================================================================================================
+  /** Options specific to the Include Required Scripts Handler middleware. */
+  //==================================================================================================================
+  requiredScriptsHandler:      {
+    // No options available.
+  },
+  //==================================================================================================================
+  /** Options specific to the Non-Angular Scripts Builder middleware. */
+  //==================================================================================================================
+  nonAngularScriptsBuilder:    {
+    // No options available.
+  }
+  //==================================================================================================================
 };
 
 /**
@@ -348,7 +394,7 @@ function Context (grunt, task)
   this.grunt = grunt;
   this.options = task.options (TASK_OPTIONS);
   this.debugBuild = grunt.option ('build') === 'debug' ||
-    (task.flags.debug === undefined ? this.options.debug : task.flags.debug);
+    (task.flags.debug === undefined ? this.options.debugBuild : task.flags.debug);
   // Clone the external modules and use it as a starting point.
   this.modules = nodeUtil._extend ({}, this._setupExternalModules ());
   // Reset tracer.

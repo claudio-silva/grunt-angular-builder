@@ -351,9 +351,9 @@ function createFileTree (filePaths)
 {
   var path = require ('path')
     , root = {
-      files:      [],
-      subfolders: {}
-    };
+        files:      [],
+        subfolders: {}
+      };
 
   filePaths.forEach (function (filename)
   {

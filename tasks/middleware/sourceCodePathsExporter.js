@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = ExportPathsMiddleware;
+module.exports = ExportSourceCodePathsMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , arrayAppend = util.arrayAppend;
@@ -12,7 +12,7 @@ var util = require ('../lib/gruntUtil')
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function ExportPathsMiddleware (context)
+function ExportSourceCodePathsMiddleware (context)
 {
   /**
    * Paths of all the required files (excluding standalone scripts) in the correct loading order.
@@ -20,9 +20,9 @@ function ExportPathsMiddleware (context)
    */
   var tracedPaths = [];
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc
@@ -65,6 +65,6 @@ function ExportPathsMiddleware (context)
 
     // Export.
 
-    context.grunt.config (context.options.scriptsConfigProperty, scripts);
+    context.grunt.config (context.options.sourceCodePathsExporter.exportToConfigProperty, scripts);
   };
 }

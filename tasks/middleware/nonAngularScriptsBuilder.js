@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = NonAngularScriptsMiddleware;
+module.exports = NonAngularScriptsBuilderMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , NL = util.NL;
@@ -18,11 +18,11 @@ var util = require ('../lib/gruntUtil')
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function NonAngularScriptsMiddleware (context)
+function NonAngularScriptsBuilderMiddleware (context)
 {
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc

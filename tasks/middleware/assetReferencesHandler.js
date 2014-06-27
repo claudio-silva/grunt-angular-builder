@@ -2,7 +2,7 @@
 
 var MATCH_URLS = /\burl\s*\(\s*('|")?\s*(.*?)\s*\1?\s*\)/gi;
 
-module.exports = AssetsMiddleware;
+module.exports = AssetReferencesHandlerMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , path = require ('path')
@@ -14,7 +14,7 @@ var util = require ('../lib/gruntUtil')
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function AssetsMiddleware (context)
+function AssetReferencesHandlerMiddleware (context)
 {
   var grunt = context.grunt;
 
@@ -26,9 +26,9 @@ function AssetsMiddleware (context)
    */
   var exportedAssets = {};
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc
@@ -54,8 +54,9 @@ function AssetsMiddleware (context)
    */
   this.build = function (targetScript)
   {
-    if (!context.options.buildAssets) return;
-    var stylehseets = grunt.config (context.options.stylesheetsConfigProperty); // Import file paths.
+    if (!context.options.assetReferencesHandler.enabled) return;
+    // Import file paths.
+    var stylehseets = grunt.config (context.options.stylesheetReferencesHandler.exportToConfigProperty);
     if (!stylehseets) return; // No stylesheet sources are configured.
     var targetPath = path.dirname (targetScript);
     stylehseets.forEach (function (filePath)
@@ -66,9 +67,9 @@ function AssetsMiddleware (context)
 
   };
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PRIVATE
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * Scans a stylesheet for asset URL references and copies the assets to the build folder.
@@ -84,7 +85,7 @@ function AssetsMiddleware (context)
       var url = match[2];
       if (!url.match (/^http/i) && url[0] !== '/') { // Skip absolute URLs
         var absSrcPath = path.resolve (basePath, url)
-          , absDestPath = path.resolve (targetPath, context.options.assetsTargetDir, url)
+          , absDestPath = path.resolve (targetPath, context.options.assetReferencesHandler.targetDir, url)
           , relDestPath = path.relative (targetPath, absDestPath);
         if (relDestPath[0] === '.')
           return util.warn ('Relative asset url falls outside the build folder: <cyan>%</cyan>%', url, util.NL);
@@ -93,7 +94,7 @@ function AssetsMiddleware (context)
         else exportedAssets[absDestPath] = true;
         var absTargetFolder = path.dirname (absDestPath);
         grunt.file.mkdir (absTargetFolder);
-        if (context.options.symlinkAssets)
+        if (context.options.assetReferencesHandler.symlink)
           fs.symlinkSync (absSrcPath, absDestPath);
         else grunt.file.copy (absSrcPath, absDestPath);
       }

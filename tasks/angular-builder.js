@@ -49,7 +49,7 @@ module.exports = function (grunt)
     // Merge task-specific and/or target-specific options with these defaults.
     options = this.options (types.TASK_OPTIONS);
 
-    if (!options.main)
+    if (!options.mainModule)
       fatal ('No main module is defined.');
 
     if (!this.files.length)
@@ -101,7 +101,7 @@ module.exports = function (grunt)
 
       // Trace the dependency graph and pass each module trough the 2nd stage of the middleware stack.
 
-      traceModule (options.main, context, function (/*ModuleDef*/module)
+      traceModule (options.mainModule, context, function (/*ModuleDef*/module)
       {
         middlewareStack.forEach (function (/*MiddlewareInterface*/ middleare)
         {

@@ -4,16 +4,16 @@ var util = require ('../lib/gruntUtil');
 
 var MATCH_DIRECTIVE = /\/\/#\s*require\s*\((.*?)\)/g;
 
-module.exports = ScriptsMiddleware;
+module.exports = RequiredScriptsHandlerMiddleware;
 
 /**
- * Exports the paths of all extra scripts required explicitly by build-directives,
+ * Exports to the context the paths of all extra scripts required explicitly by build-directives,
  * in the order defined by the modules' dependency graph.
  * @constructor
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function ScriptsMiddleware (context)
+function RequiredScriptsHandlerMiddleware (context)
 {
   var path = require ('path');
 
@@ -37,9 +37,9 @@ function ScriptsMiddleware (context)
    */
   var references = {};
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * @inheritDoc
@@ -87,9 +87,9 @@ function ScriptsMiddleware (context)
     }
   };
 
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // PRIVATE
-  //-------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   /**
    * Extracts file paths from embedded comment references to scripts and appends them to `paths`.
