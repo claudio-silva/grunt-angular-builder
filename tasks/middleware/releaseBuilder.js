@@ -1,6 +1,9 @@
 /**
- * @license
  * Angular Builder middleware module.
+ *
+ * @module middleware/releaseBuilder
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -17,6 +20,9 @@ exports.options = TaskOptions;
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
+/**
+ * @constructor
+ */
 function TaskOptions () {}
 
 TaskOptions.prototype = {
@@ -105,18 +111,12 @@ function ReleaseBuilderMiddleware (context)
   // PUBLIC API
   //--------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * @inheritDoc
-   */
   this.analyze = function (filesArray)
   {
     /* jshint unused: vars */
     // Do nothing
   };
 
-  /**
-   * @inheritDoc
-   */
   this.trace = function (/*ModuleDef*/ module)
   {
     if (context.debugBuild) return;
@@ -154,10 +154,6 @@ function ReleaseBuilderMiddleware (context)
     }
   };
 
-  /**
-   * @inheritDoc
-   * @param {string} targetScript Path to the output script.
-   */
   this.build = function (targetScript)
   {
     if (context.debugBuild) return;

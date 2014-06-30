@@ -30,8 +30,10 @@
   },
   "devDependencies": {
     "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.7.1",
     "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-jshint": "~0.7.1",
+    "grunt-jsdoc": "^0.5.6",
+    "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "time-grunt": "*"
   },
   "peerDependencies": {

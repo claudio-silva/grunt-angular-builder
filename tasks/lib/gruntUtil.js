@@ -1,12 +1,19 @@
 /**
- * @license
  * A set of utility functions for use with Grunt.
+ *
+ * @module lib/gruntUtil
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
  */
 'use strict';
 
+/**
+ * Test
+ * @type {exports}
+ */
 var nodeUtil = require ('util');
 
 /*
@@ -53,13 +60,14 @@ exports.init = function (gruntInstance)
 /**
  * Copies properties recursively from each of the source objects to the target object.
  *
+ * Variable arguments: {...Object} Source objects.
+ *
  * Notes:
  * - Properties inherited from the prototype chain are also copied.
  * - Copied properties of object type are merged with the target.
  * - Copied properties of array type are not merged, they are are cloned (the array items are still the original).
  *
  * @param {Object} t Target.
- * @param {...Object} s Sources; variable number of arguments
  */
 exports.extend = function extend (t)
 {
@@ -107,7 +115,8 @@ exports.sprintf = function (str)
 /**
  * Outputs to the console a string representation of each argument.
  * For objects, the output includes properties inherited from the prototype chain.
- * @param {...*} args
+ *
+ * Variable arguments: {...Object} Source objects.
  */
 exports.debug = function ()
 {
@@ -372,13 +381,15 @@ exports.arrayAppend = function (target, src)
  * Placeholders are represented by the symbol %.
  * To colorize, use markup with the syntax: <code>&lt;color_name>text&lt;/color_name></code>
  * Warning: do not nest color tags!
+ *
+ * Variable arguments: {...string|...number} - values for each placeholder in <code>str</code>.
+ *
  * @param {string} baseColor The base color for the string. Segments with other colors will resume the base color where
  * they end.
  * @param {string} str The string to be formatted.
- * @param {...string|...number} args Values for each placeholder in <code>str</code>.
  * @returns {string}
  */
-function csprintf (baseColor, str, args)
+function csprintf (baseColor, str)
 {
   /*jshint unused:false */
   str = exports.sprintf.apply (null, [].slice.call (arguments, 1));
@@ -397,9 +408,9 @@ function csprintf (baseColor, str, args)
 }
 
 /**
- * @private
  * Similar to <code>csprintf</code> but supports an <code>args</code> argument that should receive a function's
  * <code>arguments</code> array-like object.
+ * @private
  *
  * @param {string} baseColor Color name.
  * @param {Object} args Should be a function's <code>arguments</code> array-like object.

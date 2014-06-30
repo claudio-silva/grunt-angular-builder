@@ -1,6 +1,9 @@
 /**
- * @license
  * Angular Builder middleware module.
+ *
+ * @module middleware/assetReferencesHandler
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -20,6 +23,9 @@ var MATCH_URLS = /\burl\s*\(\s*('|")?\s*(.*?)\s*\1?\s*\)/gi;
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
+/**
+ * @constructor
+ */
 function TaskOptions () {}
 
 TaskOptions.prototype = {
@@ -77,28 +83,18 @@ function AssetReferencesHandlerMiddleware (context)
   // PUBLIC API
   //--------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * @inheritDoc
-   */
   this.analyze = function (filesArray)
   {
     /* jshint unused: vars */
     // Do nothing
   };
 
-  /**
-   * @inheritDoc
-   */
   this.trace = function (module)
   {
     /* jshint unused: vars */
     // Do nothing.
   };
 
-  /**
-   * @inheritDoc
-   * @param {string} targetScript Path to the output script.
-   */
   this.build = function (targetScript)
   {
     if (!context.options.assetReferencesHandler.enabled) return;

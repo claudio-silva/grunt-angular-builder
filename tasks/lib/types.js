@@ -1,6 +1,9 @@
 /**
- * @license
  * Angular Builder's data types.
+ *
+ * @module lib/types
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -18,6 +21,8 @@ var util = require ('./gruntUtil')
  * Angular Builder's task options.
  *
  * Note: Middleware classes augment this class with their own options.
+ *
+ * @constructor
  */
 function TaskOptions ()
 {}
@@ -85,7 +90,7 @@ TaskOptions.prototype = {
    * `after` property with the name of a target module on the middleware stack from where to insert the loaded one
    * before or after it.
    * Note: internal middlewares are loaded into the middleware stack before the external middlewares.
-   * @type {Array.<{load: string, before?: string, after?: string}>|null}
+   * @type {Array.<{load: string, before: ?string, after: ?string}>|null}
    */
   externalMiddleware:     null,
   /**
@@ -343,8 +348,8 @@ ModuleDef.prototype = {
    */
   external:  false,
   /**
-   * @type {string|undefined}
    * Third parameter of a module declaration, if present.
+   * @type {string|undefined}
    */
   configFn:  undefined
 };

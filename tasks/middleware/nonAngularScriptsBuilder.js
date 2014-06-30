@@ -1,6 +1,9 @@
 /**
- * @license
  * Angular Builder middleware module.
+ *
+ * @module middleware/nonAngularScriptsBuilder
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -31,28 +34,18 @@ function NonAngularScriptsBuilderMiddleware (context)
   // PUBLIC API
   //--------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * @inheritDoc
-   */
   this.analyze = function (filesArray)
   {
     /* jshint unused: vars */
     // Do nothing
   };
 
-  /**
-   * @inheritDoc
-   */
   this.trace = function (module)
   {
     /* jshint unused: vars */
     // Do nothing
   };
 
-  /**
-   * @inheritDoc
-   * @param {string} targetScript Path to the output script.
-   */
   this.build = function (targetScript)
   {
     // Output the standalone scripts (if any).

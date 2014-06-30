@@ -1,6 +1,9 @@
 /**
- * @license
  * Angular Builder middleware module.
+ *
+ * @module middleware/mainModuleSynthetizer
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -14,6 +17,9 @@ exports.options = TaskOptions;
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
+/**
+ * @constructor
+ */
 function TaskOptions () {}
 
 TaskOptions.prototype = {
@@ -63,27 +69,17 @@ function MainModuleSynthetizerMiddleware (context)
   // PUBLIC API
   //--------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * @inheritDoc
-   */
   this.analyze = function (filesArray)
   {
     /* jshint unused: vars */
     // Do nothing
   };
 
-  /**
-   * @inheritDoc
-   */
   this.trace = function (module)
   {
     /* jshint unused: vars */
   };
 
-  /**
-   * @inheritDoc
-   * @param {string} targetScript Path to the output script.
-   */
   this.build = function (targetScript)
   {
     /* jshint unused: vars */

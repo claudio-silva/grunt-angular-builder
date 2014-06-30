@@ -1,6 +1,9 @@
 /**
- * @license
  * Angular Builder middleware module.
+ *
+ * @module middleware/requiredScriptsHandler
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -48,18 +51,12 @@ function RequiredScriptsHandlerMiddleware (context)
   // PUBLIC API
   //--------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * @inheritDoc
-   */
   this.analyze = function (filesArray)
   {
     /* jshint unused: vars */
     // Do nothing
   };
 
-  /**
-   * @inheritDoc
-   */
   this.trace = function (module)
   {
     util.info ("Scanning <cyan>%</cyan> for non-angular script dependencies...", module.name);
@@ -70,10 +67,6 @@ function RequiredScriptsHandlerMiddleware (context)
     });
   };
 
-  /**
-   * @inheritDoc
-   * @param {string} targetScript Path to the output script.
-   */
   this.build = function (targetScript)
   {
     /* jshint unused: vars */

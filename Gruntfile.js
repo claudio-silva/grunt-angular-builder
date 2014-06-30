@@ -118,6 +118,18 @@ module.exports = function (grunt)
         src:  'tests/3rd-party/index.html',
         dest: 'dist/index.html'
       }
+    },
+
+    jsdoc: {
+      dist: {
+        // Force usage of JSDoc 3.3.0
+        jsdoc:   "./node_modules/.bin/jsdoc",
+        src:     ['tasks/**/*.js'],
+        options: {
+          destination: 'doc',
+          configure:   'jsdoc.json'
+        }
+      }
     }
 
   });
@@ -129,9 +141,12 @@ module.exports = function (grunt)
   grunt.loadNpmTasks ('grunt-contrib-jshint');
   grunt.loadNpmTasks ('grunt-contrib-clean');
   grunt.loadNpmTasks ('grunt-contrib-concat');
+  grunt.loadNpmTasks ('grunt-jsdoc');
 
   // By default, lint and run all tests.
   grunt.registerTask ('default', ['jshint']);
+
+  grunt.registerTask ('doc', ['jsdoc']);
 
   // Test tasks below can also be executed with the command line option `--build debug` to generate debug builds.
 

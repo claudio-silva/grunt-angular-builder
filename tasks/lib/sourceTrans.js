@@ -1,6 +1,9 @@
 /**
- * @license
  * A javascript source code transformation library.
+ *
+ * @module lib/sourceTrans
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.

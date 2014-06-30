@@ -1,6 +1,9 @@
 /**
- * @license
  * An AngularJS source code loader and analyser.
+ *
+ * @module middleware/analyzer
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -35,10 +38,6 @@ function AnalyzerMiddleware (context)
   // PUBLIC API
   //--------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * @inheritDoc
-   * @param {GruntFilesArrayExt} filesArray The set of source code files to be processed.
-   */
   this.analyze = function (filesArray)
   {
     var src = util.sortFilesBeforeSubfolders (filesArray.src);
@@ -70,20 +69,12 @@ function AnalyzerMiddleware (context)
 
   };
 
-  /**
-   * @inheritDoc
-   * @param {ModuleDef} module Gives you access to the module's metadata and its source code.
-   */
   this.trace = function (module)
   {
     /* jshint unused: vars */
     // Do nothing
   };
 
-  /**
-   * @inheritDoc
-   * @param {string} targetScript Path to the output script.
-   */
   this.build = function (targetScript)
   {
     /* jshint unused: vars */

@@ -1,6 +1,9 @@
 /**
- * @license
  * A javascript source code extraction library.
+ *
+ * @module lib/sourceExtract
+ *
+ * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -27,24 +30,24 @@ var tokenize = util.tokenize
  * </code>
  *//**
  * @name ModuleClosureInfo#moduleVar
- * @type {string}
  * Name of the closure parameter that receives a reference to the module.
+ * @type {string}
  *//**
  * @name ModuleClosureInfo#closureBody
- * @type {string}
  * Source code inside the closure.
+ * @type {string}
  *//**
  * @name ModuleClosureInfo#moduleDecl
- * @type {string}
  * Module declaration expression (<code>angular.module(...)</code>).
+ * @type {string}
  *//**
  * @name ModuleClosureInfo#moduleName
- * @type {string}
  * The name of the module being declared.
+ * @type {string}
  *//**
  * @name ModuleClosureInfo#moduleDeps
- * @type {string}
  * List of module dependencies.
+ * @type {string}
  */
 
 /**
@@ -54,25 +57,25 @@ var tokenize = util.tokenize
  * <code>angular.module('name')</code>.
  *//**
  * @name ModuleHeaderInfo#status
- * @type {EXTRACT_STAT}
  * The result status.
+ * @type {EXTRACT_STAT}
  *//**
  * @name ModuleHeaderInfo#name
- * @type {string}
  * Module name.
+ * @type {string}
  *//**
  * @name ModuleHeaderInfo#requires
- * @type {string[]|undefined}
  * List of module dependencies.
+ * @type {string[]|undefined}
  *//**
  * @name ModuleHeaderInfo#append
- * @type {boolean}
  * If <code>false</code> this module reference is declaring the module and its dependencies.
  * If <code>true</code> this module reference is appending definitions to a module declared elsewhere.
+ * @type {boolean}
  *//**
  * @name ModuleHeaderInfo#configFn
- * @type {string|undefined}
  * Third parameter of a module declaration, if present.
+ * @type {string|undefined}
  */
 
 /**
