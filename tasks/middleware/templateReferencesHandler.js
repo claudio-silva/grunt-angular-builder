@@ -1,8 +1,38 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
 
-var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
+exports.middleware = TemplateReferencesHandlerMiddleware;
+exports.options = TaskOptions;
 
-module.exports = TemplateReferencesHandlerMiddleware;
+//----------------------------------------------------------------------------------------------------------------------
+// OPTIONS
+//----------------------------------------------------------------------------------------------------------------------
+
+function TaskOptions () {}
+
+TaskOptions.prototype = {
+  /**
+   * Options specific to the Template References Handler middleware.
+   */
+  templateReferencesHandler: {
+    /**
+     * The name of the Gruntfile config property to where the list of required template paths will be exported.
+     * These HTML templates are those required by javascript files included in the build via build-directives.
+     * @type {string}
+     */
+    exportToConfigProperty: 'requiredTemplates'
+  }
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
 
 /**
  * Exports the paths of all templates required by the application,

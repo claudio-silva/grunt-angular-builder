@@ -1,6 +1,35 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
 
-module.exports = DebugBuilderMiddleware;
+exports.middleware = DebugBuilderMiddleware;
+exports.options = TaskOptions;
+
+//----------------------------------------------------------------------------------------------------------------------
+// OPTIONS
+//----------------------------------------------------------------------------------------------------------------------
+
+function TaskOptions () {}
+
+TaskOptions.prototype = {
+  /**
+   * Options specific to the debug builder middleware.
+   */
+  debugBuilder: {
+    /**
+     * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
+     * @type {{match:RegExp|string,replaceWith:string}[]|null}
+     */
+    rebaseDebugUrls: null
+  }
+};
+
+//----------------------------------------------------------------------------------------------------------------------
 
 var util = require ('../lib/gruntUtil');
 

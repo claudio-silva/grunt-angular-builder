@@ -1,8 +1,38 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
 
-var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
+exports.middleware = StylesheetReferencesHandlerMiddleware;
+exports.options = TaskOptions;
 
-module.exports = StylesheetReferencesHandlerMiddleware;
+//----------------------------------------------------------------------------------------------------------------------
+// OPTIONS
+//----------------------------------------------------------------------------------------------------------------------
+
+function TaskOptions () {}
+
+TaskOptions.prototype = {
+  /**
+   * Options specific to the Stylesheet References Handler middleware.
+   */
+  stylesheetReferencesHandler: {
+    /**
+     * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
+     * These stylesheets are those required by javascript files included in the build via build-directives.
+     * @type {string}
+     */
+    exportToConfigProperty: 'requiredStylesheets'
+  }
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
 
 /**
  * Exports the paths of all stylesheets required by the application,

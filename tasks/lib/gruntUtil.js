@@ -51,6 +51,44 @@ exports.init = function (gruntInstance)
 };
 
 /**
+ * Copies properties recursively from each of the source objects to the target object.
+ *
+ * Notes:
+ * - Properties inherited from the prototype chain are also copied.
+ * - Copied properties of object type are merged with the target.
+ * - Copied properties of array type are not merged, they are are cloned (the array items are still the original).
+ *
+ * @param {Object} t Target.
+ * @param {...Object} s Sources; variable number of arguments
+ */
+exports.extend = function extend (t)
+{
+  if (t === null || t === undefined)
+    t = {};
+  else if (typeof t !== 'object')
+    throw new TypeError ('Invalid target argument');
+  for (var i = 1, m = arguments.length, a, v; i < m; ++i) {
+    a = arguments[i];
+    if (typeof a !== 'object')
+      throw new TypeError ('Invalid source argument #' + i);
+    for (var k in a) {
+      v = a[k];
+      switch (Object.prototype.toString.call (v)) {
+        case '[object Object]':
+          t[k] = extend (t[k], v);
+          break;
+        case '[object Array]':
+          t[k] = v.slice ();
+          break;
+        default:
+          t[k] = v;
+      }
+    }
+  }
+  return t;
+};
+
+/**
  * A simplified string formatting function.
  * Inserts arguments into % placeholders on the given string.
  * @param {string} str The string to be formatted.
@@ -67,16 +105,46 @@ exports.sprintf = function (str)
 };
 
 /**
- * Outputs debug information to the console.
+ * Outputs to the console a string representation of each argument.
+ * For objects, the output includes properties inherited from the prototype chain.
  * @param {...*} args
  */
 exports.debug = function ()
 {
   Array.prototype.forEach.call (arguments, function (arg)
   {
-    console.log (nodeUtil.inspect (arg).yellow);
+    console.log (debug (arg, 0));
   });
-  console.log ('');
+
+  function debug (arg, depth)
+  {
+    var s = exports.strRepeat ('  ', depth);
+    if (typeof arg === 'object') {
+      var o = [];
+      if (arg instanceof Array) {
+        if (!arg.length)
+          o.push ('[]');
+        else {
+          o.push ('[', NL);
+          for (var i = 0; i < arg.length; ++i)
+            o.push (s, '  ', i, ': ', debug (arg[i], depth + 1), NL);
+          o.push (s, ']');
+        }
+      }
+      else {
+        o.push ('{');
+        var f = false;
+        for (var k in arg) {
+          f = true;
+          o.push (NL, s, '  ', k, ': ', debug (arg[k], depth + 1));
+        }
+        if (f) o.push (NL, s);
+        o.push ('}');
+      }
+      return o.join ('');
+    }
+    else return nodeUtil.inspect (arg, { showHidden: true, depth: 8, colors: true });
+  }
 };
 
 /**
@@ -269,7 +337,7 @@ exports.indent = function (text, level, indentStr)
   return text.split (/\r?\n/).map (function (line)
   {
     return line.trim () && (exports.strRepeat (indentStr || '  ', level || 1) + line);
-  }).join ('\n');
+  }).join (NL);
 };
 
 /**
@@ -280,7 +348,7 @@ exports.indent = function (text, level, indentStr)
  */
 exports.strRepeat = function (str, num)
 {
-  return new Array (num + 1).join (str);
+  return num ? new Array (num + 1).join (str) : '';
 };
 
 /**

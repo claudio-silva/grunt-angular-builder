@@ -7,7 +7,7 @@
  */
 'use strict';
 
-module.exports = AnalyzerMiddleware;
+exports.middleware = AnalyzerMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , types = require ('../lib/types')

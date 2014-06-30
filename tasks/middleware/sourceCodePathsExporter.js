@@ -1,6 +1,37 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
 
-module.exports = ExportSourceCodePathsMiddleware;
+exports.middleware = ExportSourceCodePathsMiddleware;
+exports.options = TaskOptions;
+
+//----------------------------------------------------------------------------------------------------------------------
+// OPTIONS
+//----------------------------------------------------------------------------------------------------------------------
+
+function TaskOptions () {}
+
+TaskOptions.prototype = {
+  /**
+   * Options specific to the Source Code Paths Exporter middleware.
+   */
+  sourceCodePathsExporter: {
+    /**
+     * The name of the Gruntfile config property to where the list of required script paths will be exported.
+     * These scripts are all those that are actually required by your project, including forced includes and
+     * files included via build-directives.
+     * @type {string}
+     */
+    exportToConfigProperty: 'requiredScripts'
+  }
+};
+
+//----------------------------------------------------------------------------------------------------------------------
 
 var util = require ('../lib/gruntUtil')
   , arrayAppend = util.arrayAppend;

@@ -1,12 +1,59 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
 
-var MATCH_URLS = /\burl\s*\(\s*('|")?\s*(.*?)\s*\1?\s*\)/gi;
-
-module.exports = AssetReferencesHandlerMiddleware;
+exports.middleware = AssetReferencesHandlerMiddleware;
+exports.options = TaskOptions;
 
 var util = require ('../lib/gruntUtil')
   , path = require ('path')
   , fs = require ('fs');
+
+var MATCH_URLS = /\burl\s*\(\s*('|")?\s*(.*?)\s*\1?\s*\)/gi;
+
+//----------------------------------------------------------------------------------------------------------------------
+// OPTIONS
+//----------------------------------------------------------------------------------------------------------------------
+
+function TaskOptions () {}
+
+TaskOptions.prototype = {
+  /**
+   * Options specific to the Asset References Handler middleware.
+   */
+  assetReferencesHandler: {
+    /**
+     * Set to `true` to enable the assets builder.
+     * @type {boolean}
+     */
+    enabled:   false,
+    /**
+     * Directory path that will be used as the reference point from where relative asset urls are calculated.
+     * This determines where assets are exported to.
+     * If you specify a relative path, it is resolved from the current filegroup's destination folder.
+     * @type {string}
+     */
+    targetDir: '',
+    /**
+     * When `false`, required assets are copied to the assets target directory.
+     *
+     * When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk
+     * space.
+     *
+     * If your operating system does not support symlinks, or if you want to archive or upload the build output, use
+     * `false`.
+     * @type {boolean}
+     */
+    symlink:   true
+  }
+};
+
+//----------------------------------------------------------------------------------------------------------------------
 
 /**
  * Exports the assets required by the application's modules.

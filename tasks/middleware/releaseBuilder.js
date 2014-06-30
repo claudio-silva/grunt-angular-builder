@@ -1,9 +1,65 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
 
-module.exports = ReleaseBuilderMiddleware;
-
 var util = require ('../lib/gruntUtil')
-  , sourceTrans = require ('../lib/sourceTrans')
+  , NL = util.NL;
+
+exports.middleware = ReleaseBuilderMiddleware;
+exports.options = TaskOptions;
+
+//----------------------------------------------------------------------------------------------------------------------
+// OPTIONS
+//----------------------------------------------------------------------------------------------------------------------
+
+function TaskOptions () {}
+
+TaskOptions.prototype = {
+  /**
+   * Options specific to the release builder middleware.
+   */
+  releaseBuilder: {
+    /**
+     * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
+     * functions.
+     * You may select another identifier if the default one causes a conflict with existing code.
+     * @type {string}
+     */
+    moduleVar:        'module',
+    /**
+     * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be
+     * renamed to <code>config.moduleVar</code>.
+     *
+     * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on
+     * <code>config.moduleVar</code>, a warning will be issued and the task may stop, unless the `--force` option is
+     * specified.
+     * @type {boolean}
+     */
+    renameModuleRefs: false,
+    /**
+     * Indentation white space for one level.
+     * You may, for instance, configure it for tabs or additional spaces.
+     * @type {string}
+     */
+    indent:           '  ',
+    /**
+     * This string will be appended to each module definition block.
+     * Use this to increase the readability of the generated script by visually separating each module from the previous
+     * one.
+     * @type {string}
+     */
+    moduleFooter:     NL + NL + NL
+  }
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+var sourceTrans = require ('../lib/sourceTrans')
   , sourceExtract = require ('../lib/sourceExtract');
 
 var indent = util.indent
@@ -11,8 +67,7 @@ var indent = util.indent
   , csprintf = util.csprintf
   , warn = util.warn
   , getExplanation = util.getExplanation
-  , reportErrorLocation = util.reportErrorLocation
-  , NL = util.NL;
+  , reportErrorLocation = util.reportErrorLocation;
 
 /**
  * Error codes returned by some functions in this module.

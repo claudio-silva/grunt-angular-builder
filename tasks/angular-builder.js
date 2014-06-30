@@ -1,6 +1,6 @@
 /**
  * @license
- * AngularJS Build Tool Grunt plugin.
+ * AngularJS Builder.
  * Copyright 2013 Cláudio Manuel Brás da Silva.
  * http://github.com/claudio-silva
  * Licensed under the MIT license.
@@ -18,6 +18,8 @@ var util = require ('./lib/gruntUtil')
   , types = require ('./lib/types');
 
 var Context = types.Context
+  , TaskOptions = types.TaskOptions
+  , extend = util.extend
   , fatal = util.fatal
   , info = util.info
   , writeln = util.writeln;
@@ -28,12 +30,6 @@ var Context = types.Context
  */
 module.exports = function (grunt)
 {
-  /**
-   * Task-specific options set on the Gruntfile.
-   * @type {TASK_OPTIONS}
-   */
-  var options;
-
   util.init (grunt);
 
 //------------------------------------------------------------------------------
@@ -46,20 +42,23 @@ module.exports = function (grunt)
     // SETUP
     //------------------
 
-    // Merge task-specific and/or target-specific options with these defaults.
-    options = this.options (types.TASK_OPTIONS);
-
-    if (!options.mainModule)
-      fatal ('No main module is defined.');
-
     if (!this.files.length)
       fatal ('No source files were defined.');
 
     /**
-     * An ordered list of middleware classes that will form the middleware stack.
+     * The default values for all of the Angular Builder's options.
+     * @type {TaskOptions}
+     */
+    var defaultOptions = new TaskOptions ();
+
+    /**
+     * An ordered list of middleware classes from which the middleware stack will be created later on.
+     *
+     * Note: when loading the middleware modules, the TaskOptions class becomes augmented with middleware-specific
+     * options.
      * @type {MiddlewareInterface[]}
      */
-    var middlewareStackClasses = loadMiddlewareModules ();
+    var middlewareStackClasses = loadMiddlewareModules (defaultOptions);
 
     //-------------------------
     // Process each file group
@@ -70,7 +69,10 @@ module.exports = function (grunt)
       // Note: source code analysis information for each file group is reset for each file group,
       // i.e. each group is an independent build.
 
-      var context = new Context (grunt, this);
+      var context = new Context (grunt, this, defaultOptions);
+
+      if (!context.options.mainModule)
+        fatal ('No main module is defined.');
 
       /**
        * The sequential list of loaded middleare.
@@ -101,7 +103,7 @@ module.exports = function (grunt)
 
       // Trace the dependency graph and pass each module trough the 2nd stage of the middleware stack.
 
-      traceModule (options.mainModule, context, function (/*ModuleDef*/module)
+      traceModule (context.options.mainModule, context, function (/*ModuleDef*/module)
       {
         middlewareStack.forEach (function (/*MiddlewareInterface*/ middleare)
         {
@@ -121,25 +123,36 @@ module.exports = function (grunt)
 
   /**
    * Loads all middlewares (both internal and external).
+   *
+   * @param {TaskOptions} options The task's base default options. Extended options contributed by middleware will be
+   * set in turn by each loaded middleware module.
+   * @return {Array}
    */
-  function loadMiddlewareModules ()
+  function loadMiddlewareModules (options)
   {
     var middlewareStackClasses = [];
 
     options.internalMiddleware.forEach (function (moduleName)
     {
-      middlewareStackClasses.push (require (moduleName));
+      var module = require (moduleName);
+      if (!module.middleware)
+        util.fatal ('No middleware found on module %.', moduleName);
+      if (module.options)
+        extend (options, new module.options ());
+      middlewareStackClasses.push (module.middleware);
     });
 
     if (options.externalMiddleware)
       options.externalMiddleware.forEach (function (info)
       {
-        var module = require (info.load)
-          , target = info.before || info.after
+        var module = require (info.load);
+        if (module.options)
+          extend (options, new module.options ());
+        var target = info.before || info.after
           , i = middlewareStackClasses.indexOf (target);
         if (~i)
-          util.fatal ('The % middleware module was not found.', target);
-        middlewareStackClasses.splice (i + (info.before ? 0 : 1), 0, module);
+          util.fatal ("Can't locate the % middleware module for inserting %.", target, info.load);
+        middlewareStackClasses.splice (i + (info.before ? 0 : 1), 0, module.middleware);
       });
 
     return middlewareStackClasses;
@@ -184,7 +197,7 @@ module.exports = function (grunt)
       });
     }
     // Ignore references to already loaded modules or to explicitly excluded modules.
-    if (!context.loaded[module.name] && !~options.excludedModules.indexOf (module.name)) {
+    if (!context.loaded[module.name] && !~context.options.excludedModules.indexOf (module.name)) {
       info ('Including module <cyan>%</cyan>.', moduleName);
       context.loaded[module.name] = true;
       processHook (module);

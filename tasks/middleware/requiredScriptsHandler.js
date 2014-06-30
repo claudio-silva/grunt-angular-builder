@@ -1,10 +1,17 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
+
+exports.middleware = RequiredScriptsHandlerMiddleware;
 
 var util = require ('../lib/gruntUtil');
 
 var MATCH_DIRECTIVE = /\/\/#\s*require\s*\((.*?)\)/g;
-
-module.exports = RequiredScriptsHandlerMiddleware;
 
 /**
  * Exports to the context the paths of all extra scripts required explicitly by build-directives,

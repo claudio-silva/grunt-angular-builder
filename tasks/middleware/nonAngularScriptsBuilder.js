@@ -1,6 +1,13 @@
+/**
+ * @license
+ * Angular Builder middleware module.
+ * Copyright 2013 Cláudio Manuel Brás da Silva
+ * http://github.com/claudio-silva
+ * Licensed under the MIT license.
+ */
 'use strict';
 
-module.exports = NonAngularScriptsBuilderMiddleware;
+exports.middleware = NonAngularScriptsBuilderMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , NL = util.NL;

@@ -77,8 +77,8 @@ module.exports = function (grunt)
       },
       'test-assets':              {
         options: {
-          mainModule:    'App',
-          assetsBuilder: {
+          mainModule:             'App',
+          assetReferencesHandler: {
             enabled:   true,
             targetDir: 'styles',
             symlink:   true
