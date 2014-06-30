@@ -100,6 +100,7 @@ TaskOptions.prototype = {
    * @const
    */
   internalMiddleware:     [
+    './middleware/mainModuleSynthetizer',
     './middleware/analyzer',
     './middleware/sourceCodePathsExporter',
     './middleware/requiredScriptsHandler',
