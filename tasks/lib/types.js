@@ -172,13 +172,6 @@ function MiddlewareInterface (context)
 
 MiddlewareInterface.prototype = {
   /**
-   * Extend the task's options with the middleware's default values for its custom options.
-   *
-   * @param {function(Object)} extend A function that should be called with the middleware's default option values as
-   * the argument.
-   */
-  options: function (extend) {},
-  /**
    * Load and analyze the specified source files.
    * Invoked once.
    *
