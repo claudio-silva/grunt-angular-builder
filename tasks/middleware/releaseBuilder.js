@@ -13,58 +13,6 @@
 var util = require ('../lib/gruntUtil')
   , NL = util.NL;
 
-exports.middleware = ReleaseBuilderMiddleware;
-exports.options = TaskOptions;
-
-//----------------------------------------------------------------------------------------------------------------------
-// OPTIONS
-//----------------------------------------------------------------------------------------------------------------------
-
-/**
- * @constructor
- */
-function TaskOptions () {}
-
-TaskOptions.prototype = {
-  /**
-   * Options specific to the release builder middleware.
-   */
-  releaseBuilder: {
-    /**
-     * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
-     * functions.
-     * You may select another identifier if the default one causes a conflict with existing code.
-     * @type {string}
-     */
-    moduleVar:        'module',
-    /**
-     * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be
-     * renamed to <code>config.moduleVar</code>.
-     *
-     * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on
-     * <code>config.moduleVar</code>, a warning will be issued and the task may stop, unless the `--force` option is
-     * specified.
-     * @type {boolean}
-     */
-    renameModuleRefs: false,
-    /**
-     * Indentation white space for one level.
-     * You may, for instance, configure it for tabs or additional spaces.
-     * @type {string}
-     */
-    indent:           '  ',
-    /**
-     * This string will be appended to each module definition block.
-     * Use this to increase the readability of the generated script by visually separating each module from the previous
-     * one.
-     * @type {string}
-     */
-    moduleFooter:     NL + NL + NL
-  }
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
 var sourceTrans = require ('../lib/sourceTrans')
   , sourceExtract = require ('../lib/sourceExtract');
 
@@ -84,6 +32,67 @@ var STAT = {
   INDENTED: 1
 };
 
+//----------------------------------------------------------------------------------------------------------------------
+// OPTIONS
+//----------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Options specific to the release builder middleware.
+ * @constructor
+ */
+function ReleaseBuilderOptions ()
+{}
+
+ReleaseBuilderOptions.prototype = {
+  /**
+   * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
+   * functions.
+   * You may select another identifier if the default one causes a conflict with existing code.
+   * @type {string}
+   */
+  moduleVar:        'module',
+  /**
+   * When <code>true</code>, angular module references passed as arguments to self-invoking functions will be
+   * renamed to <code>config.moduleVar</code>.
+   *
+   * When <code>false</code>, if the module reference parameter has a name that is different from the one defined on
+   * <code>config.moduleVar</code>, a warning will be issued and the task may stop, unless the `--force` option is
+   * specified.
+   * @type {boolean}
+   */
+  renameModuleRefs: false,
+  /**
+   * Indentation white space for one level.
+   * You may, for instance, configure it for tabs or additional spaces.
+   * @type {string}
+   */
+  indent:           '  ',
+  /**
+   * This string will be appended to each module definition block.
+   * Use this to increase the readability of the generated script by visually separating each module from the previous
+   * one.
+   * @type {string}
+   */
+  moduleFooter:     NL + NL + NL
+};
+
+/**
+ * @mixin
+ */
+var ReleaseBuilderOptionsMixin = {
+  /**
+   * Options specific to the release builder middleware.
+   * @type {ReleaseBuilderOptions}
+   */
+  releaseBuilder: new ReleaseBuilderOptions ()
+};
+
+exports.options = ReleaseBuilderOptionsMixin;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+exports.middleware = ReleaseBuilderMiddleware;
+
 /**
  * Saves all script files required by the specified module into a single output file, in the correct
  * loading order. This is used on release builds.
@@ -93,7 +102,7 @@ var STAT = {
  */
 function ReleaseBuilderMiddleware (context)
 {
-  var options = context.options;
+  var options = context.options.releaseBuilder;
   /**
    * <code>true</code> if the task is running in verbose mode.
    * @type {boolean}
@@ -134,13 +143,13 @@ function ReleaseBuilderMiddleware (context)
         traceOutput.push (head.data);
       // Output a module declaration with no definitions.
       traceOutput.push (sprintf ('angular.module (\'%\', %);%', module.name,
-          util.toQuotedList (module.requires), options.releaseBuilder.moduleFooter)
+          util.toQuotedList (module.requires), options.moduleFooter)
       );
     }
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
     else {
       // Begin closure.
-      traceOutput.push ('(function (' + options.releaseBuilder.moduleVar + ') {\n');
+      traceOutput.push ('(function (' + options.moduleVar + ') {\n');
       // Insert module declaration.
       traceOutput.push (conditionalIndent (head));
       // Insert additional module definitions.
@@ -150,7 +159,7 @@ function ReleaseBuilderMiddleware (context)
       }
       // End closure.
       traceOutput.push (sprintf ('\n}) (angular.module (\'%\', %%));%', module.name,
-        util.toQuotedList (module.requires), module.configFn || '', options.releaseBuilder.moduleFooter));
+        util.toQuotedList (module.requires), module.configFn || '', options.moduleFooter));
     }
   };
 
@@ -176,7 +185,7 @@ function ReleaseBuilderMiddleware (context)
    */
   function optimize (source, path, module)
   {
-    var result = sourceTrans.optimize (source, module.name, options.releaseBuilder.moduleVar);
+    var result = sourceTrans.optimize (source, module.name, options.moduleVar);
     var stat = sourceTrans.TRANS_STAT;
     switch (result.status) {
 
@@ -187,8 +196,7 @@ function ReleaseBuilderMiddleware (context)
         //----------------------------------------------------------
         return /** @type {OperationResult} */ {
           status: STAT.INDENTED,
-          data:   sourceTrans.renameModuleRefExps (module, options.releaseBuilder.indent + result.data,
-            options.releaseBuilder.moduleVar)
+          data:   sourceTrans.renameModuleRefExps (module, options.indent + result.data, options.moduleVar)
         };
 
 
@@ -211,7 +219,7 @@ function ReleaseBuilderMiddleware (context)
         // Either the code is valid or --force was used, so process it.
         return /** @type {OperationResult} */ {
           status: STAT.OK,
-          data:   sourceTrans.renameModuleRefExps (module, source, options.releaseBuilder.moduleVar)
+          data:   sourceTrans.renameModuleRefExps (module, source, options.moduleVar)
         };
 
 
@@ -223,18 +231,17 @@ function ReleaseBuilderMiddleware (context)
         //----------------------------------------------------------
         /** @type {ModuleClosureInfo} */
         var modInfo = result.data;
-        if (!options.releaseBuilder.renameModuleRefs) {
+        if (!options.renameModuleRefs) {
           warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config setting ' +
               '<cyan>moduleVar=\'%\'</cyan>.%%%',
-            modInfo.moduleVar, options.releaseBuilder.moduleVar, NL, reportErrorLocation (path),
+            modInfo.moduleVar, options.moduleVar, NL, reportErrorLocation (path),
             getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
           );
           // If --force, continue.
         }
         return /** @type {OperationResult} */ {
           status: STAT.OK,
-          data:   sourceTrans.renameModuleVariableRefs (modInfo.closureBody, modInfo.moduleVar,
-            options.releaseBuilder.moduleVar)
+          data:   sourceTrans.renameModuleVariableRefs (modInfo.closureBody, modInfo.moduleVar, options.moduleVar)
         };
 
 
@@ -259,7 +266,7 @@ function ReleaseBuilderMiddleware (context)
    */
   function conditionalIndent (result)
   {
-    return result.status === STAT.INDENTED ? result.data : indent (result.data, 1, options.releaseBuilder.indent);
+    return result.status === STAT.INDENTED ? result.data : indent (result.data, 1, options.indent);
   }
 
   /**

@@ -10,35 +10,44 @@
  */
 'use strict';
 
-exports.middleware = TemplateReferencesHandlerMiddleware;
-exports.options = TaskOptions;
+var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
 
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * Options specific to the Template References Handler middleware.
  * @constructor
  */
-function TaskOptions () {}
+function TemplateReferencesHandlerOptions ()
+{}
 
-TaskOptions.prototype = {
+TemplateReferencesHandlerOptions.prototype = {
+  /**
+   * The name of the Gruntfile config property to where the list of required template paths will be exported.
+   * These HTML templates are those required by javascript files included in the build via build-directives.
+   * @type {string}
+   */
+  exportToConfigProperty: 'requiredTemplates'
+};
+
+/**
+ * @mixin
+ */
+var TemplateReferencesHandlerOptionsMixin = {
   /**
    * Options specific to the Template References Handler middleware.
+   * @type {TemplateReferencesHandlerOptions}
    */
-  templateReferencesHandler: {
-    /**
-     * The name of the Gruntfile config property to where the list of required template paths will be exported.
-     * These HTML templates are those required by javascript files included in the build via build-directives.
-     * @type {string}
-     */
-    exportToConfigProperty: 'requiredTemplates'
-  }
+  templateReferencesHandler: new TemplateReferencesHandlerOptions ()
 };
+
+exports.options = TemplateReferencesHandlerOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
+exports.middleware = TemplateReferencesHandlerMiddleware;
 
 /**
  * Exports the paths of all templates required by the application,
@@ -49,6 +58,7 @@ var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
  */
 function TemplateReferencesHandlerMiddleware (context)
 {
+  var options = context.options.templateReferencesHandler;
   var path = require ('path');
 
   /**
@@ -81,7 +91,7 @@ function TemplateReferencesHandlerMiddleware (context)
     /* jshint unused: vars */
 
     // Export file paths.
-    context.grunt.config (context.options.templateReferencesHandler.exportToConfigProperty, paths);
+    context.grunt.config (options.exportToConfigProperty, paths);
   };
 
   //--------------------------------------------------------------------------------------------------------------------

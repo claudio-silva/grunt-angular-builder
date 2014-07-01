@@ -10,35 +10,44 @@
  */
 'use strict';
 
-exports.middleware = StylesheetReferencesHandlerMiddleware;
-exports.options = TaskOptions;
+var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
 
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * Options specific to the Stylesheet References Handler middleware.
  * @constructor
  */
-function TaskOptions () {}
+function StylesheetReferencesHandlerOptions ()
+{}
 
-TaskOptions.prototype = {
+StylesheetReferencesHandlerOptions.prototype = {
+  /**
+   * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
+   * These stylesheets are those required by javascript files included in the build via build-directives.
+   * @type {string}
+   */
+  exportToConfigProperty: 'requiredStylesheets'
+};
+
+/**
+ * @mixin
+ */
+var StylesheetReferencesHandlerOptionsMixin = {
   /**
    * Options specific to the Stylesheet References Handler middleware.
+   * @type {StylesheetReferencesHandlerOptions}
    */
-  stylesheetReferencesHandler: {
-    /**
-     * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
-     * These stylesheets are those required by javascript files included in the build via build-directives.
-     * @type {string}
-     */
-    exportToConfigProperty: 'requiredStylesheets'
-  }
+  stylesheetReferencesHandler: new StylesheetReferencesHandlerOptions ()
 };
+
+exports.options = StylesheetReferencesHandlerOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
+exports.middleware = StylesheetReferencesHandlerMiddleware;
 
 /**
  * Exports the paths of all stylesheets required by the application,
@@ -49,6 +58,7 @@ var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
  */
 function StylesheetReferencesHandlerMiddleware (context)
 {
+  var options = context.options.stylesheetReferencesHandler;
   var path = require ('path');
 
   /**
@@ -81,7 +91,7 @@ function StylesheetReferencesHandlerMiddleware (context)
     /* jshint unused: vars */
 
     // Export file paths.
-    context.grunt.config (context.options.stylesheetReferencesHandler.exportToConfigProperty, paths);
+    context.grunt.config (options.exportToConfigProperty, paths);
   };
 
   //--------------------------------------------------------------------------------------------------------------------

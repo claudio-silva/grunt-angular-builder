@@ -23,6 +23,13 @@ var util = require ('./gruntUtil')
  * Note: Middleware classes augment this class with their own options.
  *
  * @constructor
+ * @mixes AssetReferencesHandlerOptionsMixin
+ * @mixes DebugBuilderOptionsMixin
+ * @mixes MainModuleSynthetizerOptionsMixin
+ * @mixes ReleaseBuilderOptionsMixin
+ * @mixes SourceCodePathsExporterOptionsMixin
+ * @mixes StylesheetReferencesHandlerOptionsMixin
+ * @mixes TemplateReferencesHandlerOptionsMixin
  */
 function TaskOptions ()
 {}

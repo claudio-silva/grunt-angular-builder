@@ -138,7 +138,7 @@ module.exports = function (grunt)
       if (!module.middleware)
         util.fatal ('No middleware found on module %.', moduleName);
       if (module.options)
-        extend (options, new module.options ());
+        extend (options, module.options);
       middlewareStackClasses.push (module.middleware);
     });
 

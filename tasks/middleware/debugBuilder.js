@@ -10,34 +10,43 @@
  */
 'use strict';
 
-exports.middleware = DebugBuilderMiddleware;
-exports.options = TaskOptions;
+var util = require ('../lib/gruntUtil');
 
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * Options specific to the debug builder middleware.
  * @constructor
  */
-function TaskOptions () {}
+function DebugBuilderOptions ()
+{}
 
-TaskOptions.prototype = {
+DebugBuilderOptions.prototype = {
+  /**
+   * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
+   * @type {(Array.<{match:(RegExp|string),replaceWith:string}>|null)}
+   */
+  rebaseDebugUrls: null
+};
+
+/**
+ * @mixin
+ */
+var DebugBuilderOptionsMixin = {
   /**
    * Options specific to the debug builder middleware.
+   * @type {DebugBuilderOptions}
    */
-  debugBuilder: {
-    /**
-     * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
-     * @type {(Array.<{match:(RegExp|string),replaceWith:string}>|null)}
-     */
-    rebaseDebugUrls: null
-  }
+  debugBuilder: new DebugBuilderOptions ()
 };
+
+exports.options = DebugBuilderOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-var util = require ('../lib/gruntUtil');
+exports.middleware = DebugBuilderMiddleware;
 
 /**
  * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
@@ -48,6 +57,7 @@ var util = require ('../lib/gruntUtil');
  */
 function DebugBuilderMiddleware (context)
 {
+  var options = context.options.debugBuilder;
   /** @type {string[]} */
   var traceOutput = [];
 
@@ -65,7 +75,7 @@ function DebugBuilderMiddleware (context)
   {
     if (!context.debugBuild) return;
 
-    var rep = context.options.debugBuilder.rebaseDebugUrls;
+    var rep = options.rebaseDebugUrls;
     module.filePaths.forEach (function (path)
     {
       if (rep)

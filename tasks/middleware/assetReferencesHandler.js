@@ -10,9 +10,6 @@
  */
 'use strict';
 
-exports.middleware = AssetReferencesHandlerMiddleware;
-exports.options = TaskOptions;
-
 var util = require ('../lib/gruntUtil')
   , path = require ('path')
   , fs = require ('fs');
@@ -24,42 +21,54 @@ var MATCH_URLS = /\burl\s*\(\s*('|")?\s*(.*?)\s*\1?\s*\)/gi;
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * Options specific to the Asset References Handler middleware.
  * @constructor
  */
-function TaskOptions () {}
+function AssetReferencesHandlerOptions ()
+{}
 
-TaskOptions.prototype = {
+AssetReferencesHandlerOptions.prototype = {
   /**
-   * Options specific to the Asset References Handler middleware.
+   * Set to `true` to enable the assets builder.
+   * @type {boolean}
    */
-  assetReferencesHandler: {
-    /**
-     * Set to `true` to enable the assets builder.
-     * @type {boolean}
-     */
-    enabled:   false,
-    /**
-     * Directory path that will be used as the reference point from where relative asset urls are calculated.
-     * This determines where assets are exported to.
-     * If you specify a relative path, it is resolved from the current filegroup's destination folder.
-     * @type {string}
-     */
-    targetDir: '',
-    /**
-     * When `false`, required assets are copied to the assets target directory.
-     *
-     * When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk
-     * space.
-     *
-     * If your operating system does not support symlinks, or if you want to archive or upload the build output, use
-     * `false`.
-     * @type {boolean}
-     */
-    symlink:   true
-  }
+  enabled:   false,
+  /**
+   * Directory path that will be used as the reference point from where relative asset urls are calculated.
+   * This determines where assets are exported to.
+   * If you specify a relative path, it is resolved from the current filegroup's destination folder.
+   * @type {string}
+   */
+  targetDir: '',
+  /**
+   * When `false`, required assets are copied to the assets target directory.
+   *
+   * When `true`, symlinks are generated instead. This speeds up the build operation considerably, and also saves disk
+   * space.
+   *
+   * If your operating system does not support symlinks, or if you want to archive or upload the build output, use
+   * `false`.
+   * @type {boolean}
+   */
+  symlink:   true
 };
 
+/**
+ * @mixin
+ */
+var AssetReferencesHandlerOptionsMixin = {
+  /**
+   * Options specific to the Asset References Handler middleware.
+   * @type {AssetReferencesHandlerOptions}
+   */
+  assetReferencesHandler: new AssetReferencesHandlerOptions ()
+};
+
+exports.options = AssetReferencesHandlerOptionsMixin;
+
 //----------------------------------------------------------------------------------------------------------------------
+
+exports.middleware = AssetReferencesHandlerMiddleware;
 
 /**
  * Exports the assets required by the application's modules.
@@ -69,7 +78,8 @@ TaskOptions.prototype = {
  */
 function AssetReferencesHandlerMiddleware (context)
 {
-  var grunt = context.grunt;
+  var grunt = context.grunt
+    , options = context.options.assetReferencesHandler;
 
   /**
    * Records which files have been already exported.
@@ -97,7 +107,7 @@ function AssetReferencesHandlerMiddleware (context)
 
   this.build = function (targetScript)
   {
-    if (!context.options.assetReferencesHandler.enabled) return;
+    if (!options.enabled) return;
     // Import file paths.
     var stylehseets = grunt.config (context.options.stylesheetReferencesHandler.exportToConfigProperty);
     if (!stylehseets) return; // No stylesheet sources are configured.
@@ -128,7 +138,7 @@ function AssetReferencesHandlerMiddleware (context)
       var url = match[2];
       if (!url.match (/^http/i) && url[0] !== '/') { // Skip absolute URLs
         var absSrcPath = path.resolve (basePath, url)
-          , absDestPath = path.resolve (targetPath, context.options.assetReferencesHandler.targetDir, url)
+          , absDestPath = path.resolve (targetPath, options.targetDir, url)
           , relDestPath = path.relative (targetPath, absDestPath);
         if (relDestPath[0] === '.')
           return util.warn ('Relative asset url falls outside the build folder: <cyan>%</cyan>%', url, util.NL);
@@ -137,7 +147,7 @@ function AssetReferencesHandlerMiddleware (context)
         else exportedAssets[absDestPath] = true;
         var absTargetFolder = path.dirname (absDestPath);
         grunt.file.mkdir (absTargetFolder);
-        if (context.options.assetReferencesHandler.symlink)
+        if (options.symlink)
           fs.symlinkSync (absSrcPath, absDestPath);
         else grunt.file.copy (absSrcPath, absDestPath);
       }

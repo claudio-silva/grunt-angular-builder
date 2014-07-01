@@ -10,37 +10,46 @@
  */
 'use strict';
 
-exports.middleware = ExportSourceCodePathsMiddleware;
-exports.options = TaskOptions;
+var util = require ('../lib/gruntUtil')
+  , arrayAppend = util.arrayAppend;
 
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * Options specific to the Source Code Paths Exporter middleware.
  * @constructor
  */
-function TaskOptions () {}
+function SourceCodePathsExporterOptions ()
+{}
 
-TaskOptions.prototype = {
+SourceCodePathsExporterOptions.prototype = {
+  /**
+   * The name of the Gruntfile config property to where the list of required script paths will be exported.
+   * These scripts are all those that are actually required by your project, including forced includes and
+   * files included via build-directives.
+   * @type {string}
+   */
+  exportToConfigProperty: 'requiredScripts'
+};
+
+/**
+ * @mixin
+ */
+var SourceCodePathsExporterOptionsMixin = {
   /**
    * Options specific to the Source Code Paths Exporter middleware.
+   * @type {SourceCodePathsExporterOptions}
    */
-  sourceCodePathsExporter: {
-    /**
-     * The name of the Gruntfile config property to where the list of required script paths will be exported.
-     * These scripts are all those that are actually required by your project, including forced includes and
-     * files included via build-directives.
-     * @type {string}
-     */
-    exportToConfigProperty: 'requiredScripts'
-  }
+  sourceCodePathsExporter: new SourceCodePathsExporterOptions ()
 };
+
+exports.options = SourceCodePathsExporterOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-var util = require ('../lib/gruntUtil')
-  , arrayAppend = util.arrayAppend;
+exports.middleware = ExportSourceCodePathsMiddleware;
 
 /**
  * Exports the paths of all script files that are required by the application,
@@ -51,6 +60,7 @@ var util = require ('../lib/gruntUtil')
  */
 function ExportSourceCodePathsMiddleware (context)
 {
+  var options = context.options.sourceCodePathsExporter;
   /**
    * Paths of all the required files (excluding standalone scripts) in the correct loading order.
    * @type {string[]}
@@ -92,6 +102,6 @@ function ExportSourceCodePathsMiddleware (context)
 
     // Export.
 
-    context.grunt.config (context.options.sourceCodePathsExporter.exportToConfigProperty, scripts);
+    context.grunt.config (options.exportToConfigProperty, scripts);
   };
 }
