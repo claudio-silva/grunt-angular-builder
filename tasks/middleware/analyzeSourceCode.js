@@ -1,7 +1,7 @@
 /**
  * An AngularJS source code loader and analyser.
  *
- * @module middleware/analyzer
+ * @module middleware/analyzeSourceCode
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -10,7 +10,7 @@
  */
 'use strict';
 
-exports.middleware = AnalyzerMiddleware;
+exports.middleware = AnalyzeSourceCodeMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , types = require ('../lib/types')
@@ -30,7 +30,7 @@ var ModuleDef = types.ModuleDef
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function AnalyzerMiddleware (context)
+function AnalyzeSourceCodeMiddleware (context)
 {
   var grunt = context.grunt;
 

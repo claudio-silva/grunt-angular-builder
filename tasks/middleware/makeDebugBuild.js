@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/debugBuilder
+ * @module middleware/makeDebugBuild
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -20,10 +20,10 @@ var util = require ('../lib/gruntUtil');
  * Options specific to the debug builder middleware.
  * @constructor
  */
-function DebugBuilderOptions ()
+function MakeDebugBuildOptions ()
 {}
 
-DebugBuilderOptions.prototype = {
+MakeDebugBuildOptions.prototype = {
   /**
    * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
    * @type {(Array.<{match:(RegExp|string),replaceWith:string}>|null)}
@@ -34,19 +34,19 @@ DebugBuilderOptions.prototype = {
 /**
  * @mixin
  */
-var DebugBuilderOptionsMixin = {
+var MakeDebugBuildOptionsMixin = {
   /**
    * Options specific to the debug builder middleware.
-   * @type {DebugBuilderOptions}
+   * @type {MakeDebugBuildOptions}
    */
-  debugBuilder: new DebugBuilderOptions ()
+  debugBuild: new MakeDebugBuildOptions ()
 };
 
-exports.options = DebugBuilderOptionsMixin;
+exports.options = MakeDebugBuildOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-exports.middleware = DebugBuilderMiddleware;
+exports.middleware = MakeDebugBuildMiddleware;
 
 /**
  * Generates a script file that inserts SCRIPT tags to the head of the html document, which will load the original
@@ -55,9 +55,9 @@ exports.middleware = DebugBuilderMiddleware;
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function DebugBuilderMiddleware (context)
+function MakeDebugBuildMiddleware (context)
 {
-  var options = context.options.debugBuilder;
+  var options = context.options.debugBuild;
   /** @type {string[]} */
   var traceOutput = [];
 

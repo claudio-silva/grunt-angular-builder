@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/nonAngularScriptsBuilder
+ * @module middleware/buildForeignScripts
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -10,7 +10,7 @@
  */
 'use strict';
 
-exports.middleware = NonAngularScriptsBuilderMiddleware;
+exports.middleware = BuildForeignScriptsMiddleware;
 
 var util = require ('../lib/gruntUtil')
   , NL = util.NL;
@@ -28,7 +28,7 @@ var util = require ('../lib/gruntUtil')
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function NonAngularScriptsBuilderMiddleware (context)
+function BuildForeignScriptsMiddleware (context)
 {
   //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API

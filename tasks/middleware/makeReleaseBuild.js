@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/releaseBuilder
+ * @module middleware/makeReleaseBuild
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -40,10 +40,10 @@ var STAT = {
  * Options specific to the release builder middleware.
  * @constructor
  */
-function ReleaseBuilderOptions ()
+function MakeReleaseBuildOptions ()
 {}
 
-ReleaseBuilderOptions.prototype = {
+MakeReleaseBuildOptions.prototype = {
   /**
    * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
    * functions.
@@ -79,19 +79,19 @@ ReleaseBuilderOptions.prototype = {
 /**
  * @mixin
  */
-var ReleaseBuilderOptionsMixin = {
+var MakeReleaseBuildOptionsMixin = {
   /**
    * Options specific to the release builder middleware.
-   * @type {ReleaseBuilderOptions}
+   * @type {MakeReleaseBuildOptions}
    */
-  releaseBuilder: new ReleaseBuilderOptions ()
+  releaseBuild: new MakeReleaseBuildOptions ()
 };
 
-exports.options = ReleaseBuilderOptionsMixin;
+exports.options = MakeReleaseBuildOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-exports.middleware = ReleaseBuilderMiddleware;
+exports.middleware = MakeReleaseBuildMiddleware;
 
 /**
  * Saves all script files required by the specified module into a single output file, in the correct
@@ -100,9 +100,9 @@ exports.middleware = ReleaseBuilderMiddleware;
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function ReleaseBuilderMiddleware (context)
+function MakeReleaseBuildMiddleware (context)
 {
-  var options = context.options.releaseBuilder;
+  var options = context.options.releaseBuild;
   /**
    * <code>true</code> if the task is running in verbose mode.
    * @type {boolean}

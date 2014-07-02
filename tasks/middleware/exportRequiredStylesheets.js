@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/templateReferencesHandler
+ * @module middleware/exportRequiredStylesheets
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -10,59 +10,59 @@
  */
 'use strict';
 
-var MATCH_DIRECTIVE = /\/\/#\s*templates?\s*\((.*?)\)/g;
+var MATCH_DIRECTIVE = /\/\/#\s*stylesheets?\s*\((.*?)\)/g;
 
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Options specific to the Template References Handler middleware.
+ * Options specific to the Stylesheet References Handler middleware.
  * @constructor
  */
-function TemplateReferencesHandlerOptions ()
+function ExportRequiredStylesheetsOptions ()
 {}
 
-TemplateReferencesHandlerOptions.prototype = {
+ExportRequiredStylesheetsOptions.prototype = {
   /**
-   * The name of the Gruntfile config property to where the list of required template paths will be exported.
-   * These HTML templates are those required by javascript files included in the build via build-directives.
+   * The name of the Gruntfile config property to where the list of required stylesheet paths will be exported.
+   * These stylesheets are those required by javascript files included in the build via build-directives.
    * @type {string}
    */
-  exportToConfigProperty: 'requiredTemplates'
+  exportToConfigProperty: 'requiredStylesheets'
 };
 
 /**
  * @mixin
  */
-var TemplateReferencesHandlerOptionsMixin = {
+var ExportRequiredStylesheetsOptionsMixin = {
   /**
-   * Options specific to the Template References Handler middleware.
-   * @type {TemplateReferencesHandlerOptions}
+   * Options specific to the Stylesheet References Handler middleware.
+   * @type {ExportRequiredStylesheetsOptions}
    */
-  templateReferencesHandler: new TemplateReferencesHandlerOptions ()
+  requiredStylesheets: new ExportRequiredStylesheetsOptions ()
 };
 
-exports.options = TemplateReferencesHandlerOptionsMixin;
+exports.options = ExportRequiredStylesheetsOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-exports.middleware = TemplateReferencesHandlerMiddleware;
+exports.middleware = ExportRequiredStylesheetsMiddleware;
 
 /**
- * Exports the paths of all templates required by the application,
+ * Exports to Grunt's global configuration the paths of all stylesheets required by the application,
  * in the order defined by the modules' dependency graph.
  * @constructor
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function TemplateReferencesHandlerMiddleware (context)
+function ExportRequiredStylesheetsMiddleware (context)
 {
-  var options = context.options.templateReferencesHandler;
+  var options = context.options.requiredStylesheets;
   var path = require ('path');
 
   /**
-   * Paths of the required templates.
+   * Paths of the required stylesheets.
    * @type {string[]}
    */
   var paths = [];
@@ -77,7 +77,7 @@ function TemplateReferencesHandlerMiddleware (context)
     // Do nothing
   };
 
-  this.trace = function (module)
+  this.trace = function (/*ModuleDef*/ module)
   {
     scan (module.head, module.filePaths[0]);
     module.bodies.forEach (function (path, i)
@@ -99,7 +99,7 @@ function TemplateReferencesHandlerMiddleware (context)
   //--------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Extracts file paths from embedded comment references to templates and appends them to `paths`.
+   * Extracts file paths from embedded comment references to stylesheets and appends them to `paths`.
    * @param {string} sourceCode
    * @param {string} filePath
    */

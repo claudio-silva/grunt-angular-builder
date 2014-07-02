@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/assetReferencesHandler
+ * @module middleware/buildAssets
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -24,10 +24,10 @@ var MATCH_URLS = /\burl\s*\(\s*('|")?\s*(.*?)\s*\1?\s*\)/gi;
  * Options specific to the Asset References Handler middleware.
  * @constructor
  */
-function AssetReferencesHandlerOptions ()
+function BuildAssetsOptions ()
 {}
 
-AssetReferencesHandlerOptions.prototype = {
+BuildAssetsOptions.prototype = {
   /**
    * Set to `true` to enable the assets builder.
    * @type {boolean}
@@ -56,19 +56,19 @@ AssetReferencesHandlerOptions.prototype = {
 /**
  * @mixin
  */
-var AssetReferencesHandlerOptionsMixin = {
+var BuildAssetsOptionsMixin = {
   /**
    * Options specific to the Asset References Handler middleware.
-   * @type {AssetReferencesHandlerOptions}
+   * @type {BuildAssetsOptions}
    */
-  assetReferencesHandler: new AssetReferencesHandlerOptions ()
+  assets: new BuildAssetsOptions ()
 };
 
-exports.options = AssetReferencesHandlerOptionsMixin;
+exports.options = BuildAssetsOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-exports.middleware = AssetReferencesHandlerMiddleware;
+exports.middleware = BuildAssetsMiddleware;
 
 /**
  * Exports the assets required by the application's modules.
@@ -76,10 +76,10 @@ exports.middleware = AssetReferencesHandlerMiddleware;
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function AssetReferencesHandlerMiddleware (context)
+function BuildAssetsMiddleware (context)
 {
   var grunt = context.grunt
-    , options = context.options.assetReferencesHandler;
+    , options = context.options.assets;
 
   /**
    * Records which files have been already exported.
@@ -109,7 +109,7 @@ function AssetReferencesHandlerMiddleware (context)
   {
     if (!options.enabled) return;
     // Import file paths.
-    var stylehseets = grunt.config (context.options.stylesheetReferencesHandler.exportToConfigProperty);
+    var stylehseets = grunt.config (context.options.requiredStylesheets.exportToConfigProperty);
     if (!stylehseets) return; // No stylesheet sources are configured.
     var targetPath = path.dirname (targetScript);
     stylehseets.forEach (function (filePath)

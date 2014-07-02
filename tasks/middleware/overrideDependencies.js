@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/mainModuleSynthetizer
+ * @module middleware/overrideDependencies
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -18,10 +18,10 @@
  * Options specific to the Main Module Synthetizer middleware.
  * @constructor
  */
-function MainModuleSynthetizerOptions ()
+function OverrideDependenciesOptions ()
 {}
 
-MainModuleSynthetizerOptions.prototype = {
+OverrideDependenciesOptions.prototype = {
   /**
    * A list of modules to be included in the build.
    * This allows a task to synthesize the main module's dependencies.
@@ -49,19 +49,19 @@ MainModuleSynthetizerOptions.prototype = {
 /**
  * @mixin
  */
-var MainModuleSynthetizerOptionsMixin = {
+var OverrideDependenciesOptionsMixin = {
   /**
    * Options specific to the Main Module Synthetizer middleware.
-   * @type {MainModuleSynthetizerOptions}
+   * @type {OverrideDependenciesOptions}
    */
-  mainModuleSynthetizer: new MainModuleSynthetizerOptions ()
+  overrideDependencies: new OverrideDependenciesOptions ()
 };
 
-exports.options = MainModuleSynthetizerOptionsMixin;
+exports.options = OverrideDependenciesOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-exports.middleware = MainModuleSynthetizerMiddleware;
+exports.middleware = OverrideDependenciesMiddleware;
 
 /**
  * Exports the paths of all script files that are required by the application,
@@ -70,10 +70,10 @@ exports.middleware = MainModuleSynthetizerMiddleware;
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function MainModuleSynthetizerMiddleware (context)
+function OverrideDependenciesMiddleware (context)
 {
   /* jshint unused: vars */
-  var options = context.options.mainModuleSynthetizer;
+  //var options = context.options.overrideDependencies;
 
   //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API

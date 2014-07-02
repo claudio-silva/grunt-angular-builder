@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/sourceCodePathsExporter
+ * @module middleware/exportSourcePaths
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -21,10 +21,10 @@ var util = require ('../lib/gruntUtil')
  * Options specific to the Source Code Paths Exporter middleware.
  * @constructor
  */
-function SourceCodePathsExporterOptions ()
+function ExportSourcePathsOptions ()
 {}
 
-SourceCodePathsExporterOptions.prototype = {
+ExportSourcePathsOptions.prototype = {
   /**
    * The name of the Gruntfile config property to where the list of required script paths will be exported.
    * These scripts are all those that are actually required by your project, including forced includes and
@@ -37,22 +37,22 @@ SourceCodePathsExporterOptions.prototype = {
 /**
  * @mixin
  */
-var SourceCodePathsExporterOptionsMixin = {
+var ExportSourcePathsOptionsMixin = {
   /**
    * Options specific to the Source Code Paths Exporter middleware.
-   * @type {SourceCodePathsExporterOptions}
+   * @type {ExportSourcePathsOptions}
    */
-  sourceCodePathsExporter: new SourceCodePathsExporterOptions ()
+  sourcePaths: new ExportSourcePathsOptions ()
 };
 
-exports.options = SourceCodePathsExporterOptionsMixin;
+exports.options = ExportSourcePathsOptionsMixin;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 exports.middleware = ExportSourceCodePathsMiddleware;
 
 /**
- * Exports the paths of all script files that are required by the application,
+ * Exports to Grunt's global configuration the paths of all script files that are required by the application,
  * in the order defined by the modules' dependency graph.
  * @constructor
  * @implements {MiddlewareInterface}
@@ -60,7 +60,7 @@ exports.middleware = ExportSourceCodePathsMiddleware;
  */
 function ExportSourceCodePathsMiddleware (context)
 {
-  var options = context.options.sourceCodePathsExporter;
+  var options = context.options.sourcePaths;
   /**
    * Paths of all the required files (excluding standalone scripts) in the correct loading order.
    * @type {string[]}

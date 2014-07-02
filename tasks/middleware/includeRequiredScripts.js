@@ -1,7 +1,7 @@
 /**
  * Angular Builder middleware module.
  *
- * @module middleware/requiredScriptsHandler
+ * @module middleware/includeRequiredScripts
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -10,7 +10,7 @@
  */
 'use strict';
 
-exports.middleware = RequiredScriptsHandlerMiddleware;
+exports.middleware = IncludeRequiredScriptsMiddleware;
 
 var util = require ('../lib/gruntUtil');
 
@@ -23,7 +23,7 @@ var MATCH_DIRECTIVE = /\/\/#\s*require\s*\((.*?)\)/g;
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
  */
-function RequiredScriptsHandlerMiddleware (context)
+function IncludeRequiredScriptsMiddleware (context)
 {
   var path = require ('path');
 

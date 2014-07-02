@@ -41,8 +41,8 @@ module.exports = function (grunt)
       },
       'test-js-lib':              {
         options: {
-          mainModule:     'Library1',
-          releaseBuilder: {
+          mainModule:   'Library1',
+          releaseBuild: {
             renameModuleRefs: true
           }
         },
@@ -77,8 +77,8 @@ module.exports = function (grunt)
       },
       'test-assets':              {
         options: {
-          mainModule:             'App',
-          assetReferencesHandler: {
+          mainModule: 'App',
+          assets:     {
             enabled:   true,
             targetDir: 'styles',
             symlink:   true

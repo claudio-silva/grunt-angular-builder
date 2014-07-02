@@ -23,13 +23,13 @@ var util = require ('./gruntUtil')
  * Note: Middleware classes augment this class with their own options.
  *
  * @constructor
- * @mixes AssetReferencesHandlerOptionsMixin
- * @mixes DebugBuilderOptionsMixin
- * @mixes MainModuleSynthetizerOptionsMixin
- * @mixes ReleaseBuilderOptionsMixin
- * @mixes SourceCodePathsExporterOptionsMixin
- * @mixes StylesheetReferencesHandlerOptionsMixin
- * @mixes TemplateReferencesHandlerOptionsMixin
+ * @mixes BuildAssetsOptionsMixin
+ * @mixes MakeDebugBuildOptionsMixin
+ * @mixes OverrideDependenciesOptionsMixin
+ * @mixes MakeReleaseBuildOptionsMixin
+ * @mixes ExportSourcePathsOptionsMixin
+ * @mixes ExportRequiredStylesheetsOptionsMixin
+ * @mixes ExportRequiredTemplatesOptionsMixin
  */
 function TaskOptions ()
 {}
@@ -39,7 +39,7 @@ TaskOptions.prototype = {
    * Main module name. Only this module and its dependencies will be exported.
    * @type {string}
    */
-  mainModule:             '',
+  mainModule:         '',
   /**
    * Code packaging method.
    *
@@ -52,7 +52,7 @@ TaskOptions.prototype = {
    * Use the `debug` task argument instead, as it allows using the same task target for both release and debug builds.
    * @type {boolean}
    */
-  debugBuild:             false,
+  debugMode:          false,
   /**
    * A list of module names to ignore when building.
    * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that
@@ -63,14 +63,14 @@ TaskOptions.prototype = {
    * name is not present on this list.
    * @type {string|string[]}
    */
-  externalModules:        '',
+  externalModules:    '',
   /**
    * A list of framework built-in modules (ex. 'ng') that will always be appended to the `externalModules` list when
    * running tasks, so that references to them are ignored by the builder.
    * This is reserved for internal use, but could be overridden if you wish to completely replace the built-in behavior.
    * @type {string[]}
    */
-  builtinModules:         ['ng'],
+  builtinModules:     ['ng'],
   /**
    * A list of modules to be excluded from the build.
    *
@@ -79,14 +79,14 @@ TaskOptions.prototype = {
    * One typical use for this is to exclude the main module from one or more build tasks.
    * @type {string[]}
    */
-  excludedModules:        [],
+  excludedModules:    [],
   /**
    * A list of file paths to prepend to the build output.
    * This forces the inclusion of specific script files, independently of any source file scanning performed
    * by Grunt.
    * @type {string[]}
    */
-  require:                [],
+  require:            [],
   /**
    * Allows loading third-party middleware into the middleware stack.
    * This is a task-level option. Do not specify it at target-level.
@@ -99,7 +99,7 @@ TaskOptions.prototype = {
    * Note: internal middlewares are loaded into the middleware stack before the external middlewares.
    * @type {Array.<{load: string, before: ?string, after: ?string}>|null}
    */
-  externalMiddleware:     null,
+  externalMiddleware: null,
   /**
    * Defines the list of middleware bundled with angular-builder.
    * This is a task-level option. Do not specify it at target-level.
@@ -111,17 +111,17 @@ TaskOptions.prototype = {
    * @type {string[]}
    * @const
    */
-  internalMiddleware:     [
-    './middleware/mainModuleSynthetizer',
-    './middleware/analyzer',
-    './middleware/sourceCodePathsExporter',
-    './middleware/requiredScriptsHandler',
-    './middleware/nonAngularScriptsBuilder',
-    './middleware/debugBuilder',
-    './middleware/releaseBuilder',
-    './middleware/stylesheetReferencesHandler',
-    './middleware/templateReferencesHandler',
-    './middleware/assetReferencesHandler'
+  internalMiddleware: [
+    './middleware/overrideDependencies',
+    './middleware/analyzeSourceCode',
+    './middleware/exportSourcePaths',
+    './middleware/includeRequiredScripts',
+    './middleware/buildForeignScripts',
+    './middleware/makeDebugBuild',
+    './middleware/makeReleaseBuild',
+    './middleware/exportRequiredStylesheets',
+    './middleware/exportRequiredTemplates',
+    './middleware/buildAssets'
   ]
 };
 
@@ -226,7 +226,7 @@ function Context (grunt, task, defaultOptions)
   this.grunt = grunt;
   this.options = extend ({}, defaultOptions, task.options ());
   this.debugBuild = grunt.option ('build') === 'debug' ||
-    (task.flags.debug === undefined ? this.options.debugBuild : task.flags.debug);
+    (task.flags.debug === undefined ? this.options.debugMode : task.flags.debug);
   // Clone the external modules and use it as a starting point.
   this.modules = extend ({}, this._setupExternalModules ());
   // Reset tracer.
