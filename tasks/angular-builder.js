@@ -99,7 +99,10 @@ module.exports = function (grunt)
       // BUILD
       //------------------
 
-      writeln ('Generating the <cyan>%</cyan> build...', context.debugBuild ? 'debug' : 'release');
+      if (context.options.releaseBuild && context.options.releaseBuild.enabled)
+        writeln ('Generating the <cyan>release</cyan> build...');
+      else if (context.options.debugBuild && context.options.debugBuild.enabled)
+        writeln ('Generating the <cyan>debug</cyan> build...');
 
       // Trace the dependency graph and pass each module trough the 2nd stage of the middleware stack.
 

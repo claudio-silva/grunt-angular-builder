@@ -2,6 +2,8 @@
  * Angular Builder middleware module.
  *
  * @module middleware/buildForeignScripts
+ * @requires module:middleware/makeDebugBuild
+ * @requires module:middleware/makeReleaseBuild
  *
  * @license
  * Copyright 2013 Cláudio Manuel Brás da Silva
@@ -50,13 +52,13 @@ function BuildForeignScriptsMiddleware (context)
   {
     // Output the standalone scripts (if any).
     if (context.standaloneScripts.length) {
-      if (context.debugBuild) {
+      if (context.options.debugBuild && context.options.debugBuild.enabled) {
         context.prependOutput += (context.standaloneScripts.map (function (e)
         {
           return util.sprintf ('<script src=\"%\"></script>', e.path);
         }).join ('\\\n'));
       }
-      else {
+      else if (context.options.releaseBuild && context.options.releaseBuild.enabled) {
         /** @type {string[]} */
         var output = context.standaloneScripts.map (function (e) { return e.content; }).join (NL);
 

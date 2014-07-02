@@ -45,6 +45,18 @@ function MakeReleaseBuildOptions ()
 
 MakeReleaseBuildOptions.prototype = {
   /**
+   * Enables the Release Builder.
+   *
+   * When false, no release build will be generated.
+   * When true, the builder generates a single optimized javascript file with all required source code in the correct
+   * loading order.
+   *
+   * Note: The use of this setting as an option is, probably, not what you want.
+   * Use the `debug` task argument instead, as it allows using the same task target for both release and debug builds.
+   * @type {boolean}
+   */
+  enabled:          true,
+  /**
    * Name of the variable representing the angular module being defined, to be used inside self-invoked anonymous
    * functions.
    * You may select another identifier if the default one causes a conflict with existing code.
@@ -128,7 +140,7 @@ function MakeReleaseBuildMiddleware (context)
 
   this.trace = function (/*ModuleDef*/ module)
   {
-    if (context.debugBuild) return;
+    if (!options.enabled) return;
 
     // Fist process the head module declaration.
     if (!module.head)
@@ -165,7 +177,7 @@ function MakeReleaseBuildMiddleware (context)
 
   this.build = function (targetScript)
   {
-    if (context.debugBuild) return;
+    if (!options.enabled) return;
 
     util.writeFile (targetScript, traceOutput.join (NL));
   };

@@ -25,6 +25,18 @@ function MakeDebugBuildOptions ()
 
 MakeDebugBuildOptions.prototype = {
   /**
+   * Enables the Debug Builder.
+   *
+   * When false, no debug build will be generated.
+   * When true, the builder generates a set of &lt;script> tags to include all the required source files in the correct
+   * loading order.
+   *
+   * Note: The use of this setting as an option is, probably, not what you want.
+   * Use the `debug` task argument instead, as it allows using the same task target for both release and debug builds.
+   * @type {boolean}
+   */
+  enabled:         false,
+  /**
    * Transform the generated debug URLs of the source files. It's an array of regexp match and replace records.
    * @type {(Array.<{match:(RegExp|string),replaceWith:string}>|null)}
    */
@@ -73,7 +85,7 @@ function MakeDebugBuildMiddleware (context)
 
   this.trace = function (/*ModuleDef*/ module)
   {
-    if (!context.debugBuild) return;
+    if (!options.enabled) return;
 
     var rep = options.rebaseDebugUrls;
     module.filePaths.forEach (function (path)
@@ -89,7 +101,7 @@ function MakeDebugBuildMiddleware (context)
   {
     /* jshint unused: vars */
 
-    if (!context.debugBuild) return;
+    if (!options.enabled) return;
 
     /** @type {string[]} */
     var output = ['document.write (\''];

@@ -41,19 +41,6 @@ TaskOptions.prototype = {
    */
   mainModule:         '',
   /**
-   * Code packaging method.
-   *
-   * When false, the builder generates a single optimized javascript file with all required source code in the correct
-   * loading order.
-   * When true, the builder generates a set of &lt;script> tags to include all the required source files in the correct
-   * loading order.
-   *
-   * Note: The use of this setting as an option is, probably, not what you want.
-   * Use the `debug` task argument instead, as it allows using the same task target for both release and debug builds.
-   * @type {boolean}
-   */
-  debugMode:          false,
-  /**
    * A list of module names to ignore when building.
    * This allows the source code to contain references to modules not present in the build (ex. 3rd party libraries that
    * are loaded independently).
@@ -225,8 +212,10 @@ function Context (grunt, task, defaultOptions)
 {
   this.grunt = grunt;
   this.options = extend ({}, defaultOptions, task.options ());
-  this.debugBuild = grunt.option ('build') === 'debug' ||
-    (task.flags.debug === undefined ? this.options.debugMode : task.flags.debug);
+  if (task.flags.debug !== undefined) {
+    this.options.debugBuild.enabled = true;
+    this.options.releaseBuild.enabled = false;
+  }
   // Clone the external modules and use it as a starting point.
   this.modules = extend ({}, this._setupExternalModules ());
   // Reset tracer.
@@ -246,12 +235,6 @@ Context.prototype = {
    * @type {TaskOptions}
    */
   options:               null,
-  /**
-   * Is this a debug build?
-   * Note: the debug build mode can be set via three different settings.
-   * @type {boolean}
-   */
-  debugBuild:            false,
   /**
    * A map of module names to module definition records.
    * @type {Object.<string, ModuleDef>}
