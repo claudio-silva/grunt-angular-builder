@@ -80,9 +80,9 @@ TaskOptions.prototype = {
    *
    * This option allows the definition of a list of external middleware modules to load and for each one, to specify
    * where to place it on the middleware stack.
-   * Each element in the list defines a module name (with the `load` property) and either the `before` or
-   * `after` property with the name of a target module on the middleware stack from where to insert the loaded one
-   * before or after it.
+   * Each element in the list defines a module name (with the `load` property) and one of the following properties:
+   * `before`, `after` or `over`. The property name selects the insertion position on the middleware stack for the
+   * loaded one.
    * Note: internal middlewares are loaded into the middleware stack before the external middlewares.
    * @type {Array.<{load: string, before: ?string, after: ?string}>|null}
    */
@@ -93,7 +93,7 @@ TaskOptions.prototype = {
    *
    * This option sets a list of modules names to load and assemble into a middleware stack in the specified order.
    * This is reserved for internal use, but could be overridden if you wish to replace some or all of the
-   * built-in behavior.
+   * built-in behavior. Usually, though, you should use the `externalMiddleware` option.
    * WARNING: the order of middleware listed here is important! If you change it, the build process may fail!
    * @type {string[]}
    * @const
