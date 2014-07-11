@@ -18,12 +18,11 @@ var util = require ('./lib/gruntUtil')
   , types = require ('./lib/types');
 
 var Context = types.Context
+  , ContextEvent = types.ContextEvent
   , TaskOptions = types.TaskOptions
   , extend = util.extend
   , fatal = util.fatal
-  , info = util.info
-  , writeln = util.writeln;
-
+  , info = util.info;
 /**
  * Exports a function that will be called by Grunt to register tasks for this plugin.
  * @param grunt The Grunt API.
@@ -81,6 +80,8 @@ module.exports = function (grunt)
        */
       var middlewareStack = assembleMiddleware (middlewareStackClasses, context);
 
+      context.trigger (ContextEvent.ON_INIT);
+
       //------------------
       // LOAD SOURCE CODE
       //------------------
@@ -95,14 +96,11 @@ module.exports = function (grunt)
         middleware.analyze (fileGroup);
       });
 
+      context.trigger (ContextEvent.ON_AFTER_ANALYZE);
+
       //------------------
       // BUILD
       //------------------
-
-      if (context.options.releaseBuild && context.options.releaseBuild.enabled)
-        writeln ('Generating the <cyan>release</cyan> build...');
-      else if (context.options.debugBuild && context.options.debugBuild.enabled)
-        writeln ('Generating the <cyan>debug</cyan> build...');
 
       // Trace the dependency graph and pass each module trough the 2nd stage of the middleware stack.
 
@@ -114,12 +112,16 @@ module.exports = function (grunt)
         });
       });
 
+      context.trigger (ContextEvent.ON_AFTER_TRACE);
+
       // Pass all the analysed source code trough the 3rd stage of the middleware stack.
 
       middlewareStack.forEach (function (/*MiddlewareInterface*/ middleware)
       {
-        middleware.build (fileGroup.dest, context.standaloneScripts);
+        middleware.build (fileGroup.dest);
       });
+
+      context.trigger (ContextEvent.ON_AFTER_BUILD);
 
     }.bind (this));
   });

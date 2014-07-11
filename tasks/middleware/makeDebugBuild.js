@@ -10,7 +10,11 @@
  */
 'use strict';
 
-var util = require ('../lib/gruntUtil');
+var util = require ('../lib/gruntUtil')
+  , types = require ('../lib/types');
+
+var ContextEvent = types.ContextEvent
+  , writeln = util.writeln;
 
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
@@ -72,6 +76,16 @@ function MakeDebugBuildMiddleware (context)
   var options = context.options.debugBuild;
   /** @type {string[]} */
   var traceOutput = [];
+
+  //--------------------------------------------------------------------------------------------------------------------
+  // EVENTS
+  //--------------------------------------------------------------------------------------------------------------------
+
+  context.listen (ContextEvent.ON_AFTER_ANALYZE, function ()
+  {
+    if (options.enabled)
+      writeln ('Generating the <cyan>debug</cyan> build...');
+  });
 
   //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API

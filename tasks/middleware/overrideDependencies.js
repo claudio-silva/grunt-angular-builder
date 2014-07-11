@@ -31,11 +31,11 @@ OverrideDependenciesOptions.prototype = {
    * This list will be set as the main module's list of required modules.
    * If it's empty, this functionality will be disabled and the build will be performed as usual.
    * If it's not empty, a synthetic main module definition will be generated for both the release and the debug
-   * builds. You  must <b>not</b> declare the main module in your application or, if you do, you must exclude
+   * builds. You must <b>not</b> declare the main module in your application or, if you do, you must exclude
    * the file that declares it from the task's source files set.
    * The reason for this is that the generated main module declaration would collide with the one on the source code.
    * You may still declare services, directives, etc. for the main module, using the
-   * <code>angular.module('name')</code> syntax. You must not call the <code>module</code> method with more than one
+   * <code>angular.module('name')</code> syntax, but you must not call the <code>module</code> method with more than one
    * argument.
    *
    * Note that, to be included in the output, the modules on this list must have their source files located somewhere

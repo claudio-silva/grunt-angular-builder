@@ -11,17 +11,19 @@
 'use strict';
 
 var util = require ('../lib/gruntUtil')
-  , NL = util.NL;
-
-var sourceTrans = require ('../lib/sourceTrans')
+  , types = require ('../lib/types')
+  , sourceTrans = require ('../lib/sourceTrans')
   , sourceExtract = require ('../lib/sourceExtract');
 
 var indent = util.indent
   , sprintf = util.sprintf
   , csprintf = util.csprintf
+  , writeln = util.writeln
   , warn = util.warn
   , getExplanation = util.getExplanation
-  , reportErrorLocation = util.reportErrorLocation;
+  , reportErrorLocation = util.reportErrorLocation
+  , NL = util.NL
+  , ContextEvent = types.ContextEvent;
 
 /**
  * Error codes returned by some functions in this module.
@@ -127,6 +129,16 @@ function MakeReleaseBuildMiddleware (context)
   var verboseOut = context.grunt.log.verbose;
   /** @type {string[]} */
   var traceOutput = [];
+
+  //--------------------------------------------------------------------------------------------------------------------
+  // EVENTS
+  //--------------------------------------------------------------------------------------------------------------------
+
+  context.listen (ContextEvent.ON_AFTER_ANALYZE, function ()
+  {
+    if (options.enabled)
+      writeln ('Generating the <cyan>release</cyan> build...');
+  });
 
   //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API

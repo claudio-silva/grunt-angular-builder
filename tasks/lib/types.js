@@ -200,6 +200,18 @@ MiddlewareInterface.prototype = {
 //======================================================================================================================
 
 /**
+ * Context event names.
+ * @enum {string}
+ * @const
+ */
+var ContextEvent = {
+  ON_INIT:          'init',
+  ON_AFTER_ANALYZE: 'after-analyze',
+  ON_AFTER_TRACE:   'after-trace',
+  ON_AFTER_BUILD:   'after-build'
+};
+
+/**
  * The execution context for the middleware stack.
  * Contains shared information available throughout the middleware stack.
  * @constructor
@@ -223,6 +235,7 @@ function Context (grunt, task, defaultOptions)
   // Reset the scripts list to a clone of the `require` option or to an empty list.
   this.standaloneScripts = (this.options.require || []).slice ();
   this.shared = {};
+  this._events = {};
 }
 
 Context.prototype = {
@@ -261,6 +274,36 @@ Context.prototype = {
    * Custom data shared between extensions.
    */
   shared:                null,
+  /**
+   * A map of registered event handlers.
+   * @type {Object.<ContextEvent,Function[]>}
+   * @private
+   */
+  _events:               null,
+  /**
+   * Registers an event handler.
+   * @param {ContextEvent} eventName
+   * @param {function()} handler
+   */
+  listen:                function (eventName, handler)
+  {
+    if (!this._events[eventName])
+      this._events[eventName] = [];
+    this._events[eventName].push (handler);
+  },
+  /**
+   * Calls all registered event handlers for the specified event.
+   * @param {ContextEvent} eventName
+   */
+  trigger:               function (eventName)
+  {
+    var e = this._events[eventName];
+    if (e)
+      e.forEach (function (handler)
+      {
+        handler ();
+      });
+  },
   /**
    * Registers the configured external modules so that they can be ignored during the build output generation.
    * @returns {Object.<string, ModuleDef>}
@@ -367,6 +410,7 @@ ModuleDef.prototype = {
 module.exports = {
   ModuleDef:          ModuleDef,
   ExtensionInterface: MiddlewareInterface,
+  ContextEvent:       ContextEvent,
   Context:            Context,
   TaskOptions:        TaskOptions
 };
