@@ -14,7 +14,8 @@ var util = require ('../lib/gruntUtil')
   , types = require ('../lib/types');
 
 var ContextEvent = types.ContextEvent
-  , writeln = util.writeln;
+  , writeln = util.writeln
+  , NL = util.NL;
 
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
@@ -83,8 +84,10 @@ function MakeDebugBuildMiddleware (context)
 
   context.listen (ContextEvent.ON_AFTER_ANALYZE, function ()
   {
-    if (options.enabled)
-      writeln ('Generating the <cyan>debug</cyan> build...');
+    if (options.enabled) {
+      var space = context.verbose ? NL : '';
+      writeln ('%Generating the <cyan>debug</cyan> build...%', space, space);
+    }
   });
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -107,7 +110,8 @@ function MakeDebugBuildMiddleware (context)
       if (rep)
         for (var i = 0, m = rep.length; i < m; ++i)
           path = path.replace (rep[i].match, rep[i].replaceWith);
-      traceOutput.push (util.sprintf ('<script src=\"%\"></script>', path));
+      if (path) // Ignore empty path; it means that this middleware should not output a script tag for the module.
+        traceOutput.push (util.sprintf ('<script src=\"%\"></script>', path));
     });
   };
 
@@ -120,11 +124,14 @@ function MakeDebugBuildMiddleware (context)
     /** @type {string[]} */
     var output = ['document.write (\''];
 
-    // Output standalone scripts (if any).
-    output.push (context.prependOutput);
+    if (context.prependOutput)
+      output.push (context.prependOutput);
 
     // Output the modules (if any).
     util.arrayAppend (output, traceOutput);
+
+    if (context.appendOutput)
+      output.push (context.appendOutput);
 
     output.push ('\');');
     util.writeFile (targetScript, output.join ('\\\n'));

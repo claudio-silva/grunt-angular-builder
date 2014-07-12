@@ -103,15 +103,13 @@ function AnalyzeSourceCodeMiddleware (context)
         var module = context.modules[moduleHeader.name];
         // If this is the first time a specific module is mentioned, create the respective information record.
         if (!module)
-          module = context.modules[moduleHeader.name] = new ModuleDef ();
+          module = context.modules[moduleHeader.name] = new ModuleDef (moduleHeader.name);
         // Skip the file if it defines an external module.
         else if (module.external)
           return;
         // Reject additional attempts to redeclare a module (only appending is allowed).
         else if (module.head && !moduleHeader.append)
           fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
-        // Fill out the module definition record.
-        module.name = moduleHeader.name;
         // The file is appending definitions to a module declared elsewhere.
         if (moduleHeader.append) {
           module.bodies.push (fileContent);

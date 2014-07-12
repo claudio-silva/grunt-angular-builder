@@ -10,6 +10,12 @@
  */
 'use strict';
 
+var util = require ('../lib/gruntUtil')
+  , types = require ('../lib/types');
+
+var ModuleDef = types.ModuleDef
+  , sprintf = util.sprintf;
+
 //----------------------------------------------------------------------------------------------------------------------
 // OPTIONS
 //----------------------------------------------------------------------------------------------------------------------
@@ -51,7 +57,7 @@ OverrideDependenciesOptions.prototype = {
  */
 var OverrideDependenciesOptionsMixin = {
   /**
-   * Options specific to the Main Module Synthetizer middleware.
+   * Options specific to the Override Dependencies middleware.
    * @type {OverrideDependenciesOptions}
    */
   overrideDependencies: new OverrideDependenciesOptions ()
@@ -73,7 +79,8 @@ exports.middleware = OverrideDependenciesMiddleware;
 function OverrideDependenciesMiddleware (context)
 {
   /* jshint unused: vars */
-  //var options = context.options.overrideDependencies;
+  var options = context.options.overrideDependencies
+    , enabled = options.dependencies && options.dependencies.length;
 
   //--------------------------------------------------------------------------------------------------------------------
   // PUBLIC API
@@ -82,7 +89,15 @@ function OverrideDependenciesMiddleware (context)
   this.analyze = function (filesArray)
   {
     /* jshint unused: vars */
-    // Do nothing
+    if (!enabled) return;
+
+    var mainModuleName = context.options.mainModule;
+    var mainModule = context.modules[mainModuleName] = new ModuleDef (mainModuleName);
+    mainModule.requires = options.dependencies;
+    // Must define an empty path corresponding to the (non-existent) file that declared the module.
+    mainModule.filePaths = [''];
+    // Must set head to a non-empty string to mark the module as being initialized.
+    mainModule.head = ' ';
   };
 
   this.trace = function (module)
@@ -93,5 +108,14 @@ function OverrideDependenciesMiddleware (context)
   this.build = function (targetScript)
   {
     /* jshint unused: vars */
+    if (!enabled) return;
+
+    if (context.options.debugBuild && context.options.debugBuild.enabled) {
+      var declaration = sprintf ("angular.module('%',%);",
+        context.options.mainModule,
+        util.toQuotedList (options.dependencies)
+      );
+      context.appendOutput += sprintf ('<script>%</script>', declaration);
+    }
   };
 }

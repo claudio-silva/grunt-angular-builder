@@ -102,6 +102,16 @@ module.exports = function (grunt)
         src:          'tests/include-non-angular/**/*.js',
         dest:         'dist/main.js',
         forceInclude: 'tests/include-non-angular/other/other.js'
+      },
+      'test-override-deps':       {
+        options: {
+          mainModule:           'App',
+          overrideDependencies: {
+            dependencies: ['Submodule1', 'Library1']
+          }
+        },
+        src:     ['tests/js-only/**/*.js', '!tests/js-only/App.js'],
+        dest:    'dist/main.js'
       }
     },
 
@@ -158,7 +168,8 @@ module.exports = function (grunt)
     'test-stylesheets',
     'test-assets',
     'test-3rd-party',
-    'test-include-non-angular'
+    'test-include-non-angular',
+    'test-override-deps'
   ]);
 
   grunt.registerTask ('test-js-app', ['clean', 'angular-builder:test-js-app']);
@@ -169,5 +180,6 @@ module.exports = function (grunt)
   grunt.registerTask ('test-assets', ['clean', 'angular-builder:test-assets', 'concat:test-assets']);
   grunt.registerTask ('test-3rd-party', ['clean', 'angular-builder:test-3rd-party', 'concat:3rd-party']);
   grunt.registerTask ('test-include-non-angular', ['clean', 'angular-builder:test-include-non-angular']);
+  grunt.registerTask ('test-override-deps', ['clean', 'angular-builder:test-override-deps']);
 
 };

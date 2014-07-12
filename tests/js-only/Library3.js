@@ -7,7 +7,7 @@ angular.module ('Library3', [
 
     // Single-line comment
 
-    'Submodule2', // Trailing comma.
+    'Submodule2', // Trailing comma (do not remove it!).
 
     /* And another comment */
   ]

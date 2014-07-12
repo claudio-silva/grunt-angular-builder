@@ -118,11 +118,6 @@ function MakeReleaseBuildMiddleware (context)
 {
   var options = context.options.releaseBuild;
   /**
-   * <code>true</code> if the task is running in verbose mode.
-   * @type {boolean}
-   */
-  var verbose = context.grunt.option ('verbose');
-  /**
    * Grunt's verbose output API.
    * @type {Object}
    */
@@ -136,8 +131,10 @@ function MakeReleaseBuildMiddleware (context)
 
   context.listen (ContextEvent.ON_AFTER_ANALYZE, function ()
   {
-    if (options.enabled)
-      writeln ('Generating the <cyan>release</cyan> build...');
+    if (options.enabled) {
+      var space = context.verbose ? NL : '';
+      writeln ('%Generating the <cyan>release</cyan> build...%', space, space);
+    }
   });
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -191,6 +188,11 @@ function MakeReleaseBuildMiddleware (context)
   {
     if (!options.enabled) return;
 
+    if (context.prependOutput)
+      traceOutput.unshift (context.prependOutput);
+    if (context.appendOutput)
+      traceOutput.push (context.appendOutput);
+
     util.writeFile (targetScript, traceOutput.join (NL));
   };
 
@@ -230,7 +232,8 @@ function MakeReleaseBuildMiddleware (context)
         // Unwrapped source code.
         // It must be validated to make sure it's safe.
         //----------------------------------------------------------
-        verboseOut.write ('Validating ' + path.cyan + '...');
+        if (path)
+          verboseOut.write ('Validating ' + path.cyan + '...');
         var valid = sourceTrans.validateUnwrappedCode (source);
         if (valid)
         // The code passed validation.
@@ -301,14 +304,14 @@ function MakeReleaseBuildMiddleware (context)
   function warnAboutGlobalCode (sandbox, path)
   {
     var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
-        reportErrorLocation (path) +
+      (path ? reportErrorLocation (path) : '') +
         getExplanation (
             'This kind of code will behave differently between release and debug builds.' + NL +
             'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
             'directly to the window object.'
         )
     );
-    if (verbose) {
+    if (context.verbose) {
       var found = false;
       util.forEachProperty (sandbox, function (k, v)
       {

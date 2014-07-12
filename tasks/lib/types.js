@@ -224,10 +224,11 @@ function Context (grunt, task, defaultOptions)
 {
   this.grunt = grunt;
   this.options = extend ({}, defaultOptions, task.options ());
-  if (task.flags.debug !== undefined) {
+  if (task.flags.debug !== undefined || grunt.option ('build') === 'debug') {
     this.options.debugBuild.enabled = true;
     this.options.releaseBuild.enabled = false;
   }
+  this.verbose = grunt.option ('verbose');
   // Clone the external modules and use it as a starting point.
   this.modules = extend ({}, this._setupExternalModules ());
   // Reset tracer.
@@ -249,6 +250,11 @@ Context.prototype = {
    */
   options:               null,
   /**
+   * <code>true</code> if the task is running in verbose mode.
+   * @type {boolean}
+   */
+  verbose:               false,
+  /**
    * A map of module names to module definition records.
    * @type {Object.<string, ModuleDef>}
    */
@@ -266,10 +272,15 @@ Context.prototype = {
    */
   standaloneScripts:     null,
   /**
-   * Source code to be prepended to the build output file.
+   * Source code to be prepended to the output build file.
    * @type {string}
    */
   prependOutput:         '',
+  /**
+   * Source code to be appended to the output build file.
+   * @type {string}
+   */
+  appendOutput:          '',
   /**
    * Custom data shared between extensions.
    */
@@ -322,8 +333,7 @@ Context.prototype = {
       // Ignore redundant names.
       if (!modules[moduleName]) {
         /** @type {ModuleDef} */
-        var module = modules[moduleName] = new ModuleDef ();
-        module.name = moduleName;
+        var module = modules[moduleName] = new ModuleDef (moduleName);
         module.external = true;
       }
     });
@@ -338,9 +348,11 @@ Context.prototype = {
  * A module definition record.
  * Contains all javascript defining the module, read from one or more source files.
  * @constructor
+ * @param {string} name
  */
-function ModuleDef ()
+function ModuleDef (name)
 {
+  this.name = name;
   this.bodies = [];
   this.filePaths = [];
 }
@@ -354,6 +366,8 @@ ModuleDef.prototype = {
   /**
    * Relative file paths to the source script files.
    * The first entry corresponds to the file that starts the module definition.
+   * Note: empty string elements will be ignored.
+   * Note: at least one element must be present, even if empty.
    * @type {string[]}
    */
   filePaths: null,
