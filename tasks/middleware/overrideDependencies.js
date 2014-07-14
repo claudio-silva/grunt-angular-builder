@@ -70,8 +70,8 @@ exports.options = OverrideDependenciesOptionsMixin;
 exports.middleware = OverrideDependenciesMiddleware;
 
 /**
- * Exports the paths of all script files that are required by the application,
- * in the order defined by the modules' dependency graph.
+ * Allows the setting of the main module's dependencies via Grunt configuration options and synthetizes that module's
+ * declaration javascript code.
  * @constructor
  * @implements {MiddlewareInterface}
  * @param {Context} context The execution context for the middleware stack.
