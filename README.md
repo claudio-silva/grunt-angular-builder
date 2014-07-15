@@ -15,8 +15,9 @@ Read the [Introduction](https://github.com/claudio-silva/grunt-angular-builder/w
 
 ### Features
 
-Read the [Features](https://github.com/claudio-silva/grunt-angular-builder/wiki/Features) page.
+Angular Builder brings you much more than source code loading and packaging.
 
+Read the [Features](https://github.com/claudio-silva/grunt-angular-builder/wiki/Features) page to get a better understanding of what Angular Builder can do for you.
 
 ### Roadmap
 
