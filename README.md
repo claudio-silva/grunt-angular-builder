@@ -1,13 +1,13 @@
-## angular-builder
+## Angular Builder
 > Build your AngularJS applications the Angular way!
 
-### What is Angular-Builder?
+### What is Angular Builder?
 
 It's a Grunt plugin that handles the loading of modules, stylesheets and assets dependencies of AngularJS applications in a way that doesn't require you to tweak your code to adapt it to module/script loaders.
 
-That's right, folks! No AMD, CommonJS or ES6 module loaders are required!
+Write your code the way it is meant to be written, using only AngularJS native constructs, as if no module loading is required or necessary.
 
-Write your code the way it is supposed to be written, using only AngularJS native constructs, as if no module loading is required or necessary.
+AMD, CommonJS or ES6 module loaders / optimizers / packagers are no longer necessary for developing medium or large (or even huge) AngularJS-based applications!
 
 ### Why a builder tool?
 
