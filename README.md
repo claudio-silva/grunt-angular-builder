@@ -1,13 +1,20 @@
 ## Angular Builder
 > Build your AngularJS applications the Angular way!
 
+### Elevator pitch
+
+Did you know AMD, CommonJS or ES6 module loaders / optimizers / packagers are no longer necessary for developing medium to large (or even huge) AngularJS-based applications?
+
+Now you can write your code the way it was meant to be written, using only AngularJS native constructs, as if no module loading is required or necessary!
+
+Stop worrying about connecting all your project's myriad files into a cohesive whole. Split your code into as many files as needed, organized into any directory style structure you wish, and let Angular Builder do the *Grunt* work for you, while you concentrate on writing actual useful code! ;-)
+
+
 ### What is Angular Builder?
 
-It's a Grunt plugin that handles the loading of modules, stylesheets and assets dependencies of AngularJS applications in a way that doesn't require you to tweak your code to adapt it to module/script loaders.
+Angular Builder is a Grunt plugin that transforms the source code of AngularJS-based applications into a format that can be directly processed by Angular's native module loading capabilities without requiring you to resort to AMD, CommonJS or ES6 module loaders.
 
-Write your code the way it is meant to be written, using only AngularJS native constructs, as if no module loading is required or necessary.
-
-AMD, CommonJS or ES6 module loaders / optimizers / packagers are no longer necessary for developing medium or large (or even huge) AngularJS-based applications!
+It also provides advanced building capabilities for integrating stylesheets, templates and assets dependencies into your build pipeline.
 
 ### Why a builder tool?
 
@@ -15,7 +22,7 @@ Read the [Introduction](https://github.com/claudio-silva/grunt-angular-builder/w
 
 ### Features
 
-Angular Builder brings you much more than source code loading and packaging.
+Angular Builder brings you much more than source code analysis and assemblage.
 
 Read the [Features](https://github.com/claudio-silva/grunt-angular-builder/wiki/Features) page to get a better understanding of what Angular Builder can do for you.
 
