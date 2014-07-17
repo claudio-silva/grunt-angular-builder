@@ -14,9 +14,12 @@ Stop worrying about connecting all your project's myriad files into a cohesive w
 
 Angular Builder is a Grunt plugin that transforms the source code of AngularJS-based applications into a format that can be directly processed by Angular's native module loading capabilities.
 
-This allows you to write only pure AngularJS code without any alien module definition/import patterns of non-Angular module specifications (like AMD, CommonJS or ES6 modules).
+This allows you to write only pure AngularJS code, free from any alien module definition/import patterns from non-Angular module specifications (like AMD, CommonJS or ES6 modules).
 
-It also provides advanced building capabilities for integrating stylesheets, templates and assets dependencies into your build pipeline.
+It also provides advanced building capabilities for:
+
+- performing source code transformations and optimizations,
+- integrate stylesheets, templates and assets dependencies into your build.
 
 ### Features
 
