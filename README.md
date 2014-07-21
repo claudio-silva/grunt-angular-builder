@@ -182,6 +182,10 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v0.5.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.5.1) / 2014-07-21
+
+- Documentation update.
+
 [v0.5.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.5.0) / 2014-07-15
 
 - Major internal refactoring; middleware-based architecture.
