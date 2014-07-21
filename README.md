@@ -31,15 +31,8 @@ Read the [Features](https://github.com/claudio-silva/grunt-angular-builder/wiki/
 
    | Status      | Feature
 ---|:------------|:-----------
- 1 | Done        | Javascript release and debug builder.
- 2 | Done        | Integration with CSS building tasks.
- 3 | Done        | Integration with HTML templates building tasks.
- 4 | Done        | Assets builder.
- 5 | Done        | Non-module-based / non-angular-code javascript builder.
- 6 | Done        | Source paths export for extended integration with other Grunt tasks.
- 7 | Done        | Middleware-based architecture.
- 8 | In progress | Improve compatibility with 3rd-party libraries.
- 9 | In progress | Even more documentation and more examples.
+ 1 | In progress | Improve compatibility with 3rd-party libraries.
+ 2 | In progress | Even more documentation and more examples.
 
 ### Show your support
 
