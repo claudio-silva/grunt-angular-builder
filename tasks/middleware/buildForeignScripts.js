@@ -52,12 +52,27 @@ function BuildForeignScriptsMiddleware (context)
   {
     // Output the standalone scripts (if any).
     if (context.standaloneScripts.length) {
+
+      // Debug Build
+
       if (context.options.debugBuild && context.options.debugBuild.enabled) {
+        var rep = context.options.debugBuild.rebaseDebugUrls;
         context.prependOutput += (context.standaloneScripts.map (function (e)
         {
-          return util.sprintf ('<script src=\"%\"></script>', e.path);
-        }).join ('\\\n'));
+          var path = e.path;
+          if (rep)
+            for (var i = 0, m = rep.length; i < m; ++i)
+              path = path.replace (rep[i].match, rep[i].replaceWith);
+          if (path) // Ignore empty path; it means that this middleware should not output a script tag.
+            return util.sprintf ('<script src=\"%\"></script>', path);
+          return '';
+        })
+          .filter (function (x) {return x;}) // Remove empty paths.
+          .join ('\\\n'));
       }
+
+      // Release Build
+
       else if (context.options.releaseBuild && context.options.releaseBuild.enabled) {
         /** @type {string[]} */
         var output = context.standaloneScripts.map (function (e) { return e.content; }).join (NL);

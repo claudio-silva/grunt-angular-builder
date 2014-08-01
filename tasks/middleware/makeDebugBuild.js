@@ -110,7 +110,7 @@ function MakeDebugBuildMiddleware (context)
       if (rep)
         for (var i = 0, m = rep.length; i < m; ++i)
           path = path.replace (rep[i].match, rep[i].replaceWith);
-      if (path) // Ignore empty path; it means that this middleware should not output a script tag for the module.
+      if (path) // Ignore empty path; it means that this middleware should not output a script tag.
         traceOutput.push (util.sprintf ('<script src=\"%\"></script>', path));
     });
   };

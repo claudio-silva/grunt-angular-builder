@@ -103,6 +103,23 @@ module.exports = function (grunt)
         dest:         'dist/main.js',
         forceInclude: 'tests/include-non-angular/other/other.js'
       },
+      'test-include-and-rebase':  {
+        options:      {
+          mainModule:   'App',
+          debugBuild:   {
+            enabled:         true,
+            rebaseDebugUrls: [
+              { match: /other\//, replaceWith: '' }, //remove path segment
+              { match: /tests\/include-non-angular/, replaceWith: 'js' }, //replace base path
+              { match: /^.*demo.js$/, replaceWith: '' } //suppress library
+            ]
+          },
+          releaseBuild: {enabled: false}
+        },
+        src:          'tests/include-non-angular/**/*.js',
+        dest:         'dist/main.js',
+        forceInclude: 'tests/include-non-angular/other/other.js'
+      },
       'test-override-deps':       {
         options: {
           mainModule:           'App',
@@ -180,6 +197,7 @@ module.exports = function (grunt)
   grunt.registerTask ('test-assets', ['clean', 'angular-builder:test-assets', 'concat:test-assets']);
   grunt.registerTask ('test-3rd-party', ['clean', 'angular-builder:test-3rd-party', 'concat:3rd-party']);
   grunt.registerTask ('test-include-non-angular', ['clean', 'angular-builder:test-include-non-angular']);
+  grunt.registerTask ('test-include-and-rebase', ['clean', 'angular-builder:test-include-and-rebase']);
   grunt.registerTask ('test-override-deps', ['clean', 'angular-builder:test-override-deps']);
 
 };
