@@ -129,6 +129,13 @@ module.exports = function (grunt)
         },
         src:     ['tests/js-only/**/*.js', '!tests/js-only/App.js'],
         dest:    'dist/main.js'
+      },
+	  'test-slashes':       {
+        options: {
+          mainModule:           'App'
+        },
+        src:     ['tests/slashes/**/*.js'],
+        dest:    'dist/main.js'
       }
     },
 
@@ -199,5 +206,6 @@ module.exports = function (grunt)
   grunt.registerTask ('test-include-non-angular', ['clean', 'angular-builder:test-include-non-angular']);
   grunt.registerTask ('test-include-and-rebase', ['clean', 'angular-builder:test-include-and-rebase']);
   grunt.registerTask ('test-override-deps', ['clean', 'angular-builder:test-override-deps']);
+  grunt.registerTask ('test-slashes', ['clean', 'angular-builder:test-slashes::debug']);
 
 };
