@@ -17,7 +17,21 @@ exports.middleware = BuildForeignScriptsMiddleware;
 var util = require ('../lib/gruntUtil')
   , path = require ('path')
   , NL = util.NL
-  , MATCH_PATH_SEP = new RegExp (path.sep, 'g');
+  , MATCH_PATH_SEP = new RegExp (escapeRegExp(path.sep), 'g');
+
+  
+/**
+ * Escape Regular Expression.
+ *
+ * Turn a string into a valid Regular Expression
+ * by escaping special chars
+ *
+ * @param {string} str The string to escape.
+ */
+function escapeRegExp (str)
+{
+  return str.replace(/[.^$*+?()[{\\|\]-]/g, '\\$&');
+}
 
 /**
  * Builds non-angular-module scripts.
