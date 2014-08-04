@@ -130,7 +130,7 @@ module.exports = function (grunt)
         src:     ['tests/js-only/**/*.js', '!tests/js-only/App.js'],
         dest:    'dist/main.js'
       },
-	  'test-slashes':       {
+      'test-slashes':       {
         options: {
           mainModule:           'App'
         },
