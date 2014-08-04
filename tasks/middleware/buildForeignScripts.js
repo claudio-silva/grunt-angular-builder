@@ -15,7 +15,9 @@
 exports.middleware = BuildForeignScriptsMiddleware;
 
 var util = require ('../lib/gruntUtil')
-  , NL = util.NL;
+  , path = require ('path')
+  , NL = util.NL
+  , MATCH_PATH_SEP = new RegExp (path.sep, 'g');
 
 /**
  * Builds non-angular-module scripts.
@@ -59,7 +61,7 @@ function BuildForeignScriptsMiddleware (context)
         var rep = context.options.debugBuild.rebaseDebugUrls;
         context.prependOutput += (context.standaloneScripts.map (function (e)
         {
-          var path = e.path;
+          var path = e.path.replace (MATCH_PATH_SEP, '/'); // Convert file paths to URLs.
           if (rep)
             for (var i = 0, m = rep.length; i < m; ++i)
               path = path.replace (rep[i].match, rep[i].replaceWith);
