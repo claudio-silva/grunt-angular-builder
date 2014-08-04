@@ -371,6 +371,19 @@ exports.arrayAppend = function (target, src)
   return Array.prototype.push.apply (target, src);
 };
 
+/**
+ * Escape Regular Expression.
+ *
+ * Turn a string into a valid Regular Expression
+ * by escaping special chars
+ *
+ * @param {string} str The string to escape.
+ */
+exports.escapeRegExp = function (str)
+{
+  return str.replace(/[.^$*+?()[{\\|\]-]/g, '\\$&');
+};
+
 //------------------------------------------------------------------------------
 // PRIVATE
 //------------------------------------------------------------------------------
