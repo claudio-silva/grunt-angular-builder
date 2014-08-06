@@ -1,18 +1,11 @@
 ## Angular Builder
 > Build your AngularJS applications the Angular way!
 
-### Elevator pitch
-
-Did you know you no longer have to use AMD, CommonJS or ES6 module loaders for developing medium to large (or even huge) AngularJS-based applications?
-
-Now you can write your code the way it was meant to be written, using only AngularJS native constructs, as if no module loading is required or necessary!
-
-Stop worrying about connecting all your project's myriad files into a cohesive whole. Split your code into as many files as needed, organized into any directory structure style you wish, and let Angular Builder do the *Grunt* work for you ;-), while you concentrate on writing actual useful code!
-
-
 ### What is Angular Builder?
 
-Angular Builder is a Grunt plugin that transforms the source code of AngularJS-based applications into a format that can be directly processed by Angular's native module loading capabilities.
+Angular Builder is the definitive solution for loading source code in AngularJS applications.
+
+Angular Builder **is not**, itself, a script loader or a module loader; it transforms your application so that it can be **loaded directly by Angular's builtin module loader**.
 
 This allows you to write only pure AngularJS code, free from any alien module definition/import patterns from non-Angular module specifications (like AMD, CommonJS or ES6 modules).
 
@@ -21,28 +14,43 @@ It also provides advanced building capabilities for:
 - performing source code transformations and optimizations,
 - integrate stylesheets, templates and assets dependencies into your build.
 
+### Elevator pitch
+
+Forget AMD, CommonJS or ES6 module loaders when developing medium to large AngularJS applications!
+
+Now you can write your code the way it was meant to be written, using only AngularJS native constructs, as if no module loading is required or necessary!
+
+Stop worrying about connecting all your project's myriad files into a cohesive whole. Split your code into as many files as needed, organized into any directory structure style you wish, and let Angular Builder do the *Grunt* work for you ;-), while you concentrate on writing actual useful code!
+
+
 ### Features
 
-Angular Builder brings you much more than source code analysis and assemblage.
+Angular Builder brings you much more than source code /assets loading.
 
 Read the [Features](https://github.com/claudio-silva/grunt-angular-builder/wiki/Features) page to get a better understanding of what Angular Builder can do for you.
-
-### Roadmap
-
-   | Status      | Feature
----|:------------|:-----------
- 1 | In progress | Improve compatibility with 3rd-party libraries.
- 2 | In progress | Even more documentation and more examples.
 
 ### Show your support
 
 If you use Angular-Builder, please [star](https://github.com/claudio-silva/grunt-angular-builder) the project on Github to show your support!
+
+And **spread the word!**
+
+A lot of people don't know about Angular Builder yet!  
+They'll surely thank you if you show them a way to make their lives easier when developing AngularJS applications! ;-)
 
 # Documentation
 
 Extended documentation is available on the [Wiki](https://github.com/claudio-silva/grunt-angular-builder/wiki).
 
 You can also examine the tests that are provided on the `/tests` folder and the test configurations that are defined on `/Gruntfile.js`. They are very simple working examples that you can build immediately.
+
+##### Extending Angular Builder
+
+If you would like to develop Angular Builder extensions (middleware), you can build reference documentation for the builder's classes and functions by running (on the project's folder):
+
+	grunt doc
+
+Then open `doc/index.html`.
 
 ## Before we start
 You should know [about angular-builder's limitations](https://github.com/claudio-silva/grunt-angular-builder/wiki/Limitations).
@@ -181,6 +189,10 @@ When your work is ready, submit a pull request.
 __Important:__ all contributions that are accepted will be made available under the project's license.
 
 ## Release History
+
+[v1.0.0-beta1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v1.0.0-beta1) / 2014-08-06
+
+- Getting ready for the official release.
 
 [v0.5.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.5.2) / 2014-08-04
 

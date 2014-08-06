@@ -1,7 +1,7 @@
 {
   "name": "grunt-angular-builder",
   "description": "A project builder for AngularJS applications.",
-  "version": "0.5.2",
+  "version": "1.0.0-beta1",
   "homepage": "https://github.com/claudio-silva/grunt-angular-builder",
   "author": {
     "name": "Cláudio Silva",
@@ -42,6 +42,11 @@
   "keywords": [
     "gruntplugin",
     "angular",
-    "angularjs"
+    "angularjs",
+    "module",
+    "loader",
+    "loading",
+    "build",
+    "builder"
   ]
 }
