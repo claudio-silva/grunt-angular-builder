@@ -190,6 +190,10 @@ __Important:__ all contributions that are accepted will be made available under 
 
 ## Release History
 
+[v1.0.0-beta2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v1.0.0-beta2) / 2014-09-23
+
+- Bug fix.
+
 [v1.0.0-beta1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v1.0.0-beta1) / 2014-08-06
 
 - Getting ready for the official release.
