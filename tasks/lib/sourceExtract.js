@@ -95,12 +95,12 @@ var EXTRACT_STAT = {
 /**
  * Matches a comment block preceding a module definition.
  * This allows excluding module definitions thar lie inside comment blocks.
- * It is assumed that closing comments are always followed by white space (ex: \n).
+ * It is assumed that opening comments are always placed at the beginning od a line, eventually preceded by white space.
  * This allows avoiding false positives with expressions like the one below:
  * //# template("skins/*.html")
  * @type {string}
  */
-var MATCH_LEADING_COMMENT = '(/`*(?:(?!/`*)[`s`S])*?)?';
+var MATCH_LEADING_COMMENT = '(?:^|`s+)/`*(?:(?!`*/)[`s`S])*$';
 /**
  * Regular expression string that matches an angular module declaration in one of these formats:
  * angular.module('name',[dependencies]) or
@@ -186,19 +186,21 @@ exports.EXTRACT_STAT = EXTRACT_STAT;
  */
 exports.extractModuleHeader = function (source)
 {
-  var LEADING_COMMENT = 1
-    , MODULE_NAME = 2
-    , MODULE_DEPS = 3
-    , CONFIG_FN = 4;
-  var R = new RegExp (tokenize (MATCH_LEADING_COMMENT + MODULE_DECL_EXP), 'ig');
-  var all = [], m;
+  var LEADING_COMMENT = 0
+    , MODULE_NAME = 1
+    , MODULE_DEPS = 2
+    , CONFIG_FN = 3;
+  var R = new RegExp (tokenize (MODULE_DECL_EXP), 'ig');
+  var R2 = new RegExp (tokenize (MATCH_LEADING_COMMENT));
+  var all = [], m, m2, prec, lastI = 0;
 
   // Collect all matches but exclude declarations inside comment blocks.
   while ((m = R.exec (source)) !== null) {
-    console.log(m[LEADING_COMMENT]);
-    console.log('-------------------------------------------------\n\n');
-    if (!m[LEADING_COMMENT] || m[LEADING_COMMENT].match (/\*\//))
+    prec = source.substring (lastI, m.index);
+    m2 = R2.exec (prec);
+    if (!m2 || m2[LEADING_COMMENT].match (/\*\//))
       all.push (m);
+    lastI = R.lastIndex;
   }
 
   // Ignore the file if it has no angular module definition.
