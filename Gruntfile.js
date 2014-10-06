@@ -134,6 +134,13 @@ module.exports = function (grunt)
         },
         src:     ['tests/slashes/**/*.js'],
         dest:    'dist/main.js'
+      },
+      'test-ui-router':       {
+        options: {
+          mainModule:           'App'
+        },
+        src:     ['tests/ui-router/**/*.js'],
+        dest:    'dist/main.js'
       }
     },
 
@@ -191,7 +198,10 @@ module.exports = function (grunt)
     'test-assets',
     'test-3rd-party',
     'test-include-non-angular',
-    'test-override-deps'
+    'test-include-and-rebase',
+    'test-override-deps',
+    'test-slashes',
+    'test-ui-router'
   ]);
 
   grunt.registerTask ('test-js-app', ['clean', 'angular-builder:test-js-app']);
@@ -205,5 +215,6 @@ module.exports = function (grunt)
   grunt.registerTask ('test-include-and-rebase', ['clean', 'angular-builder:test-include-and-rebase::debug']);
   grunt.registerTask ('test-override-deps', ['clean', 'angular-builder:test-override-deps']);
   grunt.registerTask ('test-slashes', ['clean', 'angular-builder:test-slashes::debug']);
+  grunt.registerTask ('test-ui-router', ['clean', 'angular-builder:test-ui-router']);
 
 };
