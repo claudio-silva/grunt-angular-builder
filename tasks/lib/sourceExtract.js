@@ -56,10 +56,6 @@ var tokenize = util.tokenize
  * <code>angular.module('name',[])</code> or
  * <code>angular.module('name')</code>.
  *//**
- * @name ModuleHeaderInfo#status
- * The result status.
- * @type {EXTRACT_STAT}
- *//**
  * @name ModuleHeaderInfo#name
  * Module name.
  * @type {string}
@@ -77,16 +73,6 @@ var tokenize = util.tokenize
  * Third parameter of a module declaration, if present.
  * @type {string|undefined}
  */
-
-/**
- * Error codes returned by some functions of the sourceTrans module.
- * @enum
- */
-var EXTRACT_STAT = {
-  OK:               0,
-  MULTIPLE_MODULES: -1,
-  MULTIPLE_DECLS:   -2
-};
 
 //------------------------------------------------------------------------------
 // PRIVATE DATA
@@ -169,22 +155,12 @@ var MATCH_MODULE_CLOSURE = new RegExp (tokenize (sprintf (
 //------------------------------------------------------------------------------
 
 /**
- * Error codes returned by some functions of the sourceExtract module.
- * @type {EXTRACT_STAT}
- */
-exports.EXTRACT_STAT = EXTRACT_STAT;
-
-/**
- * Searches for an angular module declaration and, if found, extracts the module's name and dependencies from it.
- * Note: if the returned 'requires' property is undefined, that means the module declaration is appending
- * definitions to a module defined elsewhere.
- * Otherwise, the module declaration is beginning the module definition.
+ * Searches for angular module declarations and, if found, extracts each module's name and dependencies from them.
  *
  * @param {string} source Javascript source code.
- * @returns {ModuleHeaderInfo|null} Null means the file does not contain any
- * module definition.
+ * @returns {ModuleHeaderInfo[]} Module information.
  */
-exports.extractModuleHeader = function (source)
+exports.extractModuleHeaders = function (source)
 {
   var LEADING_COMMENT = 0
     , MODULE_NAME = 1
@@ -205,32 +181,36 @@ exports.extractModuleHeader = function (source)
 
   // Ignore the file if it has no angular module definition.
   if (!all.length)
-    return null;
-  var moduleName = all[0][MODULE_NAME]
-    , headerIndex = false;
+    return [];
+
+  /* @type {ModuleHeaderInfo[]} */
+  var modules = [];
+  var lastAppend = null, name;
+
   for (var i = 0, x = all.length; i < x; ++i) {
-    if (all[i][MODULE_NAME] !== moduleName)
-      return {status: EXTRACT_STAT.MULTIPLE_MODULES};
-    if (all[i][MODULE_DEPS] !== undefined) {
-      if (headerIndex === false)
-        headerIndex = i;
-      else return {status: EXTRACT_STAT.MULTIPLE_DECLS};
+    name = all[i][MODULE_NAME];
+    if (all[i][MODULE_DEPS] !== undefined)
+      modules.push ({
+        name:     name,
+        append:   false,
+        requires: all[i][MODULE_DEPS] &&
+                    JSON.parse (all[i][MODULE_DEPS]
+                        .replace (MATCH_COMMENT_BLOCKS, '').replace (MATCH_LAST_COMMA, '').replace (/'/g, '"')
+                    ) || [],
+        configFn: all[i][CONFIG_FN]
+      });
+    else {
+      if (lastAppend && lastAppend !== name)
+        throw 'Appending definitions to several modules in the same file is not allowed.' + util.NL +
+          'Started with module <cyan>' + lastAppend + '</cyan> and later switched to <cyan>' + name + '</cyan>.';
+      lastAppend = name;
+      modules.push ({
+        name:   name,
+        append: true
+      });
     }
   }
-  m = all[headerIndex || 0];
-  return /** @type {ModuleHeaderInfo} */ {
-    status:   EXTRACT_STAT.OK,
-    name:     moduleName,
-    append:   headerIndex === false,
-    requires: m[MODULE_DEPS] &&
-                JSON.parse (
-                  m[MODULE_DEPS]
-                    .replace (MATCH_COMMENT_BLOCKS, '')
-                    .replace (MATCH_LAST_COMMA, '')
-                    .replace (/'/g, '"')
-                ) || [],
-    configFn: m[CONFIG_FN]
-  };
+  return modules;
 };
 
 /**

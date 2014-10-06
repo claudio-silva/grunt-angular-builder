@@ -50,11 +50,21 @@ function AnalyzeSourceCodeMiddleware (context)
         warn ('Source file "' + path + '" not found.');
         return;
       }
-      // Read the script and scan it for a module declaration.
+      // Read the script and scan it for module declarations.
       var script = grunt.file.read (path);
-      var moduleHeader = sourceExtract.extractModuleHeader (script);
+      /** @type {ModuleHeaderInfo[]} */
+      var moduleHeaders;
+      try {
+        moduleHeaders = sourceExtract.extractModuleHeaders (script);
+      }
+      catch (e) {
+        if (typeof e === 'string')
+          return warn (e + NL + reportErrorLocation (path));
+        throw e;
+      }
+
       // Ignore irrelevant files.
-      if (!moduleHeader) {
+      if (!moduleHeaders.length) {
         if (!filesArray.forceInclude || !grunt.file.isMatch ({matchBase: true}, filesArray.forceInclude, path)) {
           info ('Ignored file: %', path.cyan);
           return;
@@ -64,7 +74,10 @@ function AnalyzeSourceCodeMiddleware (context)
           content: script
         });
       }
-      else setupModuleInfo (moduleHeader, script, path);
+      else moduleHeaders.forEach (function (header)
+      {
+        setupModuleInfo (header, script, path);
+      });
     });
 
   };
@@ -94,49 +107,34 @@ function AnalyzeSourceCodeMiddleware (context)
    */
   function setupModuleInfo (moduleHeader, fileContent, filePath)
   {
-    var STAT = sourceExtract.EXTRACT_STAT;
-    switch (moduleHeader.status) {
-
-      case STAT.OK:
-
-        // Get information about the specified module.
-        var module = context.modules[moduleHeader.name];
-        // If this is the first time a specific module is mentioned, create the respective information record.
-        if (!module)
-          module = context.modules[moduleHeader.name] = new ModuleDef (moduleHeader.name);
-        // Skip the file if it defines an external module.
-        else if (module.external)
-          return;
-        // Reject additional attempts to redeclare a module (only appending is allowed).
-        else if (module.head && !moduleHeader.append)
-          fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
-        // The file is appending definitions to a module declared elsewhere.
-        if (moduleHeader.append) {
-          module.bodies.push (fileContent);
-          // Append the file path to the bottom of the paths list.
-          module.filePaths.push (filePath);
-        }
-        // Otherwise, the file contains a module declaration.
-        else {
-          if (module.head)
-            fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
-          module.head = fileContent;
-          // Add the file path to the top of the paths list.
-          module.filePaths.unshift (filePath);
-          module.requires = moduleHeader.requires;
-        }
-        module.configFn = moduleHeader.configFn;
-        break;
-
-      case STAT.MULTIPLE_MODULES:
-
-        warn ('Definitions for multiple modules were found on the same file.' + NL + reportErrorLocation (filePath));
-        break;
-
-      case STAT.MULTIPLE_DECLS:
-
-        warn ('More than one module declaration was found on the same file.' + NL + reportErrorLocation (filePath));
+    console.log("REGISTER",moduleHeader.name);
+    // Get information about the specified module.
+    var module = context.modules[moduleHeader.name];
+    // If this is the first time a specific module is mentioned, create the respective information record.
+    if (!module)
+      module = context.modules[moduleHeader.name] = new ModuleDef (moduleHeader.name);
+    // Skip the file if it defines an external module.
+    else if (module.external)
+      return;
+    // Reject additional attempts to redeclare a module (only appending is allowed).
+    else if (module.head && !moduleHeader.append)
+      fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
+    // The file is appending definitions to a module declared elsewhere.
+    if (moduleHeader.append) {
+      module.bodies.push (fileContent);
+      // Append the file path to the bottom of the paths list.
+      module.filePaths.push (filePath);
     }
+    // Otherwise, the file contains a module declaration.
+    else {
+      if (module.head)
+        fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
+      module.head = fileContent;
+      // Add the file path to the top of the paths list.
+      module.filePaths.unshift (filePath);
+      module.requires = moduleHeader.requires;
+    }
+    module.configFn = moduleHeader.configFn;
   }
 
 }
