@@ -154,6 +154,13 @@ function MakeReleaseBuildMiddleware (context)
     // Fist process the head module declaration.
     if (!module.head)
       return util.warn ('Module <cyan>%</cyan> has no declaration.', module.name);
+
+    // Skip it if the corresponding file was already output by some other module.
+    var headPath = module.filePaths[0];
+    if (context.filesUsed[headPath])
+      return;
+    context.filesUsed[headPath] = true;
+
     var head = optimize (module.head, module.filePaths[0], module);
 
     // Prevent the creation of an empty (or comments-only) self-invoking function.
@@ -175,7 +182,13 @@ function MakeReleaseBuildMiddleware (context)
       traceOutput.push (conditionalIndent (head));
       // Insert additional module definitions.
       for (var i = 0, m = module.bodies.length; i < m; ++i) {
-        var body = optimize (module.bodies[i], module.filePaths[i + 1], module);
+        var bodyPath = module.filePaths[i + 1];
+        // Skip bodies who's corresponding file was already output.
+        if (context.filesUsed[bodyPath])
+          continue;
+        context.filesUsed[bodyPath] = true;
+
+        var body = optimize (module.bodies[i], bodyPath, module);
         traceOutput.push (conditionalIndent (body));
       }
       // End closure.
@@ -304,7 +317,7 @@ function MakeReleaseBuildMiddleware (context)
   function warnAboutGlobalCode (sandbox, path)
   {
     var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
-      (path ? reportErrorLocation (path) : '') +
+        (path ? reportErrorLocation (path) : '') +
         getExplanation (
             'This kind of code will behave differently between release and debug builds.' + NL +
             'You should wrap it in a self-invoking function and/or assign global variables/functions ' +

@@ -233,6 +233,7 @@ function Context (grunt, task, defaultOptions)
   this.modules = extend ({}, this._setupExternalModules ());
   // Reset tracer.
   this.loaded = {};
+  this.filesUsed = {};
   // Reset the scripts list to a clone of the `require` option or to an empty list.
   this.standaloneScripts = (this.options.require || []).slice ();
   this.shared = {};

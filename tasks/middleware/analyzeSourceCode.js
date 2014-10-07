@@ -107,7 +107,6 @@ function AnalyzeSourceCodeMiddleware (context)
    */
   function setupModuleInfo (moduleHeader, fileContent, filePath)
   {
-    console.log("REGISTER",moduleHeader.name);
     // Get information about the specified module.
     var module = context.modules[moduleHeader.name];
     // If this is the first time a specific module is mentioned, create the respective information record.
