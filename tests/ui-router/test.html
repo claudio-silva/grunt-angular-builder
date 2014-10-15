@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.24/angular.js"></script>
+	<script src="../../dist/main.js"></script>
+
+	<script>
+		//  angular.module ('App', ['ui.router']); appears in dist/main.js
+		angular.module("App")
+
+			.config(function ($stateProvider, $urlRouterProvider) {
+
+				$urlRouterProvider.otherwise('/home');
+
+				$stateProvider
+					.state('home', {
+						url: '/home',
+						templateUrl: '1.html'
+					})
+					.state('about', {
+						url: '/about',
+						templateUrl: '2.html'
+					});
+
+			});
+	</script>
+
+</head>
+<body>
+
+	<div ng-app="App">
+		<div ui-view></div>
+		<script type="text/ng-template" id="1.html">
+			View 1
+			<a href="#/about"> To about </a>
+		</script>
+		<script type="text/ng-template" id="2.html">
+			View 2
+			<a href="#/home"> To home </a>
+		</script>
+	</div>
+
+</body>
+</html>
