@@ -1,5 +1,3 @@
-angular.module ('App', ['ui.router']);
-
 /**
  * State-based routing for AngularJS
  * @version v0.2.11

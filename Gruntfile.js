@@ -137,7 +137,12 @@ module.exports = function (grunt)
       },
       'test-ui-router':           {
         options: {
-          mainModule: 'App'
+          mainModule: 'App',
+          debugBuild: {
+            rebaseDebugUrls: [
+              { match: /tests\/ui-router\//, replaceWith: '' }
+            ]
+          }
         },
         src:     ['tests/ui-router/**/*.js'],
         dest:    'dist/main.js'
@@ -215,10 +220,8 @@ module.exports = function (grunt)
   grunt.registerTask ('test-include-and-rebase', ['clean', 'angular-builder:test-include-and-rebase::debug']);
   grunt.registerTask ('test-override-deps', ['clean', 'angular-builder:test-override-deps']);
   grunt.registerTask ('test-slashes', ['clean', 'angular-builder:test-slashes::debug']);
-  grunt.registerTask ('test-ui-router', [
-    'clean',
-    'angular-builder:test-ui-router',
-    'angular-builder:test-ui-router:debug'
-  ]);
+  grunt.registerTask ('test-ui-router-release', ['clean', 'angular-builder:test-ui-router']);
+  grunt.registerTask ('test-ui-router-debug', ['clean', 'angular-builder:test-ui-router:debug']);
+  grunt.registerTask ('test-ui-router', ['test-ui-router-release', 'test-ui-router-debug']);
 
 };
