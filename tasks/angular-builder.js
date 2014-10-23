@@ -194,6 +194,14 @@ module.exports = function (grunt)
     // Ignore the module if it's external.
     if (module.external)
       return;
+    // Setup info. to track repeated files.
+    module.filePaths.forEach (function (path) {
+      if (!context.filesOwnedBy[path]) {
+        context.filesOwnedBy[path] = module.name;
+        context.filesRefCount[path] = 1;
+      }
+      else ++context.filesRefCount[path];
+    });
     // Include required submodules first.
     if (module.requires) {
       module.requires.forEach (function (modName)

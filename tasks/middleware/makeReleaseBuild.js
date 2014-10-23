@@ -154,12 +154,27 @@ function MakeReleaseBuildMiddleware (context)
     // Fist process the head module declaration.
     if (!module.head)
       return util.warn ('Module <cyan>%</cyan> has no declaration.', module.name);
+    console.log(context.filesUsed);
+    console.log(context.filesRefCount);
 
     // Skip it if the corresponding file was already output by some other module.
     var headPath = module.filePaths[0];
-    if (context.filesUsed[headPath])
+    if (context.filesUsed[headPath] && context.filesUsed[headPath] !== module.name) {
+      util.info ('On module <cyan>%</cyan>, skipped file <cyan>%</cyan> belonging to <cyan>%</cyan>.', module.name,
+        headPath, context.filesUsed[headPath]);
+        util.info('\nPartial inputs');
+        // Insert additional module definitions.
+        for (var i = 0, m = module.bodies.length; i < m; ++i) {
+          var bodyPath = module.filePaths[i + 1];
+          util.info('Check % [%]', bodyPath, context.filesRefCount[headPath]);
+          if (context.filesRefCount[bodyPath] === 1 || context.filesUsed[bodyPath] === module.name) {
+            util.info('INCLUDE');
+            traceOutput.push (module.bodies[i]);
+          }
+        }
+        util.info('');
       return;
-    context.filesUsed[headPath] = true;
+    }
 
     var head = optimize (module.head, module.filePaths[0], module);
 
@@ -174,8 +189,25 @@ function MakeReleaseBuildMiddleware (context)
           util.toQuotedList (module.requires), options.moduleFooter)
       );
     }
+    else if (context.filesUsed[headPath] === module.name && context.filesRefCount[headPath] > 1) {
+      // Begin closure.
+      traceOutput.push ('(function () {\n');
+      // Insert module declaration.
+      traceOutput.push (conditionalIndent (head));
+      // Insert additional module definitions.
+      for (var i = 0, m = module.bodies.length; i < m; ++i) {
+        var bodyPath = module.filePaths[i + 1];
+        // Skip bodies who's corresponding file was already output.
+        if (context.filesUsed[bodyPath] && context.filesUsed[bodyPath] !== module.name)
+          continue;
+
+        traceOutput.push (module.bodies[i]);
+      }
+      // End closure.
+      traceOutput.push ('\n}) ();');
+    }
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
-    else {
+    else if (context.filesUsed[headPath] === module.name) {
       // Begin closure.
       traceOutput.push ('(function (' + options.moduleVar + ') {\n');
       // Insert module declaration.

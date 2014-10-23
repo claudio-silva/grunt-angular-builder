@@ -233,7 +233,12 @@ function Context (grunt, task, defaultOptions)
   this.modules = extend ({}, this._setupExternalModules ());
   // Reset tracer.
   this.loaded = {};
+  /** @type {Object.<string,string>} */
+  this.filesOwnedBy = {};
+  /** @type {Object.<string,boolean>} */
   this.filesUsed = {};
+  /** @type {Object.<string,number>} */
+  this.filesRefCount = {};
   // Reset the scripts list to a clone of the `require` option or to an empty list.
   this.standaloneScripts = (this.options.require || []).slice ();
   this.shared = {};
@@ -399,7 +404,13 @@ ModuleDef.prototype = {
    * Third parameter of a module declaration, if present.
    * @type {string|undefined}
    */
-  configFn:  undefined
+  configFn:  undefined,
+  /**
+   * When false, no optimizations will be performed on this module's files for a release build.
+   * Optimizations are disabled when multiple module definitions are found on the same file.
+   * @type {boolean}
+   */
+  optimize: true
 };
 
 //======================================================================================================================

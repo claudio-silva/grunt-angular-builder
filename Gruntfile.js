@@ -144,7 +144,7 @@ module.exports = function (grunt)
             ]
           }
         },
-        src:     ['tests/ui-router/**/*.js'],
+        src:     ['tests/ui-router/**/*.js', '!tests/ui-router/comparison.js' /*not required, but let's keep it safe*/],
         dest:    'dist/main.js'
       }
     },
