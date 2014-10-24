@@ -159,10 +159,10 @@ function MakeReleaseBuildMiddleware (context)
 
     // Skip it if the corresponding file was already output by some other module.
     var headPath = module.filePaths[0];
-    if (context.filesUsed[headPath] && context.filesUsed[headPath] !== module.name) {
+    if (context.filesUsed[headPath] && context.filesOwnedBy[headPath] !== module.name) {
       util.info ('On module <cyan>%</cyan>, skipped file <cyan>%</cyan> belonging to <cyan>%</cyan>.', module.name,
-        headPath, context.filesUsed[headPath]);
-        util.info('\nPartial inputs');
+        headPath, context.filesOwned[headPath]);
+        util.info('\nSubfiles');
         // Insert additional module definitions.
         for (var i = 0, m = module.bodies.length; i < m; ++i) {
           var bodyPath = module.filePaths[i + 1];
