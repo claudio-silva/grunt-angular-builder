@@ -12,16 +12,16 @@
 
 exports.middleware = AnalyzeSourceCodeMiddleware;
 
-var util = require ('../lib/gruntUtil')
-  , types = require ('../lib/types')
+var util          = require ('../lib/gruntUtil')
+  , types         = require ('../lib/types')
   , sourceExtract = require ('../lib/sourceExtract');
 
-var ModuleDef = types.ModuleDef
-  , warn = util.warn
+var ModuleDef           = types.ModuleDef
+  , warn                = util.warn
   , reportErrorLocation = util.reportErrorLocation
-  , fatal = util.fatal
-  , info = util.info
-  , NL = util.NL;
+  , fatal               = util.fatal
+  , info                = util.info
+  , NL                  = util.NL;
 
 /**
  * An AngularJS source code loader and analyser middleware.
@@ -122,7 +122,8 @@ function AnalyzeSourceCodeMiddleware (context)
     if (moduleHeader.append) {
       module.bodies.push (fileContent);
       // Append the file path to the bottom of the paths list.
-      module.filePaths.push (filePath);
+      if (!~module.filePaths.indexOf (filePath))
+        module.filePaths.push (filePath);
     }
     // Otherwise, the file contains a module declaration.
     else {
@@ -130,7 +131,8 @@ function AnalyzeSourceCodeMiddleware (context)
         fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
       module.head = fileContent;
       // Add the file path to the top of the paths list.
-      module.filePaths.unshift (filePath);
+      if (!~module.filePaths.indexOf (filePath))
+        module.filePaths.unshift (filePath);
       module.requires = moduleHeader.requires;
     }
     module.configFn = moduleHeader.configFn;

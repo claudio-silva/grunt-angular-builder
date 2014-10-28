@@ -208,7 +208,8 @@ var ContextEvent = {
   ON_INIT:          'init',
   ON_AFTER_ANALYZE: 'after-analyze',
   ON_AFTER_TRACE:   'after-trace',
-  ON_AFTER_BUILD:   'after-build'
+  ON_AFTER_BUILD:   'after-build',
+  ON_BEFORE_DEPS:   'before-deps' //Triggered before a module's dependencies are traced.
 };
 
 /**
@@ -233,11 +234,7 @@ function Context (grunt, task, defaultOptions)
   this.modules = extend ({}, this._setupExternalModules ());
   // Reset tracer.
   this.loaded = {};
-  /** @type {Object.<string,string>} */
-  this.filesOwnedBy = {};
-  /** @type {Object.<string,boolean>} */
-  this.filesUsed = {};
-  /** @type {Object.<string,number>} */
+  this.outputtedFiles = {};
   this.filesRefCount = {};
   // Reset the scripts list to a clone of the `require` option or to an empty list.
   this.standaloneScripts = (this.options.require || []).slice ();
@@ -246,6 +243,17 @@ function Context (grunt, task, defaultOptions)
 }
 
 Context.prototype = {
+  /**
+   * Counts how many different module declarations/definitions a file contains.
+   * The ideal value for optimization is 1.
+   * @type {Object.<string,number>}
+   */
+  filesRefCount: null,
+  /**
+   * Tracks which files have already been output.
+   * @type {Object.<string,boolean>}
+   */
+  outputtedFiles: null,
   /**
    * The Grunt API.
    */
@@ -311,15 +319,18 @@ Context.prototype = {
   /**
    * Calls all registered event handlers for the specified event.
    * @param {ContextEvent} eventName
+   * @param {Array?} args
    */
-  trigger:               function (eventName)
+  trigger:               function (eventName, args)
   {
     var e = this._events[eventName];
-    if (e)
+    if (e) {
+      args = args || [];
       e.forEach (function (handler)
       {
-        handler ();
+        handler.apply (this, args);
       });
+    }
   },
   /**
    * Registers the configured external modules so that they can be ignored during the build output generation.
@@ -410,7 +421,11 @@ ModuleDef.prototype = {
    * Optimizations are disabled when multiple module definitions are found on the same file.
    * @type {boolean}
    */
-  optimize: true
+  optimize: true,
+  /**
+   * When true, it marks the first non-optimized module down a specific branch of the dependency tree.
+   */
+  nonOptimizedContainer: false
 };
 
 //======================================================================================================================

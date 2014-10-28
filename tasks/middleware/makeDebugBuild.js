@@ -107,9 +107,9 @@ function MakeDebugBuildMiddleware (context)
     var rep = options.rebaseDebugUrls;
     module.filePaths.forEach (function (path)
     {
-      if (context.filesUsed[path] && context.filesUsed[path] !== module.name)
+      if (context.outputtedFiles[path] && context.outputtedFiles[path] !== module.name)
         return;
-      context.filesUsed[path] = true;
+      context.outputtedFiles[path] = true;
       if (rep)
         for (var i = 0, m = rep.length; i < m; ++i)
           path = path.replace (rep[i].match, rep[i].replaceWith);

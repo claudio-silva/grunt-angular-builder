@@ -10,20 +10,20 @@
  */
 'use strict';
 
-var util = require ('../lib/gruntUtil')
-  , types = require ('../lib/types')
-  , sourceTrans = require ('../lib/sourceTrans')
+var util          = require ('../lib/gruntUtil')
+  , types         = require ('../lib/types')
+  , sourceTrans   = require ('../lib/sourceTrans')
   , sourceExtract = require ('../lib/sourceExtract');
 
-var indent = util.indent
-  , sprintf = util.sprintf
-  , csprintf = util.csprintf
-  , writeln = util.writeln
-  , warn = util.warn
-  , getExplanation = util.getExplanation
+var indent              = util.indent
+  , sprintf             = util.sprintf
+  , csprintf            = util.csprintf
+  , writeln             = util.writeln
+  , warn                = util.warn
+  , getExplanation      = util.getExplanation
   , reportErrorLocation = util.reportErrorLocation
-  , NL = util.NL
-  , ContextEvent = types.ContextEvent;
+  , NL                  = util.NL
+  , ContextEvent        = types.ContextEvent;
 
 /**
  * Error codes returned by some functions in this module.
@@ -87,7 +87,12 @@ MakeReleaseBuildOptions.prototype = {
    * one.
    * @type {string}
    */
-  moduleFooter:     NL + NL + NL
+  moduleFooter: NL + NL + NL,
+  /**
+   * When true, for each module being output, a comment with the module's name is prepended to it.
+   * @type {boolean}
+   */
+  outputModuleNames: false
 };
 
 /**
@@ -134,6 +139,15 @@ function MakeReleaseBuildMiddleware (context)
     if (options.enabled) {
       var space = context.verbose ? NL : '';
       writeln ('%Generating the <cyan>release</cyan> build...%', space, space);
+      scanForOptimization (context);
+    }
+  });
+
+  context.listen (ContextEvent.ON_BEFORE_DEPS, function (/*ModuleDef*/ module)
+  {
+    if (options.enabled) {
+      if (module.nonOptimizedContainer)
+        traceOutput.push ('(function () {\n');
     }
   });
 
@@ -151,82 +165,73 @@ function MakeReleaseBuildMiddleware (context)
   {
     if (!options.enabled) return;
 
+    if (module.nonOptimizedContainer)
+      traceOutput.push ('\n}) ();');
+
     // Fist process the head module declaration.
     if (!module.head)
       return util.warn ('Module <cyan>%</cyan> has no declaration.', module.name);
-    console.log(context.filesUsed);
-    console.log(context.filesRefCount);
 
-    // Skip it if the corresponding file was already output by some other module.
     var headPath = module.filePaths[0];
-    if (context.filesUsed[headPath] && context.filesOwnedBy[headPath] !== module.name) {
-      util.info ('On module <cyan>%</cyan>, skipped file <cyan>%</cyan> belonging to <cyan>%</cyan>.', module.name,
-        headPath, context.filesOwned[headPath]);
-        util.info('\nSubfiles');
-        // Insert additional module definitions.
-        for (var i = 0, m = module.bodies.length; i < m; ++i) {
-          var bodyPath = module.filePaths[i + 1];
-          util.info('Check % [%]', bodyPath, context.filesRefCount[headPath]);
-          if (context.filesRefCount[bodyPath] === 1 || context.filesUsed[bodyPath] === module.name) {
-            util.info('INCLUDE');
-            traceOutput.push (module.bodies[i]);
-          }
-        }
-        util.info('');
-      return;
+
+    var head, headWasOutput = context.outputtedFiles[headPath];
+    if (!headWasOutput) {
+      head = module.optimize ?
+        optimize (module.head, module.filePaths[0], module)
+        : {status: STAT.INDENTED, data: module.head};
+      context.outputtedFiles[headPath] = true;
     }
 
-    var head = optimize (module.head, module.filePaths[0], module);
+    var isEmpty = headWasOutput? true : sourceExtract.matchWhiteSpaceOrComments (head.data);
 
-    // Prevent the creation of an empty (or comments-only) self-invoking function.
-    // In that case, the head content will be output without a wrapping closure.
-    if (!module.bodies.length && sourceExtract.matchWhiteSpaceOrComments (head.data)) {
-      // Output the comments (if any).
-      if (head.data.trim ())
-        traceOutput.push (head.data);
-      // Output a module declaration with no definitions.
-      traceOutput.push (sprintf ('angular.module (\'%\', %);%', module.name,
-          util.toQuotedList (module.requires), options.moduleFooter)
-      );
+    if (module.bodies.length || !isEmpty) {
+      var line = '\
+//--------------------------------------------------------------------------------------------------------------------';
+      traceOutput.push (line, '// Module: ' + module.name, line, '');
     }
-    else if (context.filesUsed[headPath] === module.name && context.filesRefCount[headPath] > 1) {
-      // Begin closure.
-      traceOutput.push ('(function () {\n');
-      // Insert module declaration.
-      traceOutput.push (conditionalIndent (head));
-      // Insert additional module definitions.
-      for (var i = 0, m = module.bodies.length; i < m; ++i) {
-        var bodyPath = module.filePaths[i + 1];
-        // Skip bodies who's corresponding file was already output.
-        if (context.filesUsed[bodyPath] && context.filesUsed[bodyPath] !== module.name)
-          continue;
 
-        traceOutput.push (module.bodies[i]);
+    if (!headWasOutput) {
+      // Prevent the creation of an empty (or comments-only) self-invoking function.
+      // In that case, the head content will be output without a wrapping closure.
+      if (!module.bodies.length && isEmpty) {
+        // Output the comments (if any).
+        if (head.data.trim ())
+          traceOutput.push (head.data);
+        // Output a module declaration with no definitions.
+        traceOutput.push (sprintf ('angular.module (\'%\', %);%', module.name,
+            util.toQuotedList (module.requires), options.moduleFooter)
+        );
+        return;
       }
-      // End closure.
-      traceOutput.push ('\n}) ();');
     }
+
     // Enclose the module contents in a self-invoking function which receives the module instance as an argument.
-    else if (context.filesUsed[headPath] === module.name) {
-      // Begin closure.
+    if (module.optimize)
+    // Begin closure.
       traceOutput.push ('(function (' + options.moduleVar + ') {\n');
-      // Insert module declaration.
-      traceOutput.push (conditionalIndent (head));
-      // Insert additional module definitions.
-      for (var i = 0, m = module.bodies.length; i < m; ++i) {
-        var bodyPath = module.filePaths[i + 1];
-        // Skip bodies who's corresponding file was already output.
-        if (context.filesUsed[bodyPath])
-          continue;
-        context.filesUsed[bodyPath] = true;
 
-        var body = optimize (module.bodies[i], bodyPath, module);
-        traceOutput.push (conditionalIndent (body));
-      }
-      // End closure.
+    // Insert module declaration.
+    if (!headWasOutput)
+      traceOutput.push (conditionalIndent (head));
+
+    // Insert additional module definitions.
+    for (var i = 0, m = module.bodies.length; i < m; ++i) {
+      var bodyPath = module.filePaths[i + 1];
+      // Skip bodies who's corresponding file was already output.
+      if (context.outputtedFiles[bodyPath])
+        continue;
+      context.outputtedFiles[bodyPath] = true;
+
+      var body = module.optimize ?
+        optimize (module.bodies[i], bodyPath, module)
+        : {status: STAT.INDENTED, data: module.bodies[i]};
+      traceOutput.push (conditionalIndent (body));
+    }
+
+    // End closure.
+    if (module.optimize)
       traceOutput.push (sprintf ('\n}) (angular.module (\'%\', %%));%', module.name,
         util.toQuotedList (module.requires), module.configFn || '', options.moduleFooter));
-    }
   };
 
   this.build = function (targetScript)
@@ -305,7 +310,7 @@ function MakeReleaseBuildMiddleware (context)
         var modInfo = result.data;
         if (!options.renameModuleRefs) {
           warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config setting ' +
-              '<cyan>moduleVar=\'%\'</cyan>.%%%',
+            '<cyan>moduleVar=\'%\'</cyan>.%%%',
             modInfo.moduleVar, options.moduleVar, NL, reportErrorLocation (path),
             getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
           );
@@ -349,12 +354,12 @@ function MakeReleaseBuildMiddleware (context)
   function warnAboutGlobalCode (sandbox, path)
   {
     var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
-        (path ? reportErrorLocation (path) : '') +
-        getExplanation (
-            'This kind of code will behave differently between release and debug builds.' + NL +
-            'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
-            'directly to the window object.'
-        )
+      (path ? reportErrorLocation (path) : '') +
+      getExplanation (
+        'This kind of code will behave differently between release and debug builds.' + NL +
+        'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
+        'directly to the window object.'
+      )
     );
     if (context.verbose) {
       var found = false;
@@ -368,5 +373,76 @@ function MakeReleaseBuildMiddleware (context)
       });
     }
     warn (msg + '>>'.yellow);
+  }
+}
+
+/**
+ * Determine which modules can be optimized.
+ * @param {Context} context The execution context for the middleware stack.
+ */
+function scanForOptimization (context)
+{
+  var name, module, verboseOut = context.grunt.log.verbose;
+
+  // Track repeated files to determine which modules can be optimized.
+
+  for (name in context.modules)
+    if (context.modules.hasOwnProperty (name)) {
+      module = context.modules[name];
+      if (!module.external)
+        module.filePaths.forEach (function (path)
+        {
+          if (!context.filesRefCount[path])
+            context.filesRefCount[path] = 1;
+          else {
+            verboseOut.writeln ('Not optimizing ' + name.cyan +
+            ' because it shares some/all of its files with other modules.');
+            ++context.filesRefCount[path];
+            module.optimize = false;
+          }
+        });
+    }
+
+  // Determine which modules can act as containers for non-optimized sections of code.
+
+  scan (context.options.mainModule, true);
+
+  function scan (moduleName, first)
+  {
+    var module = context.modules[moduleName];
+    if (!module)
+      throw new Error (sprintf ("Module '%' was not found.", moduleName));
+    // Ignore the module if it's external.
+    if (module.external)
+      return false;
+    if (!module.optimize) {
+      if (first) {
+        module.nonOptimizedContainer = true;
+        disableOptimizationsForChildrenOf (module);
+      }
+      return true;
+    }
+    for (var i = 0, m = module.requires.length, any = false; i < m; ++i)
+      if (scan (module.requires[i])) any = true;
+    if (any) {
+      module.nonOptimizedContainer = true;
+      disableOptimizationsForChildrenOf (module);
+    }
+    return false;
+  }
+
+  function disableOptimizationsForChildrenOf (module)
+  {
+    if (module.external)
+      return;
+    for (var i = 0, m = module.requires.length; i < m; ++i) {
+      var sub = context.modules[module.requires[i]];
+      if (sub.external)
+        continue;
+      if (!sub.optimize)
+        verboseOut.writeln ("Disabling optimizations for module " + sub.name.cyan);
+      sub.optimize = false;
+      disableOptimizationsForChildrenOf (sub);
+    }
   }
 }

@@ -14,15 +14,15 @@ var TASK_DESCRIPTION = 'Generates a release/debug build of an AngularJS project.
 /**
  * Utility functions.
  */
-var util = require ('./lib/gruntUtil')
+var util  = require ('./lib/gruntUtil')
   , types = require ('./lib/types');
 
-var Context = types.Context
+var Context      = types.Context
   , ContextEvent = types.ContextEvent
-  , TaskOptions = types.TaskOptions
-  , extend = util.extend
-  , fatal = util.fatal
-  , info = util.info;
+  , TaskOptions  = types.TaskOptions
+  , extend       = util.extend
+  , fatal        = util.fatal
+  , info         = util.info;
 /**
  * Exports a function that will be called by Grunt to register tasks for this plugin.
  * @param grunt The Grunt API.
@@ -194,21 +194,12 @@ module.exports = function (grunt)
     // Ignore the module if it's external.
     if (module.external)
       return;
-    // Setup info. to track repeated files.
-    module.filePaths.forEach (function (path) {
-      if (!context.filesOwnedBy[path]) {
-        context.filesOwnedBy[path] = module.name;
-        context.filesRefCount[path] = 1;
-      }
-      else ++context.filesRefCount[path];
-    });
     // Include required submodules first.
-    if (module.requires) {
-      module.requires.forEach (function (modName)
-      {
-        traceModule (modName, context, processHook);
-      });
-    }
+    context.trigger (ContextEvent.ON_BEFORE_DEPS, [module]);
+    module.requires.forEach (function (modName)
+    {
+      traceModule (modName, context, processHook);
+    });
     // Ignore references to already loaded modules or to explicitly excluded modules.
     if (!context.loaded[module.name] && !~context.options.excludedModules.indexOf (module.name)) {
       info ('Including module <cyan>%</cyan>.', moduleName);

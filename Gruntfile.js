@@ -142,6 +142,9 @@ module.exports = function (grunt)
             rebaseDebugUrls: [
               { match: /tests\/ui-router\//, replaceWith: '' }
             ]
+          },
+          releaseBuild: {
+            outputModuleNames: true
           }
         },
         src:     ['tests/ui-router/**/*.js', '!tests/ui-router/comparison.js' /*not required, but let's keep it safe*/],

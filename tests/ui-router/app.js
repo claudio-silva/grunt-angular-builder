@@ -1,1 +1,1 @@
-angular.module("App", ["ui.router"]);
+angular.module("App", ["submodule"]);
