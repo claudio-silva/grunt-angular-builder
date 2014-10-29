@@ -79,10 +79,10 @@ function ExportRequiredStylesheetsMiddleware (context)
 
   this.trace = function (/*ModuleDef*/ module)
   {
-    scan (module.head, module.filePaths[0]);
+    scan (module.head, module.headPath);
     module.bodies.forEach (function (path, i)
     {
-      scan (path, module.filePaths[i + 1]);
+      scan (path, module.bodyPaths[i]);
     });
   };
 

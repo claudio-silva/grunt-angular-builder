@@ -144,7 +144,8 @@ module.exports = function (grunt)
             ]
           },
           releaseBuild: {
-            outputModuleNames: true
+            outputModuleNames: true,
+            outputFileNames: true
           }
         },
         src:     ['tests/ui-router/**/*.js', '!tests/ui-router/comparison.js' /*not required, but let's keep it safe*/],

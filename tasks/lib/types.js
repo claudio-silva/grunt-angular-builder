@@ -371,7 +371,7 @@ function ModuleDef (name)
 {
   this.name = name;
   this.bodies = [];
-  this.filePaths = [];
+  this.bodyPaths = [];
 }
 
 ModuleDef.prototype = {
@@ -381,13 +381,17 @@ ModuleDef.prototype = {
    */
   name:      '',
   /**
-   * Relative file paths to the source script files.
-   * The first entry corresponds to the file that starts the module definition.
+   * Relative file paths to the file that starts the module definition.
+   * @type {string}
+   */
+  headPath: '',
+  /**
+   * Relative file paths to the module's 'body' source script files.
    * Note: empty string elements will be ignored.
    * Note: at least one element must be present, even if empty.
    * @type {string[]}
    */
-  filePaths: null,
+  bodyPaths: null,
   /**
    * The content of the file that starts the module definition.
    * If null, the file was not yet read.
@@ -425,7 +429,17 @@ ModuleDef.prototype = {
   /**
    * When true, it marks the first non-optimized module down a specific branch of the dependency tree.
    */
-  nonOptimizedContainer: false
+  nonOptimizedContainer: false,
+  /**
+   * Relative file paths to the module's 'head' and 'body' source script files.
+   * Note: at least one element will be present, even if empty.
+   * @return {string[]}
+   */
+  filePaths: function () {
+    var a = [this.headPath];
+    util.arrayAppend(a, this.bodyPaths);
+    return a;
+  }
 };
 
 //======================================================================================================================

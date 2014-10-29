@@ -120,19 +120,18 @@ function AnalyzeSourceCodeMiddleware (context)
       fatal ('Can\'t redeclare module <cyan>%</cyan>', moduleHeader.name);
     // The file is appending definitions to a module declared elsewhere.
     if (moduleHeader.append) {
-      module.bodies.push (fileContent);
-      // Append the file path to the bottom of the paths list.
-      if (!~module.filePaths.indexOf (filePath))
-        module.filePaths.push (filePath);
+      // Append the file path to the paths list.
+      if (!~module.bodyPaths.indexOf (filePath)) {
+        module.bodies.push (fileContent);
+        module.bodyPaths.push (filePath);
+      }
     }
     // Otherwise, the file contains a module declaration.
     else {
       if (module.head)
         fatal ('Duplicate module definition: <cyan>%</cyan>', moduleHeader.name);
       module.head = fileContent;
-      // Add the file path to the top of the paths list.
-      if (!~module.filePaths.indexOf (filePath))
-        module.filePaths.unshift (filePath);
+      module.headPath = filePath;
       module.requires = moduleHeader.requires;
     }
     module.configFn = moduleHeader.configFn;

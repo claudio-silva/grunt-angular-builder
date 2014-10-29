@@ -94,8 +94,6 @@ function OverrideDependenciesMiddleware (context)
     var mainModuleName = context.options.mainModule;
     var mainModule = context.modules[mainModuleName] = new ModuleDef (mainModuleName);
     mainModule.requires = options.dependencies;
-    // Must define an empty path corresponding to the (non-existent) file that declared the module.
-    mainModule.filePaths = [''];
     // Must set head to a non-empty string to mark the module as being initialized.
     mainModule.head = ' ';
   };

@@ -1,4 +1,4 @@
-angular.module ('submodule', ['ui.router', 'submodule2'])
+angular.module ('submodule', ['submodule2'])
 
   .service ('testX', function ()
 {

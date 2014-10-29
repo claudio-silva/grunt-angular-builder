@@ -105,7 +105,7 @@ function MakeDebugBuildMiddleware (context)
     if (!options.enabled) return;
 
     var rep = options.rebaseDebugUrls;
-    module.filePaths.forEach (function (path)
+    module.filePaths ().forEach (function (path)
     {
       if (context.outputtedFiles[path] && context.outputtedFiles[path] !== module.name)
         return;

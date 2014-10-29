@@ -79,7 +79,8 @@ function ExportSourceCodePathsMiddleware (context)
 
   this.trace = function (module)
   {
-    arrayAppend (tracedPaths, module.filePaths);
+    tracedPaths.push (module.headPath);
+    arrayAppend (tracedPaths, module.bodyPaths);
   };
 
   this.build = function (targetScript)
