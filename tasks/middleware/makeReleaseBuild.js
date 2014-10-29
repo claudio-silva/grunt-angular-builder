@@ -174,7 +174,6 @@ function MakeReleaseBuildMiddleware (context)
 
   this.trace = function (/*ModuleDef*/ module)
   {
-    console.log("TRACE",module.name);
     var i, m, bodyPath;
 
     if (!options.enabled) return;
