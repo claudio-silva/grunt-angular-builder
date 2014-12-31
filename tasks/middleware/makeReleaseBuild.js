@@ -10,20 +10,20 @@
  */
 'use strict';
 
-var util = require ('../lib/gruntUtil')
-  , types = require ('../lib/types')
-  , sourceTrans = require ('../lib/sourceTrans')
+var util          = require ('../lib/gruntUtil')
+  , types         = require ('../lib/types')
+  , sourceTrans   = require ('../lib/sourceTrans')
   , sourceExtract = require ('../lib/sourceExtract');
 
-var indent = util.indent
-  , sprintf = util.sprintf
-  , csprintf = util.csprintf
-  , writeln = util.writeln
-  , warn = util.warn
-  , getExplanation = util.getExplanation
+var indent              = util.indent
+  , sprintf             = util.sprintf
+  , csprintf            = util.csprintf
+  , writeln             = util.writeln
+  , warn                = util.warn
+  , getExplanation      = util.getExplanation
   , reportErrorLocation = util.reportErrorLocation
-  , NL = util.NL
-  , ContextEvent = types.ContextEvent;
+  , NL                  = util.NL
+  , ContextEvent        = types.ContextEvent;
 
 /**
  * Error codes returned by some functions in this module.
@@ -174,8 +174,6 @@ function MakeReleaseBuildMiddleware (context)
 
   this.trace = function (/*ModuleDef*/ module)
   {
-    var i, m, bodyPath;
-
     if (!options.enabled) return;
 
     if (module.nonOptimizedContainer)
@@ -197,22 +195,7 @@ function MakeReleaseBuildMiddleware (context)
 
     var isEmpty = headWasOutput ? true : sourceExtract.matchWhiteSpaceOrComments (head.data);
 
-    if (module.bodies.length || !headWasOutput) {
-      traceOutput.push (LINE2, '// Module:    ' + module.name, '// Optimized: ' + (module.optimize ? 'Yes' : 'No'));
-      if (!headWasOutput)
-        traceOutput.push ('// File:      ' + headPath);
-      else {
-        for (i = 0, m = module.bodies.length; i < m; ++i) {
-          bodyPath = module.bodyPaths[i];
-          // Find first body who's corresponding file was not yet output.
-          if (!context.outputtedFiles[bodyPath]) {
-            traceOutput.push ('// File:      ' + bodyPath);
-            break;
-          }
-        }
-      }
-      traceOutput.push (LINE2, '');
-    }
+    outputModuleHeader (module, headWasOutput, headPath);
 
     if (!headWasOutput) {
       // Prevent the creation of an empty (or comments-only) self-invoking function.
@@ -238,24 +221,7 @@ function MakeReleaseBuildMiddleware (context)
     if (!headWasOutput)
       traceOutput.push (conditionalIndent (head));
 
-    // Insert additional module definitions.
-    for (i = 0, m = module.bodies.length; i < m; ++i) {
-      bodyPath = module.bodyPaths[i];
-      if (!bodyPath)
-        console.log (module.name, i, module.bodies.length, module.bodyPaths);
-      // Skip bodies who's corresponding file was already output.
-      if (context.outputtedFiles[bodyPath])
-        continue;
-      context.outputtedFiles[bodyPath] = true;
-
-      var body = module.optimize ?
-        optimize (module.bodies[i], bodyPath, module)
-        : {status: STAT.INDENTED, data: module.bodies[i]};
-
-      if (i || !headWasOutput)
-        traceOutput.push (LINE, '// File: ' + bodyPath, LINE, '');
-      traceOutput.push (conditionalIndent (body));
-    }
+    outputModuleDefinitions (module, headWasOutput);
 
     // End closure.
     if (module.optimize)
@@ -278,6 +244,60 @@ function MakeReleaseBuildMiddleware (context)
   //--------------------------------------------------------------------------------------------------------------------
   // PRIVATE
   //--------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * Outputs a module information header.
+   *
+   * @param {ModuleDef} module
+   * @param {boolean} headWasOutput
+   * @param {string} headPath
+   */
+  function outputModuleHeader (module, headWasOutput, headPath)
+  {
+    if (module.bodies.length || !headWasOutput) {
+      traceOutput.push (LINE2, '// Module:    ' + module.name, '// Optimized: ' + (module.optimize ? 'Yes' : 'No'));
+      if (!headWasOutput)
+        traceOutput.push ('// File:      ' + headPath);
+      else {
+        for (var i = 0, m = module.bodies.length; i < m; ++i) {
+          var bodyPath = module.bodyPaths[i];
+          // Find first body who's corresponding file was not yet output.
+          if (!context.outputtedFiles[bodyPath]) {
+            traceOutput.push ('// File:      ' + bodyPath);
+            break;
+          }
+        }
+      }
+      traceOutput.push (LINE2, '');
+    }
+  }
+
+  /**
+   * Insert additional module definitions.
+   *
+   * @param {ModuleDef} module
+   * @param {boolean} headWasOutput
+   */
+  function outputModuleDefinitions (module, headWasOutput)
+  {
+    for (var i = 0, m = module.bodies.length; i < m; ++i) {
+      var bodyPath = module.bodyPaths[i];
+      if (!bodyPath)
+        console.log (module.name, i, module.bodies.length, module.bodyPaths);
+      // Skip bodies who's corresponding file was already output.
+      if (context.outputtedFiles[bodyPath])
+        continue;
+      context.outputtedFiles[bodyPath] = true;
+
+      var body = module.optimize ?
+        optimize (module.bodies[i], bodyPath, module)
+        : {status: STAT.INDENTED, data: module.bodies[i]};
+
+      if (i || !headWasOutput)
+        traceOutput.push (LINE, '// File: ' + bodyPath, LINE, '');
+      traceOutput.push (conditionalIndent (body));
+    }
+  }
 
   /**
    * Calls sourceTrans.optimize() and handles the result.
@@ -339,7 +359,7 @@ function MakeReleaseBuildMiddleware (context)
         var modInfo = result.data;
         if (!options.renameModuleRefs) {
           warn ('The module variable reference <cyan>%</cyan> doesn\'t match the preset name on the config setting ' +
-              '<cyan>moduleVar=\'%\'</cyan>.%%%',
+            '<cyan>moduleVar=\'%\'</cyan>.%%%',
             modInfo.moduleVar, options.moduleVar, NL, reportErrorLocation (path),
             getExplanation ('Either rename the variable or enable <cyan>renameModuleRefs</cyan>.')
           );
@@ -383,12 +403,12 @@ function MakeReleaseBuildMiddleware (context)
   function warnAboutGlobalCode (sandbox, path)
   {
     var msg = csprintf ('yellow', 'Incompatible code found on the global scope!'.red + NL +
-        (path ? reportErrorLocation (path) : '') +
-        getExplanation (
-            'This kind of code will behave differently between release and debug builds.' + NL +
-            'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
-            'directly to the window object.'
-        )
+      (path ? reportErrorLocation (path) : '') +
+      getExplanation (
+        'This kind of code will behave differently between release and debug builds.' + NL +
+        'You should wrap it in a self-invoking function and/or assign global variables/functions ' +
+        'directly to the window object.'
+      )
     );
     if (context.verbose) {
       var found = false;
@@ -411,11 +431,12 @@ function MakeReleaseBuildMiddleware (context)
  */
 function scanForOptimization (context)
 {
-  var name, module, verboseOut = context.grunt.log.verbose;
+  var module, verboseOut = context.grunt.log.verbose;
 
   // Track repeated files to determine which modules can be optimized.
 
-  for (name in context.modules)
+  Object.keys (context.modules).forEach (function (name)
+  {
     if (context.modules.hasOwnProperty (name)) {
       module = context.modules[name];
       if (!module.external)
@@ -431,6 +452,7 @@ function scanForOptimization (context)
           }
         });
     }
+  });
 
   // Determine which modules can act as containers for non-optimized sections of code.
 

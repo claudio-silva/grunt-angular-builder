@@ -36,6 +36,12 @@ function TaskOptions ()
 
 TaskOptions.prototype = {
   /**
+   * When set to either `'debug'` or `'release'`, it overrides both the `debugBuild.enabled` and the
+   * `releaseBuild.enabled` options.
+   * @type {string}
+   */
+  buildMode:          '',
+  /**
    * Main module name. Only this module and its dependencies will be exported.
    * @type {string}
    */
@@ -225,6 +231,15 @@ function Context (grunt, task, defaultOptions)
 {
   this.grunt = grunt;
   this.options = extend ({}, defaultOptions, task.options ());
+  switch (this.options.buildMode) {
+    case 'release':
+      this.options.debugBuild.enabled = false;
+      this.options.releaseBuild.enabled = true;
+      break;
+    case 'debug':
+      this.options.debugBuild.enabled = true;
+      this.options.releaseBuild.enabled = false;
+  }
   if (task.flags.debug !== undefined || grunt.option ('build') === 'debug') {
     this.options.debugBuild.enabled = true;
     this.options.releaseBuild.enabled = false;
