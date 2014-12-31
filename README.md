@@ -35,7 +35,7 @@ If you use Angular-Builder, please [star](https://github.com/claudio-silva/grunt
 
 And **spread the word!**
 
-A lot of people don't know about Angular Builder yet!  
+A lot of people don't know about Angular Builder yet!
 They'll surely thank you if you show them a way to make their lives easier when developing AngularJS applications! ;-)
 
 # Documentation
@@ -117,9 +117,9 @@ module.exports = function (grunt)
     }
 
   });
-  
+
   grunt.loadNpmTasks ('grunt-angular-builder');
-  
+
   grunt.registerTask ('release', ['angular-builder']);
   grunt.registerTask ('debug', ['angular-builder::debug']);
 
@@ -153,7 +153,7 @@ For a debug build, run the command:
 
 ### Integrating with other Grunt tasks
 
-_Build-directives_ embedded in your source javascript files can direct the builder to generate lists of stylesheets and templates that are **actually** required by your modules, in the correct loading order. These file path arrays can then be used by other Grunt tasks to build the required files.  
+_Build-directives_ embedded in your source javascript files can direct the builder to generate lists of stylesheets and templates that are **actually** required by your modules, in the correct loading order. These file path arrays can then be used by other Grunt tasks to build the required files.
 Read the [Wiki](https://github.com/claudio-silva/grunt-angular-builder/wiki) for more information.
 
 ##### If you wish to minify/optimize your build files
@@ -189,6 +189,13 @@ When your work is ready, submit a pull request.
 __Important:__ all contributions that are accepted will be made available under the project's license.
 
 ## Release History
+
+[v1.0.0-beta3](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v1.0.0-beta3) / 2014-12-31
+
+- Support for multiple module definitions per file.
+- Supports building more third-party libraries than before (ex: ui-router).
+- Prettify code output with module comment headers.
+- Easier setting of debug/release mode via task config option.
 
 [v1.0.0-beta2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v1.0.0-beta2) / 2014-09-23
 
@@ -228,43 +235,43 @@ __Important:__ all contributions that are accepted will be made available under 
 - Improved compatibility with 3rd-party libraries.
     - The standard AngularJS libraries can now be included in builds successfully.
     - Module references assignments and inline module configuration functions are supported now.
-  
+
 [v0.4.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.2) / 2014-05-17
 
 - Improved compatibility with 3rd-party libraries.
 - Bug fixes.
-  
+
 [v0.4.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.1) / 2014-05-04
 
 - Bug fixes.
-  
+
 [v0.4.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.4.0) / 2014-04-20
 
 - Major internal refactoring.
 - More builder capabilities: stylesheets, templates, assets and source paths export.
-  
+
 [v0.3.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.3.0) / 2014-03-29
 
 - Added support for multiple patterns on rebaseDebugUrls. Breaks compatibility with previous version.
-  
+
 [v0.2.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.2.0) / 2014-03-29
 
 - Bug fixes. Configuration (breaking) changes. Updated documentation.
-  
-[v0.1.3](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.3) / 2013-11-25  
+
+[v0.1.3](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.3) / 2013-11-25
 
 - The project was renamed.
-  
-[v0.1.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.2) / 2013-11-04  
+
+[v0.1.2](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.2) / 2013-11-04
 
 - Major internal refactoring.
 - Bug fixes.
 - More options.
-  
-[v0.1.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.1) / 2013-10-31  
+
+[v0.1.1](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.1) / 2013-10-31
 
 - Documentation updates.
-  
+
 [v0.1.0](https://github.com/claudio-silva/grunt-angular-builder/releases/tag/v0.1.0) / 2013-10-29
 
 - Javascript build support.
