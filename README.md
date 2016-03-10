@@ -1,6 +1,23 @@
 ## Angular Builder
 > Build your AngularJS applications the Angular way!
 
+#### Warning
+
+> **This project applies to Angular 1.x only!**
+
+> With Angular 2.x it is not needed.
+
+#### Warning
+
+> **This project is on maintenance mode.**
+
+> I feel a little sad that so much work is being shelved, but with Angular 2 making this build process obsolete, there's no reason for me to keep working on it.  
+> Angular Builder, as it is, works fine for us, and we're not developing new apps with it.
+
+> This means, **I'm not accepting any new feature requests nor any pull-requests for new features.**
+
+> I hope Angular Builder has been useful to you, and thank you for using it.
+
 ### What is Angular Builder?
 
 Angular Builder is the definitive solution for loading source code in AngularJS applications.
