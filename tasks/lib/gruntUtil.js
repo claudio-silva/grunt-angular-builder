@@ -232,14 +232,11 @@ exports.sortFilesAfterSubfolders = function (filePaths)
 
   (function iterate (folderNode)
   {
-    for (var folder in folderNode.subfolders)
-      if (folderNode.subfolders.hasOwnProperty (folder))
-        iterate (folderNode.subfolders[folder]);
+    for (var subnode of folderNode.subfolders.values ())
+      iterate (subnode);
 
-    folderNode.files.forEach (function (file)
-    {
+    for (var file of folderNode.files)
       out.push (file);
-    });
   }) (tree);
 
   return out;
@@ -258,14 +255,11 @@ exports.sortFilesBeforeSubfolders = function (filePaths)
 
   (function iterate (folderNode)
   {
-    folderNode.files.forEach (function (file)
-    {
+    for (var file of folderNode.files)
       out.push (file);
-    });
 
-    for (var folder in folderNode.subfolders)
-      if (folderNode.subfolders.hasOwnProperty (folder))
-        iterate (folderNode.subfolders[folder]);
+    for (var subnode of folderNode.subfolders.values ())
+      iterate (subnode);
   }) (tree);
 
   return out;
@@ -437,15 +431,15 @@ function icsprintf (baseColor, args)
 /**
  * Generates a tree of folder names and file names from a (possibliy) unsorted linear list of file paths.
  * @param {string[]} filePaths
- * @returns {{files: string[], subfolders: {}}}
+ * @returns {{files: string[], subfolders: Map}}
  */
 function createFileTree (filePaths)
 {
   var path = require ('path')
     , root = {
-        files:      [],
-        subfolders: {}
-      };
+    files:      [],
+    subfolders: new Map
+  };
 
   filePaths.forEach (function (filename)
   {
@@ -454,12 +448,12 @@ function createFileTree (filePaths)
     if (dir)
       dir.split (path.sep).forEach (function (segment)
       {
-        if (!folderPtr.subfolders[segment])
-          folderPtr.subfolders[segment] = {
+        if (!folderPtr.subfolders.has (segment))
+          folderPtr.subfolders.set (segment, {
             files:      [],
-            subfolders: {}
-          };
-        folderPtr = folderPtr.subfolders[segment];
+            subfolders: new Map
+          });
+        folderPtr = folderPtr.subfolders.get (segment);
       });
     folderPtr.files.push (filename);
   });
