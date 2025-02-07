@@ -1,7 +1,7 @@
 {
   "name": "grunt-angular-builder",
   "description": "A project builder for AngularJS applications.",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "homepage": "https://github.com/claudio-silva/grunt-angular-builder",
   "author": {
     "name": "Cláudio Silva",
@@ -25,16 +25,14 @@
     "node": ">= 4.9.1"
   },
   "dependencies": {
-    "colors": "~0.6.0-1",
-    "grunt-contrib-concat": "~0.4.0"
+    "colors": "~1.4.0",
+    "grunt-contrib-concat": "~2.1.0"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-clean": "~0.4.1",
-    "grunt-contrib-jshint": "~0.7.1",
-    "grunt-jsdoc": "^0.5.6",
-    "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
-    "time-grunt": "*"
+    "grunt": "~1.6.1",
+    "grunt-contrib-clean": "~2.0.1",
+    "grunt-contrib-jshint": "~3.2.0",
+    "time-grunt": "1.4.0"
   },
   "peerDependencies": {
     "grunt": ">=0.4.1"
